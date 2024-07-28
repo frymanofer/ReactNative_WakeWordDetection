@@ -1,4 +1,4 @@
-# Davoice React Native KeywordsDetection
+# ReactNative KeywordsDetection by Davoice
 
 <p style="font-family: Arial, sans-serif; font-size: 16px;">
 Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword detection solution designed by <strong>DaVoice</strong>.
