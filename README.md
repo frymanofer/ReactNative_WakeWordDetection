@@ -18,7 +18,7 @@ Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword de
   <li><strong>React-Native IOS:</strong> React Native Wrapper for IOS.</li>
 </ul>
 
-<h2>Contact us</h2>
+<h2>Contact us @ frymanofer@gmail.com </h2>
 <ul>
   <li>We have full support for Ract-Native. This repository is being build in the meanwhile please contact us at frymanofer@gmail.com</li>
 </ul>
