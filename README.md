@@ -7,7 +7,7 @@ Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword de
 <h2>Features</h2>
 <ul>
   <li><strong>High Accuracy:</strong> Our advanced machine learning models deliver top-notch accuracy.</li>
-  <li><strong>Easy to deploy with React Native:</strong> checkout rn_example/DetectingKeyWords.js for a simple example of how to use DetectingKeyWords .</li>
+  <li><strong>Easy to deploy with React Native:</strong> check out our example: "rn_example/DetectingKeyWords.js" with a few simple lines of code you have your own key word detecting enabled app .</li>
   <li><strong>Cross-Platform Support:</strong> Integrate Davoice KeywordsDetection into React-Native Framework both iOS and Android supported.</li>
   <li><strong>Low Latency:</strong> Experience near-instantaneous keyword detection.</li>
 </ul>
