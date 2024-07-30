@@ -43,11 +43,11 @@ Import the main class:</strong>
   };
 
 <strong>Setup and activate keywords detection:</strong> 
-  try {
 <strong>Provide the model file name, you do not have to provide a path the code will find the file for you.
 Provide the threashold - recommended 0.9999 to prevent any false positive.
 Provide the falsePositiveChecks - recommended setting of 2:</strong>
 
+      try {
           let modelParams = {modelName:"my_key_word.onnx", /* replace with your model */ 
               threshold: 0.9999, /* false positive sensitivity */ 
               falsePositiveChecks: 2} /* How many checks for false positives */
