@@ -43,9 +43,9 @@ Import the main class:</strong>
   };
 
 <strong>Setup and activate keywords detection:</strong> 
-<li><strong>Provide the model file name, you do not have to provide a path the code will find the file for you.</li>
-<li>Provide the threashold - recommended 0.9999 to prevent any false positive.</li>
-<li>Provide the falsePositiveChecks - recommended setting of #2:</li></strong>
+  <li><Provide the model file name, you do not have to provide a path the code will find the file for you.</li>
+  <li>Provide the threashold - recommended 0.9999 to prevent any false positive.</li>
+  <li>Provide the falsePositiveChecks - recommended setting of #2:</li>
 
       try {
           let modelParams = {modelName:"my_key_word.onnx", /* replace with your model */ 
