@@ -25,7 +25,7 @@ Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword de
 
 <h2>Step by step instructions:</h2>
 <ul>
-Install the package (soon to be released and you can use: npm install react-native-davoice-keywordsdetection)
+<strong>Install the package</strong> (soon to be released and you can use: npm install react-native-davoice-keywordsdetection) <br>
 Below is an example of how to use with a simple js code:
 Import the main class
 import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
