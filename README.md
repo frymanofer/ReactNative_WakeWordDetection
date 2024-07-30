@@ -33,14 +33,14 @@ Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword de
 
 Import the main class:</strong>
 
-import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
+  import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
 
 <strong>Setup your callback on keyword / wakeword detected:</strong>
 
-const onKeyWordDetected = async (keywordIndex: any) => {
-   // Do whatever you need on callback
-   // Stop searching for Keywords if it makes sense - KeyWordRNBridge.stopKeyWord();
-};
+  const onKeyWordDetected = async (keywordIndex: any) => {
+    // Do whatever you need on callback
+    // Stop searching for Keywords if it makes sense - KeyWordRNBridge.stopKeyWord();
+  };
 
 <strong>Setup and activate keywords detection:</strong> 
   try {
