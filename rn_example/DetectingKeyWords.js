@@ -1,4 +1,4 @@
-import KeyWordRNBridge from 'KeyWordRNBridge';
+import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Platform } from 'react-native';
 
@@ -24,9 +24,9 @@ const loadDavoice = async () => {
     try {
             let modelParams = {modelName:"my_key_word.onnx", /* replace with your model */ 
                 threshold: 0.9999, /* false positive sensitivity */ 
-                falsePositiveCnt: 2} /* How many checks for false positives */
+                falsePositiveChecks: 2} /* How many checks for false positives */
             console.log(modelParams); // Check the model name
-            const result = await KeyWordRNBridge.initKeyWord(modelParams.modelName, modelParams.threshold, modelParams.falsePositiveCnt);
+            const result = await KeyWordRNBridge.initKeyWord(modelParams.modelName, modelParams.threshold, modelParams.falsePositiveChecks);
             console.log(result);
             KeyWordRNBridge.onKeyWordEvent((event) => {
                 console.log('KeyWord event detected:', event);
