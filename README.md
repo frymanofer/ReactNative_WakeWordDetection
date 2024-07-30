@@ -43,7 +43,7 @@ Import the main class:</strong>
   };
 
 <strong>Setup and activate keywords detection:</strong> 
-  <li><Provide the model file name, you do not have to provide a path the code will find the file for you.</li>
+  <li>Provide the model file name, you do not have to provide a path the code will find the file for you.</li>
   <li>Provide the threashold - recommended 0.9999 to prevent any false positive.</li>
   <li>Provide the falsePositiveChecks - recommended setting of #2:</li>
 
@@ -51,15 +51,15 @@ Import the main class:</strong>
           let modelParams = {modelName:"my_key_word.onnx", /* replace with your model */ 
               threshold: 0.9999, /* false positive sensitivity */ 
               falsePositiveChecks: 2} /* How many checks for false positives */
-Initialize the detection:
+<strong>Initialize the detection:</strong>
 
           const result = await KeyWordRNBridge.initKeyWord(modelParams.modelName, modelParams.threshold, modelParams.falsePositiveChecks);
-Setup the callback:
+<strong>Setup the callback:</strong>
 
           KeyWordRNBridge.onKeyWordEvent((event) => {
               onKeyWordDetected(event);
           });
-Now we are set - you can start listening and detect key words:
+<strong>Now we are set - you can start listening and detect key words:</strong>
 
           KeyWordRNBridge.startKeyWord();
     } catch (e) {
