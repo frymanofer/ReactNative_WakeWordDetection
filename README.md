@@ -25,22 +25,28 @@ Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword de
 
 <h2>Step by step instructions:</h2>
 <ul>
-<strong>Install the package</strong> (soon to be released and you can use: npm install react-native-davoice-keywordsdetection) <br>
-Below is an example of how to use with a simple js code:
-Import the main class
+<strong>Install the package</strong> (soon to be released and you can use: npm install react-native-davoice-keywordsdetection)
+
+<strong>Below is a simple js code of how to use:
+
+Import the main class</strong>
+
 import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
 
-Setup your callback on keyword / wakeword detected:
+<strong>Setup your callback on keyword / wakeword detected:</strong>
+
 const onKeyWordDetected = async (keywordIndex: any) => {
    // Do whatever you need on callback
    // Stop searching for Keywords if it makes sense - KeyWordRNBridge.stopKeyWord();
 };
+<strong>Setup and activate keywords detection.</strong> 
 
   try {
-Setup and activate keywords detection. 
-Provide the model file name, you do not have to provide a path the code will find the file for you.
+
+<strong>Provide the model file name, you do not have to provide a path the code will find the file for you.
 Provide the threashold - recommended 0.9999 to prevent any false positive.
-Provide the falsePositiveChecks - recommended setting of 2.
+Provide the falsePositiveChecks - recommended setting of 2.</strong>
+
           let modelParams = {modelName:"my_key_word.onnx", /* replace with your model */ 
               threshold: 0.9999, /* false positive sensitivity */ 
               falsePositiveChecks: 2} /* How many checks for false positives */
