@@ -1,7 +1,7 @@
 # ReactNative KeywordsDetection by Davoice
 
 <p style="font-family: Arial, sans-serif; font-size: 16px;">
-Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword detection solution designed by <strong>DaVoice</strong>.
+Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword detection solution designed by <strong>DaVoice.io</strong>.
 </p>
 
 <h2>Features</h2>
@@ -18,9 +18,9 @@ Welcome to <strong>Davoice KeywordsDetection</strong> – the premier keyword de
   <li><strong>React-Native IOS:</strong> React Native Wrapper for IOS.</li>
 </ul>
 
-<h2>Contact us @ frymanofer@gmail.com </h2>
+<h2>Contact us @ info@davoice.io </h2>
 <ul>
-  <li>We have full support for Ract-Native. This repository is being build in the meanwhile please contact us at frymanofer@gmail.com</li>
+  <li>For any questions / requirements and more support for Ract-Nativeplease contact us at info@davoice.io</li>
 </ul>
 
 <h2>Step by step instructions:</h2>
@@ -66,3 +66,33 @@ Import the main class:</strong>
         console.log("ERROR loadDavoice", e);
     }
 </ul>
+
+<h2>Listening while the app is shutdown or in the background</h2>
+
+Android: On Android we build the capability to activate our code from complete shutdown. This means you will be able to trigger a notification or activate a task that will activate DaVoice Wake Word detection.
+IOS: Unfortunately on IOS we found it impossible to start listening while the app is completely shut down. We have found the workaround below to be able to listen to the microphone on IOS in the background.
+
+<h2>IOS ONLY !!! If you require your IOS app to work from the background:</h2>
+
+Apple do not want to you listen when the app is in the background. 
+However some applications such as security application may require it.
+
+Since on IOS it is impossible to start recording from the background The idea is to activate the microphone with empty code - meaning not wasting battery until you need to listen and then you replace the microphone callback with the real listener.
+
+Here is an example I built in react native Not that the function below - backgroundMicEmptyListener() creates an empty listener with no CPU usage except the call to the function and return.
+
+
+const handleAppStateChange = (nextAppState) => {
+  console.log("handleAppStateChange(): ", nextAppState);
+  
+  if (nextAppState === 'background') {
+      console.log("nextAppState === 'background'");
+      BackgroundJob.start(backgroundMicEmptyListener, backgroundOptions)
+      .then(() => {
+          console.log('Background job started successfully');
+      })
+      .catch((err) => {
+          console.error('Error starting background job:', err);
+      });
+  }
+
