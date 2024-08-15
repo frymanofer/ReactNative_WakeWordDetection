@@ -67,7 +67,7 @@ Import the main class:</strong>
     }
 </ul>
 
-<h2>Listening while the app is shutdown or in the background</h2>
+<h2>Using Keywords / Wake word detection while the app is in the background or in shutdown state</h2>
 
 Android: On Android we build the capability to activate our code from complete shutdown. This means you will be able to trigger a notification or activate a task that will activate DaVoice Wake Word detection.
 IOS: Unfortunately on IOS we found it impossible to start listening while the app is completely shut down. We have found the workaround below to be able to listen to the microphone on IOS in the background.
@@ -82,17 +82,18 @@ Since on IOS it is impossible to start recording from the background The idea is
 Here is an example I built in react native Not that the function below - backgroundMicEmptyListener() creates an empty listener with no CPU usage except the call to the function and return.
 
 
-const handleAppStateChange = (nextAppState) => {
-  console.log("handleAppStateChange(): ", nextAppState);
-  
-  if (nextAppState === 'background') {
-      console.log("nextAppState === 'background'");
-      BackgroundJob.start(backgroundMicEmptyListener, backgroundOptions)
-      .then(() => {
-          console.log('Background job started successfully');
-      })
-      .catch((err) => {
-          console.error('Error starting background job:', err);
-      });
+  const handleAppStateChange = (nextAppState) => {
+    console.log("handleAppStateChange(): ", nextAppState);
+    
+    if (nextAppState === 'background') {
+        console.log("nextAppState === 'background'");
+        BackgroundJob.start(backgroundMicEmptyListener, backgroundOptions)
+        .then(() => {
+            console.log('Background job started successfully');
+        })
+        .catch((err) => {
+            console.error('Error starting background job:', err);
+        });
+    }
   }
 
