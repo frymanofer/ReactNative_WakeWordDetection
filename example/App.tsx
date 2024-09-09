@@ -93,7 +93,7 @@ function App(): React.JSX.Element {
         await AudioPermissionComponent();
 
         // Initialize keyword detection after permission is granted
-        KeyWordRNBridge.initKeywordDetection("sidekick_model.onnx", 0.9999, 2);
+        KeyWordRNBridge.initKeywordDetection("need_help_now.onnx", 0.9999, 2);
         await KeyWordRNBridge.setKeywordDetectionLicense(
           "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE=",
       );
