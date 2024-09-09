@@ -70,7 +70,7 @@ function App(): React.JSX.Element {
   };
   useEffect(() => {
     // Call your native bridge function
-    KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
+    KeyWordRNBridge.initKeywordDetection("sidekick_model.onnx", 0.9999, 2);
   //KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
   //loadModel();
 }, []);  // Empty dependency array ensures it runs once when the component mounts
