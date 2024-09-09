@@ -11,9 +11,11 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 import androidx.annotation.Nullable;
 import ai.onnxruntime.*;
+import android.util.Log;
 
 public class KeyWordRNBridge extends ReactContextBaseJavaModule {
 
+    private final String TAG = "KeyWordsDetection";
     private static final String REACT_CLASS = "KeyWordRNBridge";
     private static ReactApplicationContext reactContext;
     private KeyWordsDetection keyWordsDetection;
@@ -84,16 +86,22 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void initKeywordDetection(String modelName, float threshold, int buffer_cnt, Promise promise) {
+        Log.d(TAG, "initKeywordDetection(): ");
         try {
             keyThreshold = threshold;
             keyWordsDetection = new KeyWordsDetection(reactContext, modelName, threshold, buffer_cnt);
+            Log.d(TAG, "initKeywordDetection(): Success - resolving promise");
             if (keyWordsDetection != null) {
+                Log.d(TAG, "initKeywordDetection(): calling initialize(this::onKeywordDetected");
                 keyWordsDetection.initialize(this::onKeywordDetected);
+                Log.d(TAG, "initKeywordDetection(): Success - resolving promise");
                 promise.resolve("KeyWordsDetection initialized with model: " + modelName);
             } else {
+                Log.d(TAG, "initKeywordDetection(): Fail!!!!!!!!!!- resolving promise");
                 promise.reject("init_error", "KeyWordsDetection is null");
             }
         } catch (Exception e) {
+            Log.d(TAG, "initKeywordDetection(): Exception Fail!!!!!!!!!!- resolving promise");
             promise.reject("init_error", "Failed to initialize KeyWordsDetection", e);
         }
     }

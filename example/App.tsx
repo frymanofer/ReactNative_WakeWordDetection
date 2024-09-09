@@ -7,6 +7,8 @@
 
 import React, { useEffect } from 'react';
 
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -14,6 +16,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  Platform,
   useColorScheme,
   View,
 } from 'react-native';
@@ -28,6 +31,20 @@ import {
 
 //import { useModel } from "./useModel";
 //const { loadModel, startListening, stopListening } = useModel();
+
+const detectionCallback = async (keywordIndex: any) => {
+  console.log("detectionCallback detectionCallback detectionCallback!!!!!!!!!!!!!!!!!!");
+  KeyWordRNBridge?.stopKeywordDetection();
+};
+
+const AudioPermissionComponent = async () => {
+  const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.MICROPHONE : PERMISSIONS.ANDROID.RECORD_AUDIO;
+  await request(permission);
+  const status = await check(permission);
+  if (status !== RESULTS.GRANTED) {
+      await request(permission);
+  }
+}
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -60,6 +77,7 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
+type DetectionCallback = (event: any) => void;
 
 
 function App(): React.JSX.Element {
@@ -69,8 +87,30 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   useEffect(() => {
+    const initializeKeywordDetection = async () => {
+      try {
+        // Wait for audio permission to be granted
+        await AudioPermissionComponent();
+
+        // Initialize keyword detection after permission is granted
+        KeyWordRNBridge.initKeywordDetection("sidekick_model.onnx", 0.9999, 2);
+        await KeyWordRNBridge.setKeywordDetectionLicense(
+          "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE=",
+      );
+      KeyWordRNBridge.onKeywordDetectionEvent((event) => {
+        console.log("KeywordDetection event detected:", event);
+        detectionCallback(event);
+     });
+      KeyWordRNBridge?.stopKeywordDetection();
+      KeyWordRNBridge.startKeywordDetection();
+
+      } catch (error) {
+        console.error('Error during keyword detection initialization:', error);
+      }
+    };
+
+    initializeKeywordDetection();  // Call the async function inside useEffect
     // Call your native bridge function
-    KeyWordRNBridge.initKeywordDetection("sidekick_model.onnx", 0.9999, 2);
   //KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
   //loadModel();
 }, []);  // Empty dependency array ensures it runs once when the component mounts
