@@ -1,0 +1,1398 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "TopLevel",
+    "printedName": "TopLevel",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "GlobalVariables",
+        "printedName": "GlobalVariables",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "shared",
+            "printedName": "shared",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "GlobalVariables",
+                "printedName": "KeyWordDetection.GlobalVariables",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(cpy)shared",
+            "mangledName": "$s16KeyWordDetection15GlobalVariablesC6sharedACvpZ",
+            "moduleName": "KeyWordDetection",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GlobalVariables",
+                    "printedName": "KeyWordDetection.GlobalVariables",
+                    "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(cm)shared",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC6sharedACvgZ",
+                "moduleName": "KeyWordDetection",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "keyWordsDetectionInstance",
+            "printedName": "keyWordsDetectionInstance",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "KeyWordDetection.KeyWordsDetection?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "KeyWordsDetection",
+                    "printedName": "KeyWordDetection.KeyWordsDetection",
+                    "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(py)keyWordsDetectionInstance",
+            "mangledName": "$s16KeyWordDetection15GlobalVariablesC08keyWordsC8InstanceAA0agC0CSgvp",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "KeyWordDetection.KeyWordsDetection?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "KeyWordsDetection",
+                        "printedName": "KeyWordDetection.KeyWordsDetection",
+                        "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)keyWordsDetectionInstance",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC08keyWordsC8InstanceAA0agC0CSgvg",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "KeyWordDetection.KeyWordsDetection?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "KeyWordsDetection",
+                        "printedName": "KeyWordDetection.KeyWordsDetection",
+                        "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)setKeyWordsDetectionInstance:",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC08keyWordsC8InstanceAA0agC0CSgvs",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:16KeyWordDetection15GlobalVariablesC08keyWordsC8InstanceAA0agC0CSgvM",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC08keyWordsC8InstanceAA0agC0CSgvM",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "modelName",
+            "printedName": "modelName",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(py)modelName",
+            "mangledName": "$s16KeyWordDetection15GlobalVariablesC9modelNameSSSgvp",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "Swift.String?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)modelName",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9modelNameSSSgvg",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "Swift.String?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)setModelName:",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9modelNameSSSgvs",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:16KeyWordDetection15GlobalVariablesC9modelNameSSSgvM",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9modelNameSSSgvM",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "threshold",
+            "printedName": "threshold",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Float",
+                "printedName": "Swift.Float",
+                "usr": "s:Sf"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(py)threshold",
+            "mangledName": "$s16KeyWordDetection15GlobalVariablesC9thresholdSfvp",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Float",
+                    "printedName": "Swift.Float",
+                    "usr": "s:Sf"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)threshold",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9thresholdSfvg",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Float",
+                    "printedName": "Swift.Float",
+                    "usr": "s:Sf"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)setThreshold:",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9thresholdSfvs",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:16KeyWordDetection15GlobalVariablesC9thresholdSfvM",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9thresholdSfvM",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "bufferCnt",
+            "printedName": "bufferCnt",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(py)bufferCnt",
+            "mangledName": "$s16KeyWordDetection15GlobalVariablesC9bufferCntSivp",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)bufferCnt",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9bufferCntSivg",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables(im)setBufferCnt:",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9bufferCntSivs",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:16KeyWordDetection15GlobalVariablesC9bufferCntSivM",
+                "mangledName": "$s16KeyWordDetection15GlobalVariablesC9bufferCntSivM",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@KeyWordDetection@objc(cs)GlobalVariables",
+        "mangledName": "$s16KeyWordDetection15GlobalVariablesC",
+        "moduleName": "KeyWordDetection",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "hasMissingDesignatedInitializers": true,
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "Import",
+        "name": "AVFoundation",
+        "printedName": "AVFoundation",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "Import",
+        "name": "os.log",
+        "printedName": "os.log",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "Import",
+        "name": "onnxruntime_objc",
+        "printedName": "onnxruntime_objc",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "KeywordDetectionRNDelegate",
+        "printedName": "KeywordDetectionRNDelegate",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "KeywordDetectionDidDetectEvent",
+            "printedName": "KeywordDetectionDidDetectEvent(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(pl)KeywordDetectionRNDelegate(im)KeywordDetectionDidDetectEvent:",
+            "mangledName": "$s16KeyWordDetection07KeywordC10RNDelegateP0dC14DidDetectEventyySDySSypGF",
+            "moduleName": "KeyWordDetection",
+            "genericSig": "<τ_0_0 where τ_0_0 : KeyWordDetection.KeywordDetectionRNDelegate>",
+            "sugared_genericSig": "<Self where Self : KeyWordDetection.KeywordDetectionRNDelegate>",
+            "protocolReq": true,
+            "declAttributes": [
+              "ObjC"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "c:@M@KeyWordDetection@objc(pl)KeywordDetectionRNDelegate",
+        "mangledName": "$s16KeyWordDetection07KeywordC10RNDelegateP",
+        "moduleName": "KeyWordDetection",
+        "genericSig": "<τ_0_0 : AnyObject>",
+        "sugared_genericSig": "<Self : AnyObject>",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC",
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "KeyWordsDetection",
+        "printedName": "KeyWordsDetection",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "delegate",
+            "printedName": "delegate",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "WeakStorage",
+                "printedName": "(any KeyWordDetection.KeywordDetectionRNDelegate)?"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(py)delegate",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C8delegateAA07KeywordC10RNDelegate_pSgvp",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "ReferenceOwnership",
+              "AccessControl",
+              "ObjC"
+            ],
+            "ownership": 1,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(any KeyWordDetection.KeywordDetectionRNDelegate)?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "KeywordDetectionRNDelegate",
+                        "printedName": "any KeyWordDetection.KeywordDetectionRNDelegate",
+                        "usr": "c:@M@KeyWordDetection@objc(pl)KeywordDetectionRNDelegate"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)delegate",
+                "mangledName": "$s16KeyWordDetection0a5WordsC0C8delegateAA07KeywordC10RNDelegate_pSgvg",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(any KeyWordDetection.KeywordDetectionRNDelegate)?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "KeywordDetectionRNDelegate",
+                        "printedName": "any KeyWordDetection.KeywordDetectionRNDelegate",
+                        "usr": "c:@M@KeyWordDetection@objc(pl)KeywordDetectionRNDelegate"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)setDelegate:",
+                "mangledName": "$s16KeyWordDetection0a5WordsC0C8delegateAA07KeywordC10RNDelegate_pSgvs",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:16KeyWordDetection0a5WordsC0C8delegateAA07KeywordC10RNDelegate_pSgvM",
+                "mangledName": "$s16KeyWordDetection0a5WordsC0C8delegateAA07KeywordC10RNDelegate_pSgvM",
+                "moduleName": "KeyWordDetection",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(modelPath:threshold:bufferCnt:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "KeyWordsDetection",
+                "printedName": "KeyWordDetection.KeyWordsDetection",
+                "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Float",
+                "printedName": "Swift.Float",
+                "usr": "s:Sf"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)initWithModelPath:threshold:bufferCnt:error:",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C9modelPath9threshold9bufferCntACSS_SfSitKcfc",
+            "moduleName": "KeyWordDetection",
+            "objc_name": "initWithModelPath:threshold:bufferCnt:error:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "throwing": true,
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "replaceKeywordDetectionModel",
+            "printedName": "replaceKeywordDetectionModel(modelPath:threshold:bufferCnt:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Float",
+                "printedName": "Swift.Float",
+                "usr": "s:Sf"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)replaceKeywordDetectionModelWithModelPath:threshold:bufferCnt:error:",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C014replaceKeywordC5Model9modelPath9threshold9bufferCntySS_SfSitKF",
+            "moduleName": "KeyWordDetection",
+            "objc_name": "replaceKeywordDetectionModelWithModelPath:threshold:bufferCnt:error:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "gerKeywordDetectionModel",
+            "printedName": "gerKeywordDetectionModel()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)gerKeywordDetectionModel",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C010gerKeywordC5ModelSSyF",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "gerRecordingWav",
+            "printedName": "gerRecordingWav()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)gerRecordingWav",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C15gerRecordingWavSSyF",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setKeywordDetectionLicense",
+            "printedName": "setKeywordDetectionLicense(licenseKey:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)setKeywordDetectionLicenseWithLicenseKey:",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C010setKeywordC7License07licenseA0SbSS_tF",
+            "moduleName": "KeyWordDetection",
+            "objc_name": "setKeywordDetectionLicenseWithLicenseKey:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setLicense",
+            "printedName": "setLicense(licenseKey:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)setLicenseWithLicenseKey:",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C10setLicense07licenseA0SbSS_tF",
+            "moduleName": "KeyWordDetection",
+            "objc_name": "setLicenseWithLicenseKey:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "callBack",
+            "printedName": "callBack(frame:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.Int16]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int16",
+                    "printedName": "Swift.Int16",
+                    "usr": "s:s5Int16V"
+                  }
+                ],
+                "usr": "s:Sa"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)callBackWithFrame:",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C8callBack5frameySays5Int16VG_tF",
+            "moduleName": "KeyWordDetection",
+            "objc_name": "callBackWithFrame:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "startListening",
+            "printedName": "startListening()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)startListeningAndReturnError:",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C14startListeningyyKF",
+            "moduleName": "KeyWordDetection",
+            "objc_name": "startListeningAndReturnError:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "stopListening",
+            "printedName": "stopListening()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)stopListening",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C13stopListeningyyF",
+            "moduleName": "KeyWordDetection",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "KeyWordsDetection",
+                "printedName": "KeyWordDetection.KeyWordsDetection",
+                "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)init",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0CACycfc",
+            "moduleName": "KeyWordDetection",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection",
+        "mangledName": "$s16KeyWordDetection0a5WordsC0C",
+        "moduleName": "KeyWordDetection",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "Import",
+        "name": "CommonCrypto",
+        "printedName": "CommonCrypto",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "LicenseManager",
+        "printedName": "LicenseManager",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "LicenseManager",
+                "printedName": "KeyWordDetection.LicenseManager",
+                "usr": "c:@M@KeyWordDetection@objc(cs)LicenseManager"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@KeyWordDetection@objc(cs)LicenseManager(im)init",
+            "mangledName": "$s16KeyWordDetection14LicenseManagerCACycfc",
+            "moduleName": "KeyWordDetection",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@KeyWordDetection@objc(cs)LicenseManager",
+        "mangledName": "$s16KeyWordDetection14LicenseManagerC",
+        "moduleName": "KeyWordDetection",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "Import",
+        "name": "AVFoundation",
+        "printedName": "AVFoundation",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      },
+      {
+        "kind": "Import",
+        "name": "ios_voice_processor",
+        "printedName": "ios_voice_processor",
+        "declKind": "Import",
+        "moduleName": "KeyWordDetection"
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/GlobalVariables.swift",
+      "kind": "FloatLiteral",
+      "offset": 314,
+      "length": 6,
+      "value": "0.9999"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/GlobalVariables.swift",
+      "kind": "IntegerLiteral",
+      "offset": 359,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5286,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5481,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5632,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5773,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5778,
+      "length": 2,
+      "value": "97"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5812,
+      "length": 4,
+      "value": "1280"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5854,
+      "length": 5,
+      "value": "16000"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5911,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5993,
+      "length": 2,
+      "value": "80"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6029,
+      "length": 2,
+      "value": "16"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "BooleanLiteral",
+      "offset": 6061,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
+      "kind": "StringLiteral",
+      "offset": 4934,
+      "length": 17,
+      "value": "\"KeyWordDetection.KeyWordsDetection\""
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/LicenseManager.swift",
+      "kind": "StringLiteral",
+      "offset": 122,
+      "length": 46,
+      "value": "\"c1fbZVHYITkmYDRO4wcZV1Ts\/dMBJPTtDMUMIOta0wo=\""
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/AudioProcessorFromFile.swift",
+      "kind": "BooleanLiteral",
+      "offset": 134,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/AudioProcessorFromFile.swift",
+      "kind": "IntegerLiteral",
+      "offset": 175,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/AudioProcessorFromFile.swift",
+      "kind": "FloatLiteral",
+      "offset": 214,
+      "length": 7,
+      "value": "16000.0"
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/AudioProcessorFromFile.swift",
+      "kind": "StringLiteral",
+      "offset": 244,
+      "length": 24,
+      "value": "\"AudioProcessorFromFile\""
+    },
+    {
+      "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/AudioProcessorFromFile.swift",
+      "kind": "StringLiteral",
+      "offset": 72,
+      "length": 22,
+      "value": "\"KeyWordDetection.AudioProcessorFromFile\""
+    }
+  ]
+}
