@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
@@ -29,12 +29,33 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import LinearGradient from 'react-native-linear-gradient';
+
 //import { useModel } from "./useModel";
 //const { loadModel, startListening, stopListening } = useModel();
 
 const detectionCallback = async (keywordIndex: any) => {
   console.log("detectionCallback detectionCallback detectionCallback!!!!!!!!!!!!!!!!!!");
   KeyWordRNBridge?.stopKeywordDetection();
+};
+
+/*
+const AudioPermissionComponent = async () => {
+  const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.MICROPHONE : PERMISSIONS.ANDROID.RECORD_AUDIO;
+  await request(permission);
+  const status = await check(permission);
+  if (status !== RESULTS.GRANTED) {
+      await request(permission);
+  }
+}
+*/
+
+// Helper function to format the ONNX file name
+const formatWakeWord = (fileName) => {
+  return fileName
+    .replace(/_/g, ' ')  // Use global flag to replace all underscores
+    .replace('.onnx', '')
+    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
 };
 
 const AudioPermissionComponent = async () => {
@@ -44,7 +65,21 @@ const AudioPermissionComponent = async () => {
   if (status !== RESULTS.GRANTED) {
       await request(permission);
   }
+  if (Platform.OS === 'ios' )
+  {
+
+  }
+  else {
+    const foregroundServicePermission = await request(PERMISSIONS.ANDROID.FOREGROUND_SERVICE);
+    if (foregroundServicePermission === RESULTS.GRANTED) {
+      console.log("Permissions granted", "Microphone and foreground service permissions granted.");
+        // Start your service or perform other actions
+    } else {
+      console.log("Permission denied", "Foreground service microphone permission is required.");
+    }
+  }
 }
+
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -86,6 +121,12 @@ function App(): React.JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  const wakeWordFile = "need_help_now.onnx";
+  const wakeWord = formatWakeWord(wakeWordFile);
+  // State to handle the display message
+  const [message, setMessage] = useState(`Listening to WakeWord '${wakeWord}'...`);
+
   useEffect(() => {
     const initializeKeywordDetection = async () => {
       try {
@@ -93,15 +134,25 @@ function App(): React.JSX.Element {
         await AudioPermissionComponent();
 
         // Initialize keyword detection after permission is granted
-        KeyWordRNBridge.initKeywordDetection("need_help_now.onnx", 0.9999, 2);
+        KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         await KeyWordRNBridge.setKeywordDetectionLicense(
           "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE=",
       );
       KeyWordRNBridge.onKeywordDetectionEvent((event) => {
         console.log("KeywordDetection event detected:", event);
+        console.log("KeywordDetection event detected:", event);
+          
+        // Change the message to detected
+        setMessage(`WakeWord '${wakeWord}' detected`);
+
+        // Revert back to the listening message after 10 seconds
+        setTimeout(() => {
+          setMessage(`Listening to WakeWord '${wakeWord}'...`);
+        }, 10000); // 10 seconds delay
+
         detectionCallback(event);
      });
-      KeyWordRNBridge?.stopKeywordDetection();
+      KeyWordRNBridge.stopKeywordDetection();
       KeyWordRNBridge.startKeywordDetection();
 
       } catch (error) {
@@ -116,58 +167,53 @@ function App(): React.JSX.Element {
 }, []);  // Empty dependency array ensures it runs once when the component mounts
 
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-            Here is change #1
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+return (
+  <LinearGradient
+    colors={isDarkMode ? ['#232526', '#414345'] : ['#e0eafc', '#cfdef3']}
+    style={styles.linearGradient}>
+    <StatusBar
+      barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+      backgroundColor={backgroundStyle.backgroundColor}
+    />
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      style={backgroundStyle}>
+      <View style={[styles.container, { backgroundColor: isDarkMode ? Colors.black : Colors.white }]}>
+        <Text style={styles.title}>{message}</Text>
+      </View>
+    </ScrollView>
+    </LinearGradient>
+);
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+container: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 16,
+  marginTop: 32,
+},
+linearGradient: {
+  flex: 1,
+},
+title: {
+  fontSize: 28,
+  fontWeight: 'bold',
+  color: '#4a4a4a',
+  textAlign: 'center',
+  paddingHorizontal: 20,
+  backgroundColor: '#ffffff99',
+  borderRadius: 12,
+  paddingVertical: 20,
+  marginHorizontal: 10,
+  elevation: 4, // Android shadow
+  shadowColor: '#000', // iOS shadow
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 3,
+},
 });
 
 export default App;
+
