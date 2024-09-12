@@ -106,6 +106,12 @@ try {
 }
 ```
 
+## Benchmark.
+
+Our customers have benchmarked our technology against leading solutions, including Picovoice Porcupine, Snowboy, Pocketsphinx, Sensory, and others. 
+In several tests, our performance was comparable to Picovoice Porcupine, occasionally surpassing it, however both technologies consistently outperformed all others in specific benchmarks. 
+For detailed references or specific benchmark results, please contact us at ofer@davoice.io.
+
 ## Activating Microphone while the app operates in the background or during shutdown/closure.
 This example in the Git repository enables Android functionality in both the foreground and background, and iOS functionality in the foreground. However, we have developed an advanced SDK that allows the microphone to be activated from a complete shutdown state on Android and from the background state on iOS. If you require this capability for your app, please reach out to us at ofer@davoice.io.
 
