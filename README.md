@@ -85,19 +85,22 @@ try {
   };
 
   // Initialize the detection
-  const result = await KeyWordRNBridge.initKeyWord(
+  const result = await KeyWordRNBridge.initKeywordDetection(
     modelParams.modelName, 
     modelParams.threshold, 
     modelParams.falsePositiveChecks
   );
 
+  await KeyWordRNBridge.setKeywordDetectionLicense(
+          "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE="); // Set a valid license!!!!
+
   // Setup the callback
-  KeyWordRNBridge.onKeyWordEvent((event) => {
+  KeyWordRNBridge.onKeywordDetectionEvent((event) => {
     onKeyWordDetected(event);
   });
 
   // Now we are set - you can start listening and detect key words
-  KeyWordRNBridge.startKeyWord();
+  KeyWordRNBridge.startKeywordDetection();
 } catch (e) {
   console.log("ERROR loadDavoice", e);
 }
