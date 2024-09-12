@@ -28,7 +28,7 @@ For any questions, requirements, or more support for React-Native, please contac
 
 ## Installation and Usage
 
-### Install the package
+### npm install - package
 
 (Soon to be released. You will be able to use: `npm install react-native-davoice-keywordsdetection`)
 
