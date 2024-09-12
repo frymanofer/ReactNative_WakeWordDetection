@@ -17,6 +17,10 @@ end
 target 'ExampleApp' do
   config = use_native_modules!
 
+  # Pods for KeyWordsDetection
+  pod 'ios-voice-processor', '~> 1.1.0'
+  pod 'onnxruntime-objc', '~> 1.18.0'
+  
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.

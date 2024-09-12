@@ -87,6 +87,7 @@ type SectionProps = PropsWithChildren<{
 
 function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+
   return (
     <View style={styles.sectionContainer}>
       <Text
@@ -117,12 +118,12 @@ type DetectionCallback = (event: any) => void;
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [isFlashing, setIsFlashing] = useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const wakeWordFile = "need_help_now.onnx";
   const wakeWord = formatWakeWord(wakeWordFile);
   // State to handle the display message
   const [message, setMessage] = useState(`Listening to WakeWord '${wakeWord}'...`);
@@ -140,15 +141,19 @@ function App(): React.JSX.Element {
       );
       KeyWordRNBridge.onKeywordDetectionEvent((event) => {
         console.log("KeywordDetection event detected:", event);
-        console.log("KeywordDetection event detected:", event);
           
         // Change the message to detected
         setMessage(`WakeWord '${wakeWord}' detected`);
 
+        setIsFlashing(true);  // Start flashing effect (Line 122)
+
         // Revert back to the listening message after 10 seconds
         setTimeout(() => {
           setMessage(`Listening to WakeWord '${wakeWord}'...`);
-        }, 10000); // 10 seconds delay
+          setIsFlashing(false);  // Stop flashing effect (Line 126)
+//          KeyWordRNBridge.stopKeywordDetection();
+//          KeyWordRNBridge.startKeywordDetection();    
+        }, 5000); // 5 seconds delay
 
         detectionCallback(event);
      });
@@ -178,7 +183,10 @@ return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={backgroundStyle}>
-      <View style={[styles.container, { backgroundColor: isDarkMode ? Colors.black : Colors.white }]}>
+      <View 
+      style={[styles.container, 
+      { backgroundColor: 
+        isFlashing ? (isDarkMode ? '#ff4d4d' : '#ffcccc') : isDarkMode ? Colors.black : Colors.white }]}>
         <Text style={styles.title}>{message}</Text>
       </View>
     </ScrollView>
