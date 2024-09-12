@@ -1,4 +1,4 @@
-# KeyWordDetectionIOSFramework
+# ReactNative KeywordsDetection by Davoice
 
 [![GitHub release](https://img.shields.io/github/release/frymanofer/KeyWordDetectionIOSFramework.svg)](https://github.com/frymanofer/KeyWordDetectionIOSFramework/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -7,57 +7,32 @@ Made in Israel by [DaVoice.io](https://davoice.io)
 
 [![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FDaVoiceAI)](https://twitter.com/DaVoiceAI)
 
-Welcome to the iOS Framework for KeyWordDetection by DaVoice.io. This framework provides robust keyword detection capabilities on iOS, and can be used natively or within React Native projects.
 
-## Table of Contents
-
-- [KeyWordDetectionIOSFramework](#keyworddetectioniosframework)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Installation](#installation)
-    - [Native iOS Integration](#native-ios-integration)
-    - [React Native Integration](#react-native-integration)
-  - [Demo Instructions](#demo-instructions)
-  - [Quick Start](#quick-start)
-  - [Usage](#usage)
-  - [Support](#support)
-  - [Links](#links)
+Welcome to **Davoice KeywordsDetection** – the premier keyword detection solution designed by **DaVoice.io**.
 
 ## Features
 
-- Robust keyword detection for iOS devices
-- Compatible with native iOS and React Native projects
-- High accuracy and low latency
-- Easy integration with existing projects
+- **High Accuracy:** Our advanced machine learning models deliver top-notch accuracy.
+- **Easy to deploy with React Native:** Check out our example: "rn_example/DetectingKeyWords.js". With a few simple lines of code, you have your own keyword detecting enabled app.
+- **Cross-Platform Support:** Integrate Davoice KeywordsDetection into React-Native Framework. Both iOS and Android are supported.
+- **Low Latency:** Experience near-instantaneous keyword detection.
 
-## Installation
+## Platforms and Supported Languages
 
-### Native iOS Integration
+- **React-Native Android:** React Native Wrapper for Android.
+- **React-Native iOS:** React Native Wrapper for iOS.
 
-To integrate the framework natively into your iOS project, follow these steps:
+## Contact
 
-1. **Download the Framework:** Manually add the KeyWordDetection framework to your Xcode project.
+For any questions, requirements, or more support for React-Native, please contact us at info@davoice.io.
 
-2. **Modify Your Podfile:** Add the necessary dependencies and configurations.
+## Installation and Usage
 
-   ```ruby
-   target 'MyProjectName' do
-     # Your existing configurations...
-     # DAVOICE REQUIRED CONFIGURATION
-     use_frameworks! :linkage => :static
-     # Required Pods
-     pod 'onnxruntime-objc', '~> 1.18.0'
-     pod 'ios-voice-processor', '~> 1.1.0'
-   end
-   ```
+### Install the package
 
-   **Note:** We are working on supporting various linkage types; currently, linkage must be static.
+(Soon to be released. You will be able to use: `npm install react-native-davoice-keywordsdetection`)
 
-### React Native Integration
-
-To use this framework in a React Native project, visit our [React Native setup page](https://github.com/frymanofer/ReactNative_WakeWordDetection).
-
-## Demo Instructions
+### Demo Instructions
 
 To run the demo:
 
@@ -87,22 +62,13 @@ To run the demo:
 
    **Note:** If you don't have an iOS environment setup (Xcode, CocoaPods, iOS device or Emulator, etc.) and need help, please contact us at ofer@davoice.io.
 
-## Quick Start
+### Usage Example
 
-1. Follow the native installation instructions - Download and install KeyWordDetection iOS framework in Xcode and make changes to the Podfile as in the above instructions.
-2. Install React Native:
-   ```
-   npm install react-native
-   ```
-
-## Usage
-
-Here's an example of how to use the framework with React Native:
+Below is a simple JavaScript code showing how to use Davoice KeywordsDetection:
 
 ```javascript
 // Import the main class
-// import KeyWordRNBridge from 'react-native-davoice-keywordsdetection'; // Not yet available
-import KeyWordRNBridge from './rnbrigedspotter/KeyWordRNBridge';
+import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
 
 // Setup your callback on keyword / wakeword detected
 const onKeyWordDetected = async (keywordIndex) => {
@@ -111,40 +77,64 @@ const onKeyWordDetected = async (keywordIndex) => {
 };
 
 // Setup and activate keywords detection
-async function setupKeywordDetection() {
-  try {
-    let modelParams = {
-      modelName: "my_key_word.onnx", // replace with your model
-      threshold: 0.9999, // false positive sensitivity
-      falsePositiveChecks: 2 // How many checks for false positives
-    };
+try {
+  let modelParams = {
+    modelName: "my_key_word.onnx", // replace with your model
+    threshold: 0.9999, // false positive sensitivity
+    falsePositiveChecks: 2 // How many checks for false positives
+  };
 
-    // Initialize the detection
-    const result = await KeyWordRNBridge.initKeyWord(
-      modelParams.modelName, 
-      modelParams.threshold, 
-      modelParams.falsePositiveChecks
-    );
+  // Initialize the detection
+  const result = await KeyWordRNBridge.initKeyWord(
+    modelParams.modelName, 
+    modelParams.threshold, 
+    modelParams.falsePositiveChecks
+  );
 
-    // Setup the callback
-    KeyWordRNBridge.onKeyWordEvent((event) => {
-      onKeyWordDetected(event);
-    });
+  // Setup the callback
+  KeyWordRNBridge.onKeyWordEvent((event) => {
+    onKeyWordDetected(event);
+  });
 
-    // Now we are set - you can start listening and detect key words
-    KeyWordRNBridge.startKeyWord();
-  } catch (e) {
-    console.log("ERROR loadDavoice", e);
-  }
+  // Now we are set - you can start listening and detect key words
+  KeyWordRNBridge.startKeyWord();
+} catch (e) {
+  console.log("ERROR loadDavoice", e);
 }
 ```
 
-## Support
+## Background Detection
 
-For any questions or support, please contact us at:
+### Android
+On Android, we build the capability to activate our code from complete shutdown. This means you will be able to trigger a notification or activate a task that will activate DaVoice Wake Word detection.
 
-- Email: info@davoice.io
-- Website: [DaVoice.io](https://davoice.io)
+### iOS
+Unfortunately, on iOS, we found it impossible to start listening while the app is completely shut down. We have found the workaround below to be able to listen to the microphone on iOS in the background.
+
+#### iOS Background Workaround
+
+Apple does not want you to listen when the app is in the background. However, some applications such as security applications may require it.
+
+Since on iOS it is impossible to start recording from the background, the idea is to activate the microphone with empty code - meaning not wasting battery until you need to listen and then you replace the microphone callback with the real listener.
+
+Here is an example built in React Native. Note that the function `backgroundMicEmptyListener()` creates an empty listener with no CPU usage except for the call to the function and return.
+
+```javascript
+const handleAppStateChange = (nextAppState) => {
+  console.log("handleAppStateChange(): ", nextAppState);
+  
+  if (nextAppState === 'background') {
+    console.log("nextAppState === 'background'");
+    BackgroundJob.start(backgroundMicEmptyListener, backgroundOptions)
+      .then(() => {
+        console.log('Background job started successfully');
+      })
+      .catch((err) => {
+        console.error('Error starting background job:', err);
+      });
+  }
+}
+```
 
 ## Links
 
