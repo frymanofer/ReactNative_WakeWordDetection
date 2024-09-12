@@ -119,7 +119,9 @@ type DetectionCallback = (event: any) => void;
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(false);
-  
+  const wakeWordFile = "genious.onnx";
+  const wakeWord = formatWakeWord(wakeWordFile);
+
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
@@ -129,8 +131,6 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     const initializeKeywordDetection = async () => {
-        const wakeWordFile = "genious.onnx";
-        const wakeWord = formatWakeWord(wakeWordFile);
           try {
         // Wait for audio permission to be granted
         await AudioPermissionComponent();
