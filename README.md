@@ -106,21 +106,16 @@ try {
 }
 ```
 
-## Background Detection
+## Activating Microphone while the app operates in the background or during shutdown/closure.
+This example in the Git repository enables Android functionality in both the foreground and background, and iOS functionality in the foreground. However, we have developed an advanced SDK that allows the microphone to be activated from a complete shutdown state on Android and from the background state on iOS. If you require this capability for your app, please reach out to us at ofer@davoice.io.
 
-### Android
-On Android, we build the capability to activate our code from complete shutdown. This means you will be able to trigger a notification or activate a task that will activate DaVoice Wake Word detection.
+#### Example for iOS Background State
 
-### iOS
-Unfortunately, on iOS, we found it impossible to start listening while the app is completely shut down. We have found the workaround below to be able to listen to the microphone on iOS in the background.
+Apple restricts background microphone access for privacy and battery efficiency. However, certain applications, such as security apps, car controlling apps, apps for the blind or visually impaired may require this functionality.
 
-#### iOS Background Workaround
+Below is an example for one of the workarounds we have done in order to activate microphone with an empty listener. This approach avoids unnecessary battery usage until real audio capture is needed, at which point you can swap the placeholder listener with the actual microphone callback.
 
-Apple does not want you to listen when the app is in the background. However, some applications such as security applications may require it.
-
-Since on iOS it is impossible to start recording from the background, the idea is to activate the microphone with empty code - meaning not wasting battery until you need to listen and then you replace the microphone callback with the real listener.
-
-Here is an example built in React Native. Note that the function `backgroundMicEmptyListener()` creates an empty listener with no CPU usage except for the call to the function and return.
+The example below, built in React Native, demonstrates this approach. The function backgroundMicEmptyListener() creates a minimal listener with negligible CPU impact, only processing the function call and return.
 
 ```javascript
 const handleAppStateChange = (nextAppState) => {
