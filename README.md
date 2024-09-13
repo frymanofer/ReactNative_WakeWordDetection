@@ -62,6 +62,24 @@ To run the demo:
 
    **Note:** If you don't have an iOS environment setup (Xcode, CocoaPods, iOS device or Emulator, etc.) and need help, please contact us at ofer@davoice.io.
 
+## Images
+
+   <img src="./Audio%20Permission%20Prompt.jpeg" alt="Audio Permission Prompt" width="300"/></br>
+1. **Audio Permission Prompt:**
+   The app is requesting permission to record audio, necessary for wake word detection.
+
+   <img src="./Microphone%20Settings.jpeg" alt="Microphone Settings" width="300"/></br>
+2. **Microphone Settings:**
+   The settings screen showing virtual microphone configuration in the Android emulator.
+
+   <img src="./Listening%20for%20Wake%20Word.jpeg" alt="Listening for Wake Word" width="300"/></br>
+3. **Listening for Wake Word:**
+   The app is actively listening for the wake word "Need Help Now."
+
+   <img src="./Wake%20Word%20Detected.jpeg" alt="Wake Word Detected" width="300"/></br>
+4. **Wake Word Detected:**
+   The app has detected the wake word "Need Help Now."
+
 ### Usage Example
 
 Below is a simple JavaScript code showing how to use Davoice KeywordsDetection:
