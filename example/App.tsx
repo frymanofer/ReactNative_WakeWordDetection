@@ -137,10 +137,16 @@ function App(): React.JSX.Element {
 
         // Initialize keyword detection after permission is granted
         KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
-        await KeyWordRNBridge.setKeywordDetectionLicense(
-          "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE=",
-      );
-      KeyWordRNBridge.onKeywordDetectionEvent((event) => {
+        var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
+          "MTcyODkzOTYwMDAwMA==-Gy0+y3OCG32COKypi/mpT1AYrTlYAz/IvNt1WZ+gVsI=");
+        if (!isLicensed)
+        {
+          setMessage(`No license - please contact ofer@davoice.io`);
+          return;
+        }
+        KeyWordRNBridge.onKeywordDetectionEvent((event) => {         
+        // Stop listening.
+        KeyWordRNBridge.stopKeywordDetection();
         console.log("KeywordDetection event detected:", event);
           
         // Change the message to detected
@@ -150,10 +156,9 @@ function App(): React.JSX.Element {
 
         // Revert back to the listening message after 10 seconds
         setTimeout(() => {
+          KeyWordRNBridge.startKeywordDetection();    
           setMessage(`Listening to WakeWord '${wakeWord}'...`);
           setIsFlashing(false);  // Stop flashing effect (Line 126)
-//          KeyWordRNBridge.stopKeywordDetection();
-//          KeyWordRNBridge.startKeywordDetection();    
         }, 5000); // 5 seconds delay
 
         detectionCallback(event);
