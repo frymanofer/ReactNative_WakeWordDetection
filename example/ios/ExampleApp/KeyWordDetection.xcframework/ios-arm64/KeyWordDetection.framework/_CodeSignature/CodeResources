@@ -18,11 +18,11 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo</key>
 		<data>
-		PfROM3t6h1ZVR9DYXkU56LTkjEQ=
+		q+KNyGG34yn2LkaDyWbaFBrOXaE=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		kQufsoJ6xDPTZUmUjVgrH06Jdf4=
+		8TaRyS0hcTL+RjwbXiwK1LkhFMk=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		uy88QXeZAmbwa1SFDz4UmK0b0VY=
+		fXyLNtieUWkgyCTj7W4yOQ7gNNw=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -65,14 +65,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			z1ilqATRgty4FZJ1uULqpaEvakjQs8uvG1ybMnWGH84=
+			4vr4uErxdL6REBOe/0bqWe0vqM8xmEFQcrDf0abV65g=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			oKz8Ec9OT99aePS7QMB45C0m1AnMVH1MLsSy6q8hbd4=
+			nqOtQCXVjo8E/OFW1P1UPQjm2B7alMpfZT80ae9pK5g=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
@@ -100,7 +100,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			xnahT3ByOGKvsOj64qelc5iy6xZdvrOA57z6Bm+rf9s=
+			+/Pwp0yp8hvlWwwLobe4C4mjrYuN229ClkY10U4R5bU=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

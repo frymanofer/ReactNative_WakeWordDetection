@@ -69,7 +69,8 @@ RCT_EXPORT_METHOD(gerKeywordDetectionModel: resolver:(RCTPromiseResolveBlock)res
     resolve(modelName);
 }
 
-RCT_EXPORT_METHOD(gerRecordingWav: resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(gerRecordingWav:(NSString *)bla resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+//RCT_EXPORT_METHOD(gerRecordingWav: resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     KeyWordsDetection *keyWordsDetection = [GlobalVariables shared].keyWordsDetectionInstance;
     NSString *recWavPath = @"";

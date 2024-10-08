@@ -5,6 +5,8 @@
  * @format
  */
 
+import RNFS from 'react-native-fs';
+
 import React, { useEffect, useState } from 'react';
 
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -30,13 +32,85 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import LinearGradient from 'react-native-linear-gradient';
+import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
+//import RNFS from 'react-native-fs';
 
 //import { useModel } from "./useModel";
 //const { loadModel, startListening, stopListening } = useModel();
 
+import Sound from 'react-native-sound';
+
+// Enable playback in silence mode (iOS)
+Sound.setCategory('Playback');
+
+const playSoundFile = (fileName) => {
+  try {
+    // Initialize the sound object with the file path
+    const sound = new Sound(fileName, '', (error) => {
+      if (error) {
+        console.error('Failed to load the sound', error);
+        return;
+      }
+
+      // Get the duration of the audio file in seconds
+      const duration = sound.getDuration();
+
+      // Calculate the start time (last three seconds)
+      const startTime = Math.max(0, duration - 3);
+
+      // Seek to the start time
+      sound.setCurrentTime(startTime);
+
+      // Play the sound
+      sound.play((success) => {
+        if (success) {
+          console.log('Successfully played the sound');
+        } else {
+          console.error('Playback failed due to audio decoding errors');
+        }
+
+        // Release the sound when done
+        sound.release();
+      });
+    });
+  } catch (error) {
+    console.error('Error playing sound file:', error);
+  }
+};
+
+/*
+const playAudio = (filePath) => {
+  const sound = new Sound(filePath, Sound.DOCUMENT, (error) => {
+    if (error) {
+      console.log('Failed to load the sound', error);
+      return;
+    }
+    // Play the sound
+    sound.play((success) => {
+      if (success) {
+        console.log('Successfully finished playing');
+      } else {
+        console.log('Playback failed due to audio decoding errors');
+      }
+    });
+  });
+};
+*/
+
+// Call playAudio with the path to your wav file
+//playAudio('/data/user/0/com.exampleapp/files/need_help_now_prediction.wav');
+
+const playAllSoundFile = async (fileName) => {
+  try {
+    playAudio(fileName);
+    console.log('File :', fileName);
+  } catch (error) {
+    console.error('Error moving file:', error);
+  }
+};
+
 const detectionCallback = async (keywordIndex: any) => {
   console.log("detectionCallback detectionCallback detectionCallback!!!!!!!!!!!!!!!!!!");
-  KeyWordRNBridge?.stopKeywordDetection();
 };
 
 /*
@@ -70,7 +144,8 @@ const AudioPermissionComponent = async () => {
 
   }
   else {
-    const foregroundServicePermission = await request(PERMISSIONS.ANDROID.FOREGROUND_SERVICE);
+    // Bug FOREGROUND_SERVICE does not exist
+    const foregroundServicePermission = await request('android.permission.FOREGROUND_SERVICE');
     if (foregroundServicePermission === RESULTS.GRANTED) {
       console.log("Permissions granted", "Microphone and foreground service permissions granted.");
         // Start your service or perform other actions
@@ -112,7 +187,6 @@ function Section({children, title}: SectionProps): React.JSX.Element {
   );
 }
 
-import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
 type DetectionCallback = (event: any) => void;
 
 
@@ -139,29 +213,40 @@ function App(): React.JSX.Element {
         KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
           "MTcyODkzOTYwMDAwMA==-Gy0+y3OCG32COKypi/mpT1AYrTlYAz/IvNt1WZ+gVsI=");
-        if (!isLicensed)
-        {
+        if (!isLicensed) {
           setMessage(`No license - please contact ofer@davoice.io`);
           return;
         }
+
         KeyWordRNBridge.onKeywordDetectionEvent((event) => {         
-        // Stop listening.
-        KeyWordRNBridge.stopKeywordDetection();
-        console.log("KeywordDetection event detected:", event);
-          
-        // Change the message to detected
-        setMessage(`WakeWord '${wakeWord}' detected`);
+          // Stop listening.
+          KeyWordRNBridge.stopKeywordDetection();
+          console.log("KeywordDetection event detected:", event);
+          // Change the message to detected
+          setMessage(`WakeWord '${wakeWord}' DETECTED`);
 
-        setIsFlashing(true);  // Start flashing effect (Line 122)
+          setIsFlashing(true);  // Start flashing effect (Line 122)
 
-        // Revert back to the listening message after 10 seconds
-        setTimeout(() => {
-          KeyWordRNBridge.startKeywordDetection();    
-          setMessage(`Listening to WakeWord '${wakeWord}'...`);
-          setIsFlashing(false);  // Stop flashing effect (Line 126)
-        }, 5000); // 5 seconds delay
+          setTimeout(() => {
+            (async () => {
+                setMessage(`Paying back '${wakeWord}' which activated the App`);
+                const wavFilePath = await KeyWordRNBridge.gerRecordingWav();
+                KeyWordRNBridge.stopKeywordDetection();
+                console.log("wavFilePath == ",wavFilePath);
+                if (!wavFilePath)
+                  return;
+                const cleanedFilePath = wavFilePath.startsWith('file://') ? wavFilePath.slice(7) : wavFilePath;
+                playSoundFile(cleanedFilePath);
+            })();
+            }, 1000); // 5 seconds delay
+          // Revert back to the listening message after 10 seconds
+          setTimeout(() => {
+            KeyWordRNBridge.startKeywordDetection();    
+            setMessage(`Listening to WakeWord '${wakeWord}'...`);
+            setIsFlashing(false);  // Stop flashing effect (Line 126)
+          }, 5000); // 5 seconds delay
 
-        detectionCallback(event);
+          detectionCallback(event);
      });
       KeyWordRNBridge.stopKeywordDetection();
       KeyWordRNBridge.startKeywordDetection();

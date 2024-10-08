@@ -1,4 +1,7 @@
 {
   "name": "ExampleApp",
-  "displayName": "ExampleApp"
+  "displayName": "ExampleApp",
+  "android": {
+    "packageName": "com.exampleapp"
+  }
 }
