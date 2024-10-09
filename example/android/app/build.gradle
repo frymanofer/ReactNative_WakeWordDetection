@@ -85,6 +85,9 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    Project background_fetch = project(':react-native-background-fetch')
+
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -105,6 +108,7 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+//    proguardFiles "${background_fetch.projectDir}/proguard-rules.pro"
 }
 
 repositories {
