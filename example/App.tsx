@@ -216,7 +216,8 @@ type DetectionCallback = (event: any) => void;
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(false);
-  const wakeWordFile = "need_help_now.onnx";
+  //const wakeWordFile = "need_help_now.onnx";
+  const wakeWordFile = "hey_pango.onnx";
   const wakeWord = formatWakeWord(wakeWordFile);
 
   const backgroundStyle = {
