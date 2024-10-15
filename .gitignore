@@ -99,41 +99,63 @@ fastlane/report.xml
 .eslintcache
 x
 diff_files.sh
-example/android/app/src/main/java/com/exampleapp/CalendarModule.java__
+example*/android/app/src/main/java/com/exampleapp/CalendarModule.java__
 .gitignore
-example/android/app/src/main/java/com/exampleapp/MainReactNativeHost.java__
-example/android/app/src/main/java/com/exampleapp/MainApplication.java__
-example/android/app/src/main/java/com/exampleapp/MyAppPackage.java__
-example/android/app/src/main/java/com/exampleapp/MainActivity.java__
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppDataInfo.plist
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.apple.dyld/ExampleApp.dyld4
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db-shm
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db-wal
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/functions.data
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/functions.list
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/archiveUsage.db/data.mdb
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/archiveUsage.db/lock.mdb
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/HTTPStorages/com.davoice.keyworddetection/httpstorages.sqlite
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/HTTPStorages/com.davoice.keyworddetection/httpstorages.sqlite-shm
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/HTTPStorages/com.davoice.keyworddetection/httpstorages.sqlite-wal
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Preferences/com.davoice.keyworddetection.plist
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Saved Application State/com.davoice.keyworddetection.savedState/KnownSceneSessions/data.data
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/.com.apple.mobile_container_manager.metadata.plist
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Documents/need_help_now_prediction.wav
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/17A43962-E8E8-4B8B-853A-7145F64F0D92@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/4378DBDB-4622-43C8-B614-67D96159CFC2@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/D9907F8E-70A0-498F-8418-2F7644B55F49@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/DAA8FCD9-F369-49FA-8532-047819271E92@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/downscaled/B2AB1DFC-0C1D-400A-BCBD-7AA6E5A7D002@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/6E22260C-1393-434C-85E9-28CC1E071A0A@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/7AC2BE67-9879-4CF8-8F5A-B0B0516BCF0B@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/downscaled/6B2AC988-99E7-444B-8F5C-E52397E2A1D1@3x.ktx
-example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/downscaled/CF40C159-7470-4381-A125-524A2664A97B@3x.ktx
-example/App.tsx
+example*/android/app/src/main/java/com/exampleapp/MainReactNativeHost.java__
+example*/android/app/src/main/java/com/exampleapp/MainApplication.java__
+example*/android/app/src/main/java/com/exampleapp/MyAppPackage.java__
+example*/android/app/src/main/java/com/exampleapp/MainActivity.java__
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppDataInfo.plist
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.apple.dyld/ExampleApp.dyld4
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db-shm
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db-wal
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/functions.data
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/functions.list
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/archiveUsage.db/data.mdb
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/com.apple.metal/archiveUsage.db/lock.mdb
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/HTTPStorages/com.davoice.keyworddetection/httpstorages.sqlite
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/HTTPStorages/com.davoice.keyworddetection/httpstorages.sqlite-shm
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/HTTPStorages/com.davoice.keyworddetection/httpstorages.sqlite-wal
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Preferences/com.davoice.keyworddetection.plist
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Saved Application State/com.davoice.keyworddetection.savedState/KnownSceneSessions/data.data
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/.com.apple.mobile_container_manager.metadata.plist
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Documents/need_help_now_prediction.wav
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/17A43962-E8E8-4B8B-853A-7145F64F0D92@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/4378DBDB-4622-43C8-B614-67D96159CFC2@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/D9907F8E-70A0-498F-8418-2F7644B55F49@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/DAA8FCD9-F369-49FA-8532-047819271E92@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/com.davoice.keyworddetection - {DEFAULT GROUP}/downscaled/B2AB1DFC-0C1D-400A-BCBD-7AA6E5A7D002@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/6E22260C-1393-434C-85E9-28CC1E071A0A@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/7AC2BE67-9879-4CF8-8F5A-B0B0516BCF0B@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/downscaled/6B2AC988-99E7-444B-8F5C-E52397E2A1D1@3x.ktx
+example*/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/downscaled/CF40C159-7470-4381-A125-524A2664A97B@3x.ktx
+example*/App.tsx
 .gitignore
-example/App.js_new
+example*/App.js_new
 README.md.ofer
 .gitignore
-example/need_help_now_prediction.wav
-example/android/app-release.apk
+example*/need_help_now_prediction.wav
+example*/android/app-release.apk
+example_car_parking/android/app/debug.keystore
+example_car_parking/android/gradlew.bat
+example/App.tsx
+example/App1.tsx
+example/index.js_new
+example/index1.js
+example/android/app/src/main/assets/genious.onnx
+example/android/app/src/main/assets/hey_pango.onnx
+example/android/app/src/main/assets/hey_vickie.onnx
+example/android/app/src/main/assets/hotel_genie.onnx
+example_car_parking/App1.tsx
+example_car_parking/Gemfile.lock
+example_car_parking/index.js_new
+example_car_parking/index1.js
+example_car_parking/android/app/src/main/assets/genious.onnx
+example_car_parking/android/app/src/main/assets/hey_vickie.onnx
+example_car_parking/android/app/src/main/assets/hotel_genie.onnx
+example_car_parking/android/gradle/wrapper/gradle-wrapper.jar
+example_car_parking/android/gradle/wrapper/gradle-wrapper.properties
+example_car_parking/ios/.xcode.env
+example_car_parking/ios/ExampleApp/Images.xcassets/Contents.json
+example_car_parking/ios/ExampleApp/Images.xcassets/AppIcon.appiconset/Contents.json
