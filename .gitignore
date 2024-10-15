@@ -130,3 +130,10 @@ example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcap
 example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/7AC2BE67-9879-4CF8-8F5A-B0B0516BCF0B@3x.ktx
 example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/downscaled/6B2AC988-99E7-444B-8F5C-E52397E2A1D1@3x.ktx
 example/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/SplashBoard/Snapshots/sceneID:com.davoice.keyworddetection-default/downscaled/CF40C159-7470-4381-A125-524A2664A97B@3x.ktx
+example/App.tsx
+.gitignore
+example/App.js_new
+README.md.ofer
+.gitignore
+example/need_help_now_prediction.wav
+example/android/app-release.apk

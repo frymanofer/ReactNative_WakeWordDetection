@@ -35,6 +35,28 @@ import LinearGradient from 'react-native-linear-gradient';
 import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
 //import RNFS from 'react-native-fs';
 
+import { NativeModules } from 'react-native';
+import { AppState } from 'react-native';
+
+const { ForegroundServiceModule } = NativeModules;
+
+function bringAppToForeground() {
+  if (Platform.OS === 'ios')
+    return;
+  console.log("ForegroundServiceModule == ", ForegroundServiceModule);
+  // Call the native module method to bring the app to the foreground
+  ForegroundServiceModule.bringAppToForeground()
+    .then(() => {
+      console.log('Called bringing app to foreground');
+    })
+    .catch((error) => {
+      console.error('Error bringing app to foreground:', error);
+    });
+}
+
+// Call this function when your callback is triggered
+
+
 //import { useModel } from "./useModel";
 //const { loadModel, startListening, stopListening } = useModel();
 
@@ -110,6 +132,7 @@ const playAllSoundFile = async (fileName) => {
 };
 
 const detectionCallback = async (keywordIndex: any) => {
+  bringAppToForeground();
   console.log("detectionCallback detectionCallback detectionCallback!!!!!!!!!!!!!!!!!!");
 };
 
@@ -227,18 +250,23 @@ function App(): React.JSX.Element {
 
           setIsFlashing(true);  // Start flashing effect (Line 122)
 
-          setTimeout(() => {
-            (async () => {
-                setMessage(`Paying back '${wakeWord}' which activated the App`);
-                const wavFilePath = await KeyWordRNBridge.gerRecordingWav();
+          if (!AppState.currentState.match(/foreground/)) {
+            setTimeout(() => {
+              (async () => {
+                  KeyWordRNBridge.stopKeywordDetection();
+                  setMessage(`Paying back '${wakeWord}' which activated the App`);
+                  const wavFilePath = await KeyWordRNBridge.gerRecordingWav();
+                  console.log("wavFilePath == ",wavFilePath);
+                  if (!wavFilePath)
+                    return;
+                  const cleanedFilePath = wavFilePath.startsWith('file://') ? wavFilePath.slice(7) : wavFilePath;
+                  playSoundFile(cleanedFilePath);
+              })();
+              }, 1000); // 5 seconds delay
+            } else {
                 KeyWordRNBridge.stopKeywordDetection();
-                console.log("wavFilePath == ",wavFilePath);
-                if (!wavFilePath)
-                  return;
-                const cleanedFilePath = wavFilePath.startsWith('file://') ? wavFilePath.slice(7) : wavFilePath;
-                playSoundFile(cleanedFilePath);
-            })();
-            }, 1000); // 5 seconds delay
+                // Setup react-native-background-fetch 
+            }
           // Revert back to the listening message after 10 seconds
           setTimeout(() => {
             KeyWordRNBridge.startKeywordDetection();    

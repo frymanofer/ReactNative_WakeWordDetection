@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ExampleApp</string>
+    <string name="shortcut_short_label">Open Example App</string>
+    <string name="shortcut_long_label">Open Example App</string>
 </resources>

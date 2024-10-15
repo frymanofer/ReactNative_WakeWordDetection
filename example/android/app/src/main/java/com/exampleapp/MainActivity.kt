@@ -25,6 +25,11 @@ class MainActivity : ReactActivity() {
     setTheme(R.style.AppTheme)
     super.onCreate(null)
     Log.d("MainActivity", "On create!!!!! check for cobraMainClass:() ")
+    // The intent is automatically provided when the activity is launched
+    if (intent != null && intent.hasCategory(Intent.CATEGORY_VOICE)) {
+      // This means Google Assistant or another assistant service opened the app
+      Log.d("MyApp", "App opened by Google Assistant")
+  }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       requestMicrophonePermissions()
@@ -32,6 +37,11 @@ class MainActivity : ReactActivity() {
     else {
       checkPermissions();
     }
+  }
+  // MainActivity.kt
+  override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    setIntent(intent)
   }
 
   @RequiresApi(Build.VERSION_CODES.O)
@@ -86,7 +96,9 @@ private fun startMicrophoneService() {
       val serviceIntent = Intent(this, MicrophoneService::class.java)
       ContextCompat.startForegroundService(this, serviceIntent)
   } else {
-      requestMicrophonePermissions()
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        requestMicrophonePermissions()
+      }
   }
 }
 
