@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
+
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -235,7 +236,8 @@ function App(): React.JSX.Element {
         // Initialize keyword detection after permission is granted
         KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
-          "MTcyODkzOTYwMDAwMA==-Gy0+y3OCG32COKypi/mpT1AYrTlYAz/IvNt1WZ+gVsI=");
+          "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
+  
         if (!isLicensed) {
           setMessage(`No license - please contact ofer@davoice.io`);
           return;
