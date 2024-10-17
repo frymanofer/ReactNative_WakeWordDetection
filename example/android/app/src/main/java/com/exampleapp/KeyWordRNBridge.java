@@ -48,9 +48,11 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
         else {
             try {
                 keyWordsDetection.replaceKeywordDetectionModel (reactContext, modelName, threshold, buffer_cnt);
+                keyWordsDetection.initialize(this::onKeywordDetected);
             } catch (Exception e) {
-                promise.resolve("replaceKeywordDetectionModel: replaced model to: " + modelName);
+                promise.reject("replaceKeywordDetectionModel: Error replacing model to: " + modelName);
             }
+            promise.resolve("replaceKeywordDetectionModel called initialized with model: " + modelName);
         }
     }
         
