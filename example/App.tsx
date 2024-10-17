@@ -229,7 +229,7 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     const initializeKeywordDetection = async () => {
-          try {
+      try {
         // Wait for audio permission to be granted
         await AudioPermissionComponent();
 
@@ -237,13 +237,12 @@ function App(): React.JSX.Element {
         KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
           "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
-  
         if (!isLicensed) {
           setMessage(`No license - please contact ofer@davoice.io`);
           return;
         }
 
-        KeyWordRNBridge.onKeywordDetectionEvent((event) => {         
+        const eventListener = KeyWordRNBridge.onKeywordDetectionEvent((event) => {         
           // Stop listening.
           KeyWordRNBridge.stopKeywordDetection();
           console.log("KeywordDetection event detected:", event);

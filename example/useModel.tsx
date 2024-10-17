@@ -46,8 +46,8 @@ export const useModel = () => {
                 bufferCount,
             );
             await KeyWordRNBridge.setKeywordDetectionLicense(
-                "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE=",
-            );
+                "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI="
+                );
             console.log("Model loaded:", result);
         } catch (error) {
             console.error("[useModel] Error loading model:", error);
