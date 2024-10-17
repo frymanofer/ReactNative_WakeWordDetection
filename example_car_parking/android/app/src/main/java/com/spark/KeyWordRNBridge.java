@@ -1,4 +1,4 @@
-package com.exampleapp.keywordspotting;
+package com.spark.keywordspotting;
 
 import com.davoice.keywordsdetection.keywordslibrary.KeyWordsDetection;
 
@@ -48,12 +48,14 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
         else {
             try {
                 keyWordsDetection.replaceKeywordDetectionModel (reactContext, modelName, threshold, buffer_cnt);
+                keyWordsDetection.initialize(this::onKeywordDetected);
             } catch (Exception e) {
-                promise.resolve("replaceKeywordDetectionModel: replaced model to: " + modelName);
+                promise.reject("replaceKeywordDetectionModel: Error replacing model to: " + modelName);
             }
+            promise.resolve("replaceKeywordDetectionModel called initialized with model: " + modelName);
         }
     }
-        
+    
     @ReactMethod
     public String gerKeywordDetectionModel(Promise promise) {
         String modelName = "";

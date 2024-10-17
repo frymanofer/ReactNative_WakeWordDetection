@@ -1,4 +1,4 @@
-package com.exampleapp
+package com.spark
 
 import android.content.Intent
 import android.app.ActivityManager

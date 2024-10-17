@@ -1,4 +1,4 @@
-package com.exampleapp.utils;
+package com.spark.utils;
 
 import android.os.Environment;
 import java.io.File;

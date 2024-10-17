@@ -20,6 +20,10 @@ buildscript {
     }
 }
 
+project.ext.react = [
+    enableHermes: false,  // Set this to false
+]
+
 apply plugin: "com.facebook.react.rootproject"
 
 allprojects {

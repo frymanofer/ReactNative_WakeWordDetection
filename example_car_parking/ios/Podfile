@@ -48,7 +48,7 @@ setup_permissions([
   # 'StoreKit',
 ])
 
-target 'ExampleApp' do
+target 'Spark' do
   config = use_native_modules!
 
   # Pods for KeyWordsDetection

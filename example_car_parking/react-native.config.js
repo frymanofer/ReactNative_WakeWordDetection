@@ -2,7 +2,7 @@ module.exports = {
     project: {
       ios: {},
       android: {
-        packageName: 'com.exampleapp',
+        packageName: 'com.spark',
       },
     },
 };  

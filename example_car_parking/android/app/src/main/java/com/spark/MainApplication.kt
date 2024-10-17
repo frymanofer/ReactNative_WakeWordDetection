@@ -1,4 +1,4 @@
-package com.exampleapp
+package com.spark
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,7 +10,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
-import com.exampleapp.keywordspotting.KeyWordRNBridgePackage;
+import com.spark.keywordspotting.KeyWordRNBridgePackage;
 
 class MainApplication : Application(), ReactApplication {
 

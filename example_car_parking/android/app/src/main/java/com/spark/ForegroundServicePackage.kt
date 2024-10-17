@@ -1,4 +1,4 @@
-package com.exampleapp
+package com.spark
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.ReactApplicationContext

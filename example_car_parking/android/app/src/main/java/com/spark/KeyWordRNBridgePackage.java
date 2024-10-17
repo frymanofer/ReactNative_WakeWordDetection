@@ -1,4 +1,4 @@
-package com.exampleapp.keywordspotting;
+package com.spark.keywordspotting;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

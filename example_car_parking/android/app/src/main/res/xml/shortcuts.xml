@@ -8,8 +8,8 @@
         <!-- Intent triggered by Google Assistant -->
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.example.exampleapp.MainActivity"
-            android:targetPackage="com.example.exampleapp" />
+            android:targetClass="com.example.spark.MainActivity"
+            android:targetPackage="com.example.spark" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 </shortcuts>

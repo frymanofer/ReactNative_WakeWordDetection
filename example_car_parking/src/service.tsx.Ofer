@@ -1,0 +1,51 @@
+import TrackPlayer from 'react-native-track-player';
+import { Platform } from 'react-native';
+
+module.exports = async function() {
+  TrackPlayer.addEventListener('remote-play', () => {
+    TrackPlayer.play();
+  });
+
+  TrackPlayer.addEventListener('remote-pause', () => {
+    TrackPlayer.pause();
+  });
+
+  TrackPlayer.addEventListener('remote-stop', () => {
+    TrackPlayer.stop();
+  });
+
+  // You can handle more events like next, previous, etc.
+};
+
+export async function setupTrackPlayer() {
+  console.log("setupTrackPlayer()");
+  await TrackPlayer.setupPlayer();
+  await TrackPlayer.updateOptions({
+    stopWithApp: true,
+    capabilities: [
+      TrackPlayer.CAPABILITY_PLAY,
+      TrackPlayer.CAPABILITY_PAUSE,
+      TrackPlayer.CAPABILITY_STOP,
+      TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+      TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+    ],
+    compactCapabilities: [TrackPlayer.CAPABILITY_PLAY, TrackPlayer.CAPABILITY_PAUSE],
+  });
+  console.log("End setupTrackPlayer()");
+}
+
+export async function playTrackPlayer() {
+    // Determine the correct path for the local file
+    console.log("playTrackPlayer()");
+    const track = {
+      id: 'local-track', // A unique track ID
+      title: 'Sample WAV',
+      artist: 'Artist Name',
+      url: Platform.OS === 'ios' ? './assets/carparkoptions.mp3' : 'android.resource://com.spark/raw/carparkoptions',
+    };
+  
+    await TrackPlayer.add([track]);
+    TrackPlayer.play();
+    console.log("End playTrackPlayer()");
+
+}

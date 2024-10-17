@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
+import KeyWordRNBridge from "../rnkeywordspotter/KeyWordRNBridge";
 
 type DetectionCallback = (event: any) => void;
 
@@ -10,7 +10,7 @@ type DetectionCallback = (event: any) => void;
 export const useModel = () => {
     // State to track whether the keyword detection is currently active
     const [isListening, setIsListening] = useState(false);
-
+    let currentEventListener: any = null;
     /**
      * Set the keyword detection license
      * @param licenseKey - The license key
@@ -29,26 +29,32 @@ export const useModel = () => {
      * @param threshold - The detection threshold
      * @param bufferCount - The number of audio buffers
      */
-    const loadModel = useCallback(async () => {
+    const loadModel = useCallback(async (stage) => {
+        console.log("loadModel()")
         const modelFileNameOptions = {
-            en: "help_me_now.onnx",
-            es: "ayuda_urgente.onnx",
-            he: "car_li_po.onnx",
+            'default': "need_help_now.onnx",
+            'state1': "hey_pango.onnx",
+            'state2': "i_want_to_park.onnx",
         };
+        console.log("loadModel() - model:", modelFileNameOptions[stage])
         try {
 
-            const modelFileName = "sidekick_model.onnx";
+            const modelFileName = modelFileNameOptions[stage];
             const threshold = 0.9999;
             const bufferCount = 2;
-            const result = await KeyWordRNBridge.initKeywordDetection(
+            console.log("Caling replaceKeywordDetectionModel()");
+            const result = await KeyWordRNBridge.replaceKeywordDetectionModel(
                 modelFileName,
                 threshold,
                 bufferCount,
             );
-            await KeyWordRNBridge.setKeywordDetectionLicense(
-                "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE=",
-            );
             console.log("Model loaded:", result);
+            const isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
+                "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=",
+            );
+            console.log("isLicensed:",isLicensed);
+            if (!isLicensed)
+                console.error("license invalid - please contact ofer@davoice.io");
         } catch (error) {
             console.error("[useModel] Error loading model:", error);
         }
@@ -63,9 +69,14 @@ export const useModel = () => {
             // Set up the event listener for keyword detection
             const eventListener = KeyWordRNBridge.onKeywordDetectionEvent(
                 (event: any) => {
+                    eventListener.remove();
+                    currentEventListener = null;
+                    console.log("KeyWordRNBridge.onKeywordDetectionEvent()");
                     callback(event);
                 },
             );
+            currentEventListener = eventListener;
+            console.log("startListening(): with Model - ", await KeyWordRNBridge.gerKeywordDetectionModel());
             console.log("[useModel] eventListener", eventListener);
             // Start the phrase spotting
             KeyWordRNBridge.startKeywordDetection();
@@ -83,6 +94,10 @@ export const useModel = () => {
         try {
             // Stop the phrase spotting
             KeyWordRNBridge.stopKeywordDetection();
+            if (currentEventListener) {
+                currentEventListener.remove();
+                currentEventListener = null;
+            }
 
             // Update the listening state
             setIsListening(false);

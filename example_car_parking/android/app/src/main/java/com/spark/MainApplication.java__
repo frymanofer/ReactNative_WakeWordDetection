@@ -1,0 +1,60 @@
+package com.spark;
+
+import android.app.Application;
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactPackage;
+import com.facebook.soloader.SoLoader;
+import com.spark.keywordspotting.KeyWordRNBridgePackage;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.media.AudioManager;
+import com.facebook.react.defaults.DefaultReactNativeHost;
+
+import expo.modules.ReactNativeHostWrapper;
+import com.facebook.react.PackageList;
+import java.util.List;
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.soloader.SoLoader;
+import java.lang.reflect.InvocationTargetException;
+
+
+public class MainApplication extends Application implements ReactApplication {
+    private final MainReactNativeHost voiceMReactNativeHost;
+
+    public MainApplication() {
+        super();
+        voiceMReactNativeHost = new MainReactNativeHost(this);
+    }
+
+    @Override
+    public ReactNativeHost getReactNativeHost() {
+        return voiceMReactNativeHost;
+    }
+
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    System.out.println("onCreate");
+    SoLoader.init(this, /* native exopackage */ false);
+    // initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    if (manager != null) {
+      manager.setSpeakerphoneOn(true);
+    }
+  }
+
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+  }
+
+    @Override
+    public void onTerminate() {
+        // Note: this method is not called when running on device, devies just kill the process.
+        super.onTerminate();
+    }
+
+}

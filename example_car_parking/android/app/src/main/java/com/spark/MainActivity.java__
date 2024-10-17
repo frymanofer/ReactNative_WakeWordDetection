@@ -1,0 +1,76 @@
+package com.spark;
+
+import expo.modules.ReactActivityDelegateWrapper;
+import com.facebook.react.ReactActivityDelegate;
+import com.facebook.react.ReactActivity;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import org.devio.rn.splashscreen.SplashScreen;
+import android.Manifest;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.widget.Toast;
+
+public class MainActivity extends ReactActivity {
+
+    private static final int REQUEST_MICROPHONE = 1;
+
+    /**
+     * Returns the name of the main component registered from JavaScript. This is
+     * used to schedule rendering of the component.
+     */
+    @Override
+    protected String getMainComponentName() {
+        return "Exampl"; // Ensure this matches the name in app.json
+    }
+
+    // for navigation purpose
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen.show(this);
+        super.onCreate(null);
+
+        // Request microphone permission if not already granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    REQUEST_MICROPHONE);
+        } else {
+            // Permission already granted, you can start recording or whatever you need to do with the microphone
+            // Toast.makeText(this, "Microphone permission already granted", Toast.LENGTH_SHORT).show();
+        }
+        activityProxy.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onDestroy() {
+        activityProxy.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        activityProxy.onNewIntent(intent);
+    }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+  }
+
+    @Override
+    protected ReactActivityDelegate createReactActivityDelegate() {
+        return new ReactActivityDelegateWrapper(this,
+            new ReactActivityDelegate(this, getMainComponentName()));
+    }
+}

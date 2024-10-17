@@ -1,0 +1,27 @@
+package com.spark;
+
+import android.app.Application;
+
+import com.facebook.react.PackageList;
+import com.facebook.react.ReactPackage;
+
+import java.util.List;
+
+public class MainReactNativeHost {
+  public MainReactNativeHost(Application application) {
+    super(application);
+  }
+  @Override
+  public boolean getUseDeveloperSupport() {
+    return BuildConfig.DEBUG;
+  }
+  @Override
+  protected List<ReactPackage> getPackages() {
+    List<ReactPackage> packages = new PackageList(this).getPackages();
+    return packages;
+  }
+  @Override
+  protected String getJSMainModuleName() {
+    return "index";
+  }
+}

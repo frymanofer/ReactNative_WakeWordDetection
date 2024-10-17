@@ -6,6 +6,11 @@ import BackgroundFetch from 'react-native-background-fetch';
 import { Platform } from 'react-native';
 import {name as appName} from './app.json';
 
+import TrackPlayer from 'react-native-track-player';
+import service from './src/service';  // Import your background service
+
+TrackPlayer.registerPlaybackService(() => service);
+
 const startForegroundService = () => {
   if (Platform.OS === 'ios' )
     return;
