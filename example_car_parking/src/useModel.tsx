@@ -1,10 +1,88 @@
 import { useState, useEffect, useCallback } from "react";
-import KeyWordRNBridge from "../rnkeywordspotter/KeyWordRNBridge";
-import { KeyWordRNBridgeInstance, createKeyWordRNBridgeInstance } from '../rnkeywordspotter/KeyWordRNBridgeClass';
-
+import {
+    createKeyWordRNBridgeInstance,
+    KeyWordRNBridgeInstance,
+  } from '../rnkeywordspotter/KeyWordRNBridge';
+  
 type DetectionCallback = (event: any) => void;
-let keyWordRNBridgeInstances:KeyWordRNBridgeInstance[] = [];
 
+const license = "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=";
+interface keyWordRNBridgeInstanceConfig {
+    id: string;
+    instance: KeyWordRNBridgeInstance;
+}
+
+interface instanceConfig {
+    id: string;
+    modelName: string;
+    threshold: number;
+    bufferCnt: number;
+}
+
+const keyWordRNBridgeInstances: keyWordRNBridgeInstanceConfig[] = [];
+
+// Create an array of instance configurations
+const instanceConfigs = [
+    { id: 'hey_pango', modelName: 'hey_pango.onnx', threshold: 0.9999, bufferCnt: 2 },
+    { id: 'i_want_to_park', modelName: 'i_want_to_park.onnx', threshold: 0.9999, bufferCnt: 2 },
+    { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 2 },
+    { id: 'instance2', modelName: 'model2.onnx', threshold: 0.9999, bufferCnt: 2 }
+];
+
+// Function to add a new instance dynamically
+//async function addInstance(
+//    conf: instanceConfig) 
+async function addInstance(conf: instanceConfig, callback:any): KeyWordRNBridgeInstance | null {
+    const id = conf.id;
+    const instance = await createKeyWordRNBridgeInstance(id);
+    let isLicesed = false;
+  
+    if (!instance) {
+        console.error(`Failed to create instance ${id}`);
+        return null;
+    }
+    console.log(`Instance ${id} created ${instance}`);
+    await instance.createInstance(conf.modelName, conf.threshold, conf.bufferCnt);
+    console.log(`Instance ${id} createInstance() called`);
+
+    isLicesed = await instance.setKeywordDetectionLicense(license);
+    console.log(`Instance ${id} created ${instance} and licensed ${isLicesed}`);
+  
+    keyWordRNBridgeInstances.push({ id, instance });
+      // Set up event listener
+    instance.onKeywordDetectionEvent((phrase: string) => {
+      console.log(`Instance ${id} detected: ${id}`);
+      callback(phrase);
+    });
+    console.log(`Instance ${id} calling startKeywordDetection()`);
+    instance.startKeywordDetection(conf.threshold);
+    console.log(`Instance ${id} started Keyword Detection`);
+    return instance;
+  }
+  
+  // Function to remove an instance dynamically
+function removeInstance(id: string): void {
+    const instanceIndex = keyWordRNBridgeInstances.findIndex((item) => item.id === id);
+  
+    if (instanceIndex !== -1) {
+      const { instance } = keyWordRNBridgeInstances[instanceIndex];
+  
+      instance
+        .stopKeywordDetection()
+        .then(() => instance.destroyInstance())
+        .then(() => {
+          instance.removeListeners();
+          console.log(`Instance ${id} stopped and destroyed`);
+          keyWordRNBridgeInstances.splice(instanceIndex, 1);
+        })
+        .catch((error: Error) =>
+          console.error(`Error stopping instance ${id}: ${error.message}`)
+        );
+    } else {
+      console.error(`Instance ${id} not found`);
+    }
+  }
+  
 /**
  * Custom hook for handling keyword detection using KeyWordRNBridge
  * @returns An object with functions and state for keyword detection
@@ -31,138 +109,40 @@ export const useModel = () => {
      * @param threshold - The detection threshold
      * @param bufferCount - The number of audio buffers
      */
-    const loadModel = useCallback(async (state) => {
-        console.log("loadModel()")
+    const loadModel = useCallback(async (state, callback) => {
+        console.log("loadModel()");
+        let searchIds = [""];
+        let element:any = null;
         const modelFileNameOptions = {
             'default': ["need_help_now.onnx"],
             'state1': ["hey_pango.onnx"],
             'state2': ["i_want_to_park.onnx","i_want_to_stop_park_model.onnx", "need_help_now.onnx"],
         };
-        console.log("loadModel() - model:", modelFileNameOptions[state][0])
+        console.log("loadModel() - state == ", state)
         try {
-            const modelFileName = modelFileNameOptions[state][0];
-            const threshold = 0.9999;
-            const bufferCount = 2;
-            console.log("Caling replaceKeywordDetectionModel()");
-            const result = await KeyWordRNBridge.replaceKeywordDetectionModel(
-                modelFileName,
-                threshold,
-                bufferCount,
-            );
-            console.log("Model loaded:", result);
-            const isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
-                "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=",
-            );
-            console.log("isLicensed:",isLicensed);
-            if (!isLicensed)
-                console.error("license invalid - please contact ofer@davoice.io");
-
-            if (state === 'state2') {
-                keyWordRNBridgeInstances[0] = createKeyWordRNBridgeInstance('instance0');
-                keyWordRNBridgeInstances[1] = createKeyWordRNBridgeInstance('instance1');
-                for (let i=0; i<2; i++) {
-                    const result = await keyWordRNBridgeInstances[i].replaceKeywordDetectionModel(
-                        modelFileNameOptions[state][i+1],
-                        threshold,
-                        bufferCount,
-                    );
-                    console.log("Model loaded:", result);
-                    const isLicensed = await keyWordRNBridgeInstances[i].setKeywordDetectionLicense(
-                        "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=",
-                    );
-                    console.log("isLicensed:",isLicensed);
-                    if (!isLicensed)
-                        console.error("license invalid - please contact ofer@davoice.io");
-                }
+            switch (state) {
+                case 'state1':
+                    searchIds = ['hey_pango'];
+                    break;
+                case 'state2':
+                    searchIds = ['i_want_to_park', 'need_help_now'];
+                    break;
             }
+            searchIds.forEach(sId => {
+                element = instanceConfigs.find(element => element.id === sId);
+                console.log('element:', element);
+                const id = addInstance(element, callback);
+            });
         } catch (error) {
             console.error("[useModel] Error loading model:", error);
         }
     }, []);
-
-    /**
-     * Start listening for the keyword
-     * @param callback - Function to be called when the keyword is detected
-     */
-    const startListening = useCallback(async (callback: DetectionCallback) => {
-        try {
-            // Set up the event listener for keyword detection
-            const eventListener = KeyWordRNBridge.onKeywordDetectionEvent(
-                (event: any) => {
-                    eventListener.remove();
-                    currentEventListener[0] = null;
-                    console.log("KeyWordRNBridge.onKeywordDetectionEvent()");
-                    callback(event);
-                },
-            );
-            currentEventListener[0] = eventListener;
-            console.log("startListening(): with Model - ", await KeyWordRNBridge.getKeywordDetectionModel());
-            console.log("[useModel] eventListener", eventListener);
-            // Start the phrase spotting
-            KeyWordRNBridge.startKeywordDetection();
-            // Update the listening state
-            setIsListening(true);
-        } catch (error) {
-            console.error("Error starting keyword detection:", error);
-        }
-    }, []);
-
-        /**
-     * Start listening for the keyword
-     * @param callback - Function to be called when the keyword is detected
-     */
-        const startListeningMulti = useCallback(async (callback: DetectionCallback) => {
-            try {
-                // Set up the event listener for keyword detection
-                const eventListener = KeyWordRNBridge.onKeywordDetectionEvent(
-                    (event: any) => {
-                        eventListener.remove();
-                        currentEventListener[0] = null;
-                        console.log("KeyWordRNBridge.onKeywordDetectionEvent()");
-                        callback(event);
-                    },
-                );
-                currentEventListener[0] = eventListener;
-                console.log("startListening(): with Model - ", await KeyWordRNBridge.getKeywordDetectionModel());
-                console.log("[useModel] eventListener", eventListener);
-                // Start the phrase spotting
-                KeyWordRNBridge.startKeywordDetection();
-
-                for (let i=0; i<2; i++) {
-                    const eventListener = keyWordRNBridgeInstances[i].onKeywordDetectionEvent(
-                        (event: any) => {
-                            eventListener.remove();
-                            currentEventListener[i+1] = null;
-                            console.log("KeyWordRNBridge.onKeywordDetectionEvent()");
-                            callback(event);
-                        },
-                    );
-                    currentEventListener[i+1] = eventListener;
-                    console.log("startListening(): with Model - ", await keyWordRNBridgeInstances[i].getKeywordDetectionModel());
-                    console.log("[useModel] eventListener", eventListener);
-                    // Start the phrase spotting
-                    keyWordRNBridgeInstances[i].startKeywordDetection();
-                }
-                    // Update the listening state
-                setIsListening(true);
-            } catch (error) {
-                console.error("Error starting keyword detection:", error);
-            }
-        }, []);    
     
     /**
      * Stop listening for the keyword
      */
     const stopListening = useCallback(async () => {
         try {
-            // Stop the phrase spotting
-            KeyWordRNBridge.stopKeywordDetection();
-            if (currentEventListener[0]) {
-                currentEventListener[0].remove();
-                currentEventListener[0] = null;
-            }
-
-            // Update the listening state
             setIsListening(false);
         } catch (error) {
             console.error("Error stopping keyword detection:", error);
@@ -187,8 +167,6 @@ export const useModel = () => {
         isListening,
         // setLicense,
         loadModel,
-        startListening,
-        startListeningMulti,
         stopListening,
     };
 };

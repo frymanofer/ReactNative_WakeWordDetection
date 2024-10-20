@@ -28,8 +28,8 @@ import os
   @objc weak public var delegate: (any KeyWordDetection.KeywordDetectionRNDelegate)?
   @objc public init(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int) throws
   @objc public func replaceKeywordDetectionModel(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int) throws
-  @objc public func gerKeywordDetectionModel() -> Swift.String
-  @objc public func gerRecordingWav() -> Swift.String
+  @objc public func getKeywordDetectionModel() -> Swift.String
+  @objc public func getRecordingWav() -> Swift.String
   @objc public func setKeywordDetectionLicense(licenseKey: Swift.String) -> Swift.Bool
   @objc public func setLicense(licenseKey: Swift.String) -> Swift.Bool
   @objc public func callBack(frame: [Swift.Int16])

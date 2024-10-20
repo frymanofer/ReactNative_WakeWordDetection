@@ -1,57 +1,69 @@
 // KeyWordRNBridge.js
-import { NativeModules, NativeEventEmitter } from 'react-native';
-import {
-    Platform,
-  } from 'react-native';
-  
+import { NativeModules, NativeEventEmitter, Platform } from 'react-native';
+
 const { KeyWordRNBridge } = NativeModules;
 const keywordRNBridgeEmitter = new NativeEventEmitter(KeyWordRNBridge);
 
-const setKeywordDetectionLicense = (license) => {
-    return KeyWordRNBridge.setKeywordDetectionLicense(license);
-};
-
-const initKeywordDetection = (modelName, threshold, buffer_cnt) => {    return KeyWordRNBridge.initKeywordDetection(modelName, threshold, buffer_cnt);
-};
-
-const replaceKeywordDetectionModel = (modelName, threshold, buffer_cnt) => {
-    return KeyWordRNBridge.replaceKeywordDetectionModel(modelName, threshold, buffer_cnt);
-};
-
-const getKeywordDetectionModel = () => {
-    return KeyWordRNBridge.getKeywordDetectionModel();
-};
-
-//const getRecordingWav = (bla) => {
-const getRecordingWav = (bla) => {
-    console.log("Calling RN bridge functionality getRecordingWav: ", KeyWordRNBridge.getRecordingWav);
-    if (Platform.OS === 'ios') {
-        return KeyWordRNBridge.getRecordingWav(bla);
+export class KeyWordRNBridgeInstance {
+    instanceId;
+    listeners = [];
+  
+    constructor(instanceId) {
+      this.instanceId = instanceId;
     }
-    return KeyWordRNBridge.getRecordingWav();
-};
+  
+    createInstance(
+      modelName,
+      threshold,
+      bufferCnt) 
+      {
+      return KeyWordRNBridge.createInstance(
+        this.instanceId,
+        modelName,
+        threshold,
+        bufferCnt
+      );
+    }
 
-const startKeywordDetection = () => {
-    KeyWordRNBridge.startKeywordDetection();
-};
+    setKeywordDetectionLicense(license) {
+        return KeyWordRNBridge.setKeywordDetectionLicense(this.instanceId, license);
+    }
 
-const stopKeywordDetection = () => {
-    KeyWordRNBridge.stopKeywordDetection();
-};
+    replaceKeywordDetectionModel(modelName, threshold, bufferCnt) {
+        return KeyWordRNBridge.replaceKeywordDetectionModel(this.instanceId, modelName, threshold, bufferCnt);
+    }
 
-// Event listeners
-const onKeywordDetectionEvent = (callback) => {
-    return keywordRNBridgeEmitter.addListener('onKeywordDetectionEvent', callback);
-};
+    setKeywordLicense(license) {
+        return KeyWordRNBridge.setKeywordLicense(this.instanceId, license);
+    }
 
-export default {
-    initKeywordDetection,
-    startKeywordDetection,
-    stopKeywordDetection,
-    onKeywordDetectionEvent,
-    replaceKeywordDetectionModel,
-    getKeywordDetectionModel,
-    getRecordingWav,
-    setKeywordDetectionLicense,
-};
+    startKeywordDetection(threshold) {
+        return KeyWordRNBridge.startKeywordDetection(this.instanceId, threshold);
+    }
 
+    stopKeywordDetection() {
+        return KeyWordRNBridge.stopKeywordDetection(this.instanceId);
+    }
+
+    destroyInstance() {
+        return KeyWordRNBridge.destroyInstance(this.instanceId);
+    }
+
+    onKeywordDetectionEvent(callback) {
+        const listener = keywordRNBridgeEmitter.addListener('onKeywordDetectionEvent', (event) => {
+            if (event.instanceId === this.instanceId) {
+                callback(event.phrase);
+            }
+        });
+        this.listeners.push(listener);
+    }
+
+    removeListeners() {
+        this.listeners.forEach((listener) => listener.remove());
+        this.listeners = [];
+    }
+}
+
+export const createKeyWordRNBridgeInstance = async (instanceId) => {
+    return new KeyWordRNBridgeInstance(instanceId);
+};

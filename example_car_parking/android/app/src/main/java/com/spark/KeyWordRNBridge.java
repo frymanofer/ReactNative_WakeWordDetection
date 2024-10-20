@@ -1,26 +1,23 @@
 package com.spark.keywordspotting;
 
 import com.davoice.keywordsdetection.keywordslibrary.KeyWordsDetection;
-
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.Arguments;
 import androidx.annotation.Nullable;
 import ai.onnxruntime.*;
 import android.util.Log;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KeyWordRNBridge extends ReactContextBaseJavaModule {
 
     private final String TAG = "KeyWordsDetection";
     private static final String REACT_CLASS = "KeyWordRNBridge";
     private static ReactApplicationContext reactContext;
-    private KeyWordsDetection keyWordsDetection;
-    private float keyThreshold = 0.9f;
- //   private String licenseKey = "MTcyNTEzODAwMDAwMA==-wXgQkH4ffgX3g3Tvn7YJZ/kVoTa5Mndi8xpoTqtdXfA=";
+
+    // Map to hold multiple instances
+    private Map<String, KeyWordsDetection> instances = new HashMap<>();
+
     public KeyWordRNBridge(ReactApplicationContext context) {
         super(context);
         reactContext = context;
@@ -31,111 +28,106 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
         return REACT_CLASS;
     }
 
-    private void onKeywordDetected(Boolean detected) {
-        if (detected) {
-            // Perform your desired action here
-            callback();
-        } else {
-        }
-    }
+    @ReactMethod
+    public Boolean setKeywordDetectionLicense(String instanceId, String licenseKey, Promise promise) {
+        KeyWordsDetection instance = instances.get(instanceId);
+        Log.d(TAG, "setKeywordDetectionLicense()");
 
-    @ReactMethod
-    public void replaceKeywordDetectionModel(String modelName, float threshold, int buffer_cnt, Promise promise) {
-        if (keyWordsDetection == null) {
-            initKeywordDetection (modelName, threshold, buffer_cnt, promise);
-            promise.resolve("replaceKeywordDetectionModel called initialized with model: " + modelName);
-        }
-        else {
-            try {
-                keyWordsDetection.replaceKeywordDetectionModel (reactContext, modelName, threshold, buffer_cnt);
-                keyWordsDetection.initialize(this::onKeywordDetected);
-            } catch (Exception e) {
-                promise.reject("replaceKeywordDetectionModel: Error replacing model to: " + modelName);
-            }
-            promise.resolve("replaceKeywordDetectionModel called initialized with model: " + modelName);
-        }
-    }
-    
-    @ReactMethod
-    public String getKeywordDetectionModel(Promise promise) {
-        String modelName = "";
-        if (keyWordsDetection != null) {
-            modelName = keyWordsDetection.getKeywordDetectionModel();
-        }
-        promise.resolve(modelName);
-        return modelName;
-    }
-
-    @ReactMethod
-    public String getRecordingWav(Promise promise) {
-        String wavFilePath = "";
-        if (keyWordsDetection != null) {
-            wavFilePath = keyWordsDetection.getRecordingWav ();
-        }
-        promise.resolve(wavFilePath);
-        return wavFilePath;
-    }
-
-    @ReactMethod
-    public Boolean setKeywordDetectionLicense(String licenseKey, Promise promise) {
         Boolean isLicesed = false;
-        if (keyWordsDetection != null) {
-            isLicesed = keyWordsDetection.setLicenseKey(licenseKey);
+        if (instance != null) {
+            isLicesed = instance.setLicenseKey(licenseKey);
         }
+        Log.d(TAG, "setKeywordDetectionLicense(): " + (isLicesed ? "Licensed" : "Not Licensed"));
+
         promise.resolve(isLicesed);
         return isLicesed;
     }
 
+    // Create a new instance
     @ReactMethod
-    public void initKeywordDetection(String modelName, float threshold, int buffer_cnt, Promise promise) {
-        Log.d(TAG, "initKeywordDetection(): ");
+    public void createInstance(String instanceId, String modelName, float threshold, int bufferCnt, Promise promise) {
+        if (instances.containsKey(instanceId)) {
+            promise.reject("InstanceExists", "Instance already exists with ID: " + instanceId);
+            return;
+        }
+
         try {
-            keyThreshold = threshold;
-            keyWordsDetection = new KeyWordsDetection(reactContext, modelName, threshold, buffer_cnt);
-            Log.d(TAG, "initKeywordDetection(): Success - resolving promise");
-            if (keyWordsDetection != null) {
-                Log.d(TAG, "initKeywordDetection(): calling initialize(this::onKeywordDetected");
-                keyWordsDetection.initialize(this::onKeywordDetected);
-                Log.d(TAG, "initKeywordDetection(): Success - resolving promise");
-                promise.resolve("KeyWordsDetection initialized with model: " + modelName);
-            } else {
-                Log.d(TAG, "initKeywordDetection(): Fail!!!!!!!!!!- resolving promise");
-                promise.reject("init_error", "KeyWordsDetection is null");
-            }
+            KeyWordsDetection keyWordsDetection = new KeyWordsDetection(reactContext, modelName, threshold, bufferCnt);
+            keyWordsDetection.initialize(detected -> onKeywordDetected(instanceId, detected));
+            instances.put(instanceId, keyWordsDetection);
+            promise.resolve("Instance created with ID: " + instanceId);
         } catch (Exception e) {
-            Log.d(TAG, "initKeywordDetection(): Exception Fail!!!!!!!!!!- resolving promise");
-            promise.reject("init_error", "Failed to initialize KeyWordsDetection", e);
+            promise.reject("CreateError", "Failed to create instance: " + e.getMessage());
         }
     }
 
+    // Create a new instance
     @ReactMethod
-    public void startKeywordDetection() throws OrtException {
-        if (keyWordsDetection != null) {
-            keyWordsDetection.startListening(keyThreshold);
-        } else {
-            // Handle error
+    public void replaceKeywordDetectionModel(String instanceId, String modelName, float threshold, int bufferCnt, Promise promise) {
+        KeyWordsDetection instance = instances.get(instanceId);
+        if (instance == null) {
+            promise.reject("Instance not Exists", "Instance does not exists with ID: " + instanceId);
+            return;
+        }
+
+        try {
+            instance.replaceKeywordDetectionModel(reactContext, modelName, threshold, bufferCnt);
+            promise.resolve("Instance ID: " + instanceId + " change model " + modelName);
+        } catch (Exception e) {
+            promise.reject("CreateError", "Failed to create instance: " + e.getMessage());
         }
     }
 
+    // Start detection for a specific instance
     @ReactMethod
-    public void stopKeywordDetection() {
-        if (keyWordsDetection != null) {
-            keyWordsDetection.stopListening();
+    public void startKeywordDetection(String instanceId, float threshold, Promise promise) throws OrtException {
+        KeyWordsDetection instance = instances.get(instanceId);
+        if (instance != null) {
+            instance.startListening(threshold);
+            promise.resolve("Started detection for instance: " + instanceId);
         } else {
-            // Handle error
+            promise.reject("InstanceNotFound", "No instance found with ID: " + instanceId);
         }
     }
 
-    public static void callback() {
-        //Log.d(TAG, "KeyWord detected! meanPrediction: " + meanPrediction);
-        WritableMap params = Arguments.createMap();
-        params.putString("phrase", "keyword");
-        KeyWordRNBridge.sendEvent("onKeywordDetectionEvent", params);
+    // Stop detection for a specific instance
+    @ReactMethod
+    public void stopKeywordDetection(String instanceId, Promise promise) {
+        KeyWordsDetection instance = instances.get(instanceId);
+        if (instance != null) {
+            instance.stopListening();
+            promise.resolve("Stopped detection for instance: " + instanceId);
+        } else {
+            promise.reject("InstanceNotFound", "No instance found with ID: " + instanceId);
+        }
     }
 
-    public static void sendEvent(String eventName, @Nullable WritableMap params) {
-        reactContext
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+    // Destroy an instance
+    @ReactMethod
+    public void destroyInstance(String instanceId, Promise promise) {
+        KeyWordsDetection instance = instances.remove(instanceId);
+        if (instance != null) {
+            instance.stopListening();
+            // Additional cleanup if necessary
+            promise.resolve("Destroyed instance: " + instanceId);
+        } else {
+            promise.reject("InstanceNotFound", "No instance found with ID: " + instanceId);
+        }
+    }
+
+    // Handle keyword detection event
+    private void onKeywordDetected(String instanceId, Boolean detected) {
+        if (detected) {
+            WritableMap params = Arguments.createMap();
+            params.putString("instanceId", instanceId);
+            params.putString("phrase", "keyword");
+            sendEvent("onKeywordDetectionEvent", params);
+        }
+    }
+
+    // Send event to JavaScript
+    private void sendEvent(String eventName, @Nullable WritableMap params) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit(eventName, params);
     }
 
@@ -148,4 +140,5 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
     public void removeListeners(Integer count) {
         // Remove upstream listeners, stop unnecessary background tasks
     }
+    // Implement other methods as needed, ensuring to use instanceId
 }
