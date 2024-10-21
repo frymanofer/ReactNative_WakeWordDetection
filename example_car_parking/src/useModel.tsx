@@ -20,13 +20,18 @@ interface instanceConfig {
 }
 
 const keyWordRNBridgeInstances: keyWordRNBridgeInstanceConfig[] = [];
+function findInstanceById(id: string): keyWordRNBridgeInstanceConfig | undefined {
+    return keyWordRNBridgeInstances.find(config => config.id === id);
+}
 
 // Create an array of instance configurations
 const instanceConfigs = [
     { id: 'hey_pango', modelName: 'hey_pango.onnx', threshold: 0.9999, bufferCnt: 2 },
     { id: 'i_want_to_park', modelName: 'i_want_to_park.onnx', threshold: 0.9999, bufferCnt: 2 },
     { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 2 },
-    { id: 'instance2', modelName: 'model2.onnx', threshold: 0.9999, bufferCnt: 2 }
+    { id: 'step_back', modelName: 'step_back.onnx', threshold: 0.9999, bufferCnt: 2 },
+    { id: 'nearest_gaz_station', modelName: 'nearest_gaz_station.onnx', threshold: 0.9999, bufferCnt: 6 },
+    { id: 'i_want_to_stop_park', modelName: 'i_want_to_stop_park.onnx', threshold: 0.9999, bufferCnt: 2 }
 ];
 
 // Function to add a new instance dynamically
@@ -34,6 +39,12 @@ const instanceConfigs = [
 //    conf: instanceConfig) 
 async function addInstance(conf: instanceConfig, callback:any): KeyWordRNBridgeInstance | null {
     const id = conf.id;
+    const instanceConf = findInstanceById(id);
+    if (instanceConf != null) {
+        const instance = instanceConf.instance;
+        instance.startKeywordDetection(conf.threshold);
+        return instance;
+    }
     const instance = await createKeyWordRNBridgeInstance(id);
     let isLicesed = false;
   
@@ -113,11 +124,6 @@ export const useModel = () => {
         console.log("loadModel()");
         let searchIds = [""];
         let element:any = null;
-        const modelFileNameOptions = {
-            'default': ["need_help_now.onnx"],
-            'state1': ["hey_pango.onnx"],
-            'state2': ["i_want_to_park.onnx","i_want_to_stop_park_model.onnx", "need_help_now.onnx"],
-        };
         console.log("loadModel() - state == ", state)
         try {
             switch (state) {
@@ -125,11 +131,17 @@ export const useModel = () => {
                     searchIds = ['hey_pango'];
                     break;
                 case 'state2':
-                    searchIds = ['i_want_to_park', 'need_help_now'];
+                    searchIds = ['i_want_to_park', 'need_help_now',
+                        'nearest_gaz_station', 'i_want_to_stop_park', 'step_back'];
                     break;
             }
+            stopListening();
             searchIds.forEach(sId => {
                 element = instanceConfigs.find(element => element.id === sId);
+                if (element == null || element == undefined) {
+                    console.error('element id' + sId + " not found in instanceConfigs");
+                    return;
+                }
                 console.log('element:', element);
                 const id = addInstance(element, callback);
             });
@@ -143,6 +155,10 @@ export const useModel = () => {
      */
     const stopListening = useCallback(async () => {
         try {
+            keyWordRNBridgeInstances.forEach(element => {
+                const instance = element.instance;
+                instance.stopKeywordDetection();   
+            }); 
             setIsListening(false);
         } catch (error) {
             console.error("Error stopping keyword detection:", error);

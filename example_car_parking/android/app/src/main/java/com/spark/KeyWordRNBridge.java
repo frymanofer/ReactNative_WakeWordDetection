@@ -120,7 +120,7 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
         if (detected) {
             WritableMap params = Arguments.createMap();
             params.putString("instanceId", instanceId);
-            params.putString("phrase", "keyword");
+            params.putString("phrase", instanceId);
             sendEvent("onKeywordDetectionEvent", params);
         }
     }
