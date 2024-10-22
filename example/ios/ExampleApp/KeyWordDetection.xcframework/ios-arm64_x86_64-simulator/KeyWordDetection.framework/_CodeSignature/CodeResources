@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/KeyWordDetection-Swift.h</key>
 		<data>
-		9eHWOArqdLFhc37iWBUwQYHriCU=
+		+Qjn316hRsB/AeDQlpTK9+IK810=
 		</data>
 		<key>Headers/KeyWordDetection.h</key>
 		<data>
@@ -18,19 +18,19 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		XTIEQi0xb7kUrsmz3EoAL8rir0s=
+		/9+MU+rB3tw3mfUB0UUMsfseRlw=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		PhIRjtwHhqpkeCBQP5HVyroCYHI=
+		R89BWIK9qK/Wjw+b96RZ+QDFrvc=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		8TaRyS0hcTL+RjwbXiwK1LkhFMk=
+		xja3buAZvx4paN66E0m64hinLyw=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		kx2YqKd2J4eqsJnzx96tA3exUgQ=
+		f5N6RfylkPVzCcRC6XRu59yUOXc=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -38,19 +38,19 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		kx2YqKd2J4eqsJnzx96tA3exUgQ=
+		f5N6RfylkPVzCcRC6XRu59yUOXc=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		5Pky0tPDPY4l34NnxsaFPHBBv1E=
+		aDQwgfmTx9nEoDXLwKsK6eQFvA0=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		8TaRyS0hcTL+RjwbXiwK1LkhFMk=
+		xja3buAZvx4paN66E0m64hinLyw=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		r0ZBrUftsN0QJDS6Mf2PDRE9ngc=
+		phX2Gmt2zstN/tUyKdHz4yMiURo=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -58,11 +58,11 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		r0ZBrUftsN0QJDS6Mf2PDRE9ngc=
+		phX2Gmt2zstN/tUyKdHz4yMiURo=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		yuqSRgE3fFOIfw3Pic+zOe15Bg0=
+		Ffgfx+2Jkt1XkB6F8Gna77QMmak=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -75,7 +75,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ke5+2AtXeYhhVSv1mv+uH0s6XGZ6CUoIKl6e0qcu42M=
+			9iJxMqzaGUwv48+kn4a1Fx6ZVvM7DkEhnrp67VmwkJk=
 			</data>
 		</dict>
 		<key>Headers/KeyWordDetection.h</key>
@@ -89,28 +89,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			lPcLqz/dpbQt3sOJI4mkJsbL5hS1PStOYp7w7Y/gVHA=
+			mxpi75Ny8l0jqGVtfu3m4tIYyZo75GBn7cHGm2PQpAo=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			0mnyWfxXaHJnRJIA7i/K/ENK/b5OO/r9VBy5Y1pFan4=
+			y7PyE8UdAsxsZ7XBNFDY7Bdk+Wi15ORMbCQJuZBubeQ=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			nqOtQCXVjo8E/OFW1P1UPQjm2B7alMpfZT80ae9pK5g=
+			4f2PTjoTdVb1LvzXbXW+rHoa5ixWoLmsf9xYdQx9tkg=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			bzwxF73J9MIsMFBKo8Q07pbdbTUsC3m6GjmsWEsr7HQ=
+			AKmTqxOhutyuB58dzKDCw77kpt+sE8aNsEnMGjnOF2M=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
@@ -124,28 +124,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			bzwxF73J9MIsMFBKo8Q07pbdbTUsC3m6GjmsWEsr7HQ=
+			AKmTqxOhutyuB58dzKDCw77kpt+sE8aNsEnMGjnOF2M=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			4kYZ0hWr3RAYEh4MxlLhVczLJcrH2WlQnLAQzyugb64=
+			57R6yPS5hX9eh8S4CEFhsRN+326CHZp5/xuC7mGmMAA=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			nqOtQCXVjo8E/OFW1P1UPQjm2B7alMpfZT80ae9pK5g=
+			4f2PTjoTdVb1LvzXbXW+rHoa5ixWoLmsf9xYdQx9tkg=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			qBq0cz7aU3IWuhZVKoVNmJiJd3R7OguyTcMhkDLrxEM=
+			xJI26oAasXaxCwk0Q9XOjypMbCVzbbh7hKa5rN8rm1o=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -159,14 +159,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qBq0cz7aU3IWuhZVKoVNmJiJd3R7OguyTcMhkDLrxEM=
+			xJI26oAasXaxCwk0Q9XOjypMbCVzbbh7hKa5rN8rm1o=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			A18N4n1Hk1P2O7QYX5WZ0YA22UFzAjew5HQGI9Wci7c=
+			1agWKFZVTE7fDkywHmv1kdRmeKeWrCybcM84i9uVSQI=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

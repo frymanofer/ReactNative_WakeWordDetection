@@ -321,8 +321,8 @@ SWIFT_CLASS("_TtC16KeyWordDetection17KeyWordsDetection")
 @property (nonatomic, weak) id <KeywordDetectionRNDelegate> _Nullable delegate;
 - (nullable instancetype)initWithModelPath:(NSString * _Nonnull)modelPath threshold:(float)threshold bufferCnt:(NSInteger)bufferCnt error:(NSError * _Nullable * _Nullable)error OBJC_DESIGNATED_INITIALIZER;
 - (BOOL)replaceKeywordDetectionModelWithModelPath:(NSString * _Nonnull)modelPath threshold:(float)threshold bufferCnt:(NSInteger)bufferCnt error:(NSError * _Nullable * _Nullable)error;
-- (NSString * _Nonnull)gerKeywordDetectionModel SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nonnull)gerRecordingWav SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)getKeywordDetectionModel SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)getRecordingWav SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)setKeywordDetectionLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)setLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (void)callBackWithFrame:(NSArray<NSNumber *> * _Nonnull)frame;
@@ -675,8 +675,8 @@ SWIFT_CLASS("_TtC16KeyWordDetection17KeyWordsDetection")
 @property (nonatomic, weak) id <KeywordDetectionRNDelegate> _Nullable delegate;
 - (nullable instancetype)initWithModelPath:(NSString * _Nonnull)modelPath threshold:(float)threshold bufferCnt:(NSInteger)bufferCnt error:(NSError * _Nullable * _Nullable)error OBJC_DESIGNATED_INITIALIZER;
 - (BOOL)replaceKeywordDetectionModelWithModelPath:(NSString * _Nonnull)modelPath threshold:(float)threshold bufferCnt:(NSInteger)bufferCnt error:(NSError * _Nullable * _Nullable)error;
-- (NSString * _Nonnull)gerKeywordDetectionModel SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nonnull)gerRecordingWav SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)getKeywordDetectionModel SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)getRecordingWav SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)setKeywordDetectionLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)setLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (void)callBackWithFrame:(NSArray<NSNumber *> * _Nonnull)frame;

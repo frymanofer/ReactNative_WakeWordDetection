@@ -59,23 +59,23 @@ RCT_EXPORT_METHOD(replaceKeywordDetectionModel:(NSString *)modelName threshold:(
     }
 }
 
-RCT_EXPORT_METHOD(gerKeywordDetectionModel: resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(getKeywordDetectionModel: resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     KeyWordsDetection *keyWordsDetection = [GlobalVariables shared].keyWordsDetectionInstance;
     NSString *modelName = @"";
     if (keyWordsDetection) {
-        modelName = [keyWordsDetection gerKeywordDetectionModel];
+        modelName = [keyWordsDetection getKeywordDetectionModel];
     }
     resolve(modelName);
 }
 
-RCT_EXPORT_METHOD(gerRecordingWav:(NSString *)bla resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-//RCT_EXPORT_METHOD(gerRecordingWav: resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(getRecordingWav:(NSString *)bla resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+//RCT_EXPORT_METHOD(getRecordingWav: resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     KeyWordsDetection *keyWordsDetection = [GlobalVariables shared].keyWordsDetectionInstance;
     NSString *recWavPath = @"";
     if (keyWordsDetection) {
-        recWavPath = [keyWordsDetection gerRecordingWav];
+        recWavPath = [keyWordsDetection getRecordingWav];
     }
     resolve(recWavPath);
 }

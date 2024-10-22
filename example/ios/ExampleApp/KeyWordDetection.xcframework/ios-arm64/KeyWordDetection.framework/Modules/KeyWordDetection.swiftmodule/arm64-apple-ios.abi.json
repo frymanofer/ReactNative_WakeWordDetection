@@ -846,8 +846,8 @@
           },
           {
             "kind": "Function",
-            "name": "gerKeywordDetectionModel",
-            "printedName": "gerKeywordDetectionModel()",
+            "name": "getKeywordDetectionModel",
+            "printedName": "getKeywordDetectionModel()",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -857,8 +857,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)gerKeywordDetectionModel",
-            "mangledName": "$s16KeyWordDetection0a5WordsC0C010gerKeywordC5ModelSSyF",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)getKeywordDetectionModel",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C010getKeywordC5ModelSSyF",
             "moduleName": "KeyWordDetection",
             "declAttributes": [
               "AccessControl",
@@ -868,8 +868,8 @@
           },
           {
             "kind": "Function",
-            "name": "gerRecordingWav",
-            "printedName": "gerRecordingWav()",
+            "name": "getRecordingWav",
+            "printedName": "getRecordingWav()",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -879,8 +879,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)gerRecordingWav",
-            "mangledName": "$s16KeyWordDetection0a5WordsC0C15gerRecordingWavSSyF",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)getRecordingWav",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C15getRecordingWavSSyF",
             "moduleName": "KeyWordDetection",
             "declAttributes": [
               "AccessControl",

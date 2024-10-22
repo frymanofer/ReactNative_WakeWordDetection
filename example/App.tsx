@@ -39,12 +39,13 @@ import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
 import { NativeModules } from 'react-native';
 import { AppState } from 'react-native';
 
-const { ForegroundServiceModule } = NativeModules;
+//const { ForegroundServiceModule } = NativeModules;
 
 function bringAppToForeground() {
   if (Platform.OS === 'ios')
     return;
-  console.log("ForegroundServiceModule == ", ForegroundServiceModule);
+  /*
+    console.log("ForegroundServiceModule == ", ForegroundServiceModule);
   // Call the native module method to bring the app to the foreground
   ForegroundServiceModule.bringAppToForeground()
     .then(() => {
@@ -52,7 +53,7 @@ function bringAppToForeground() {
     })
     .catch((error) => {
       console.error('Error bringing app to foreground:', error);
-    });
+    });*/
 }
 
 // Call this function when your callback is triggered
@@ -256,7 +257,7 @@ function App(): React.JSX.Element {
               (async () => {
                   KeyWordRNBridge.stopKeywordDetection();
                   setMessage(`Paying back '${wakeWord}' which activated the App`);
-                  const wavFilePath = await KeyWordRNBridge.gerRecordingWav();
+                  const wavFilePath = await KeyWordRNBridge.getRecordingWav();
                   console.log("wavFilePath == ",wavFilePath);
                   if (!wavFilePath)
                     return;

@@ -18,17 +18,17 @@ const replaceKeywordDetectionModel = (modelName, threshold, buffer_cnt) => {
     return KeyWordRNBridge.replaceKeywordDetectionModel(modelName, threshold, buffer_cnt);
 };
 
-const gerKeywordDetectionModel = () => {
-    return KeyWordRNBridge.gerKeywordDetectionModel();
+const getKeywordDetectionModel = () => {
+    return KeyWordRNBridge.getKeywordDetectionModel();
 };
 
-//const gerRecordingWav = (bla) => {
-const gerRecordingWav = (bla) => {
-    console.log("Calling RN bridge functionality gerRecordingWav: ", KeyWordRNBridge.gerRecordingWav);
+//const getRecordingWav = (bla) => {
+const getRecordingWav = (bla) => {
+    console.log("Calling RN bridge functionality getRecordingWav: ", KeyWordRNBridge.getRecordingWav);
     if (Platform.OS === 'ios') {
-        return KeyWordRNBridge.gerRecordingWav(bla);
+        return KeyWordRNBridge.getRecordingWav(bla);
     }
-    return KeyWordRNBridge.gerRecordingWav();
+    return KeyWordRNBridge.getRecordingWav();
 };
 
 const startKeywordDetection = () => {
@@ -50,8 +50,8 @@ export default {
     stopKeywordDetection,
     onKeywordDetectionEvent,
     replaceKeywordDetectionModel,
-    gerKeywordDetectionModel,
-    gerRecordingWav,
+    getKeywordDetectionModel,
+    getRecordingWav,
     setKeywordDetectionLicense,
 };
 

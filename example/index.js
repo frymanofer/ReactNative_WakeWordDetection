@@ -6,15 +6,17 @@ import BackgroundFetch from 'react-native-background-fetch';
 import { Platform } from 'react-native';
 import {name as appName} from './app.json';
 
+/*
 const startForegroundService = () => {
   if (Platform.OS === 'ios' )
     return;
   const { NativeModules } = require('react-native');
-  const { ForegroundServiceModule } = NativeModules;
-  ForegroundServiceModule.startService();
+  const { ForegroundModule } = NativeModules;
+  ForegroundModule.startMicrophoneService();
 };
 
 startForegroundService();
+*/
 
 // Ensure the environment is set up appropriately whether you load the app in Expo Go or in a native build
 AppRegistry.registerComponent(appName, () => App);
