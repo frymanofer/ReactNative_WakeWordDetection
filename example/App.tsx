@@ -247,34 +247,47 @@ function App(): React.JSX.Element {
           // Stop listening.
           KeyWordRNBridge.stopKeywordDetection();
           console.log("KeywordDetection event detected:", event);
+          console.log("KeywordDetection AppState.currentState:", AppState.currentState);
           // Change the message to detected
           setMessage(`WakeWord '${wakeWord}' DETECTED`);
 
           setIsFlashing(true);  // Start flashing effect (Line 122)
 
-          if (!AppState.currentState.match(/foreground/)) {
+          //if (!AppState.currentState.match('background')) {
             setTimeout(() => {
               (async () => {
                   KeyWordRNBridge.stopKeywordDetection();
                   setMessage(`Paying back '${wakeWord}' which activated the App`);
-                  const wavFilePath = await KeyWordRNBridge.getRecordingWav();
-                  console.log("wavFilePath == ",wavFilePath);
-                  if (!wavFilePath)
-                    return;
-                  const cleanedFilePath = wavFilePath.startsWith('file://') ? wavFilePath.slice(7) : wavFilePath;
-                  playSoundFile(cleanedFilePath);
+
+                  if (!AppState.currentState.match('background')) {
+                    const wavFilePath = await KeyWordRNBridge.getRecordingWav();
+                    console.log("wavFilePath == ",wavFilePath);
+                    if (!wavFilePath)
+                      return;
+                    const cleanedFilePath = wavFilePath.startsWith('file://') ? wavFilePath.slice(7) : wavFilePath;
+                    playSoundFile(cleanedFilePath);
+                  }
               })();
               }, 1000); // 5 seconds delay
-            } else {
-                KeyWordRNBridge.stopKeywordDetection();
+            //} else {
+            //    KeyWordRNBridge.stopKeywordDetection();
                 // Setup react-native-background-fetch 
-            }
+            //}
           // Revert back to the listening message after 10 seconds
+          setTimeout(() => {
+            //KeyWordRNBridge.startKeywordDetection();    
+            KeyWordRNBridge.stopKeywordDetection();
+            KeyWordRNBridge.stopKeywordDetection();
+            KeyWordRNBridge.stopKeywordDetection();
+            //setMessage(`Listening to WakeWord '${wakeWord}'...`);
+            //setIsFlashing(false);  // Stop flashing effect (Line 126)
+          }, 5000); // 5 seconds delay
+
           setTimeout(() => {
             KeyWordRNBridge.startKeywordDetection();    
             setMessage(`Listening to WakeWord '${wakeWord}'...`);
             setIsFlashing(false);  // Stop flashing effect (Line 126)
-          }, 5000); // 5 seconds delay
+          }, 15000); // 15 seconds delay
 
           detectionCallback(event);
      });

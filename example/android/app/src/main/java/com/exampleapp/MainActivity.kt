@@ -95,6 +95,7 @@ class MainActivity : ReactActivity() {
 }
 
 private val REQUEST_MICROPHONE_PERMISSIONS = 1
+/*
 private fun startMicrophoneService() {
   if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_MICROPHONE) == PackageManager.PERMISSION_GRANTED &&
       ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -104,6 +105,7 @@ private fun startMicrophoneService() {
       requestMicrophonePermissions()
   }
 }
+*/
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults)

@@ -20,7 +20,8 @@ startForegroundService();
 
 // Ensure the environment is set up appropriately whether you load the app in Expo Go or in a native build
 AppRegistry.registerComponent(appName, () => App);
-  
+
+/*
   // Background Fetch setup for iOS
 const configureBackgroundFetch = () => {
   if (Platform.OS === 'ios') {
@@ -46,4 +47,5 @@ const configureBackgroundFetch = () => {
 };
 
 // configureBackgroundFetch();
+*/
 
