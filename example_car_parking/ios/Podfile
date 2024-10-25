@@ -63,7 +63,7 @@ target 'Spark' do
     :fabric_enabled => true
   )
 
-  target 'ExampleAppTests' do
+  target 'SparkTests' do
     inherit! :complete
     # Pods for testing
   end

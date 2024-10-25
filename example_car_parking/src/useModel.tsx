@@ -62,8 +62,9 @@ async function addInstance(conf: instanceConfig, callback:any): KeyWordRNBridgeI
     keyWordRNBridgeInstances.push({ id, instance });
       // Set up event listener
     instance.onKeywordDetectionEvent((phrase: string) => {
-      console.log(`Instance ${id} detected: ${id}`);
-      callback(phrase);
+      console.log(`Instance ${id} detected: ${id} with phrase`, phrase);
+      // callback(phrase); Does not work on IOS
+      callback(id);
     });
     console.log(`Instance ${id} calling startKeywordDetection()`);
     instance.startKeywordDetection(conf.threshold);
@@ -133,8 +134,11 @@ export const useModel = () => {
                 case 'state2':
                     searchIds = ['i_want_to_park', 'need_help_now',
                         'nearest_gaz_station', 'i_want_to_stop_park', 'step_back'];
+                    //searchIds = ['i_want_to_park', 'i_want_to_stop_park', 'need_help_now', 'step_back'];
                     break;
-            }
+                case 'step_back':
+                    searchIds = ['step_back'];
+                }
             stopListening();
             searchIds.forEach(sId => {
                 element = instanceConfigs.find(element => element.id === sId);
