@@ -18,15 +18,15 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		9D4xqP5eyoxHRE/EpEHdSWDdvC4=
+		xRaY9bFP//IR4Ck5qi1uNNPXdj8=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		7X3XmsPf4UlIWC8IC4Bd/5NYI0U=
+		IEOA+NH8VNsOJO+5/xehIk0rXb0=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		+L2OPp8z1lBz5oTXrJwx9wq0YWI=
+		91smI5AwCNcHAuSlWCWRVLPMXQk=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
@@ -46,7 +46,7 @@
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		+L2OPp8z1lBz5oTXrJwx9wq0YWI=
+		91smI5AwCNcHAuSlWCWRVLPMXQk=
 		</data>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
@@ -89,21 +89,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			DVWzlWCejINanm9GhX/2WH1JvNYRBWRPk9b89Wng6OU=
+			KQbRrQFVUb2zgVdgKtuDYDOVa5v8m/06utQgIhqcfeA=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			4Xk4qYYvXlGYBm1icpc821+0oLP5/j7/Nj5MVJjJV3U=
+			/uiZzJVNLEyHT6Ppt7hfQoF7bvkrHzW+nO6zOy9QkMA=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			+NWgun9mS9IOFkF7nPblD5tVzxeEeezg+ARmLIxBh/s=
+			0Hpf7usPc6wG36yGigo/SFWbEa+O/M0H+lWncIb5+CM=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
@@ -138,7 +138,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			+NWgun9mS9IOFkF7nPblD5tVzxeEeezg+ARmLIxBh/s=
+			0Hpf7usPc6wG36yGigo/SFWbEa+O/M0H+lWncIb5+CM=
 			</data>
 		</dict>
 		<key>Modules/KeyWordDetection.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
