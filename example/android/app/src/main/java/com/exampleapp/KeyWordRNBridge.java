@@ -57,20 +57,20 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
     }
         
     @ReactMethod
-    public String getKeywordDetectionModel(Promise promise) {
+    public String gerKeywordDetectionModel(Promise promise) {
         String modelName = "";
         if (keyWordsDetection != null) {
-            modelName = keyWordsDetection.getKeywordDetectionModel();
+            modelName = keyWordsDetection.gerKeywordDetectionModel();
         }
         promise.resolve(modelName);
         return modelName;
     }
 
     @ReactMethod
-    public String getRecordingWav(Promise promise) {
+    public String gerRecordingWav(Promise promise) {
         String wavFilePath = "";
         if (keyWordsDetection != null) {
-            wavFilePath = keyWordsDetection.getRecordingWav ();
+            wavFilePath = keyWordsDetection.gerRecordingWav ();
         }
         promise.resolve(wavFilePath);
         return wavFilePath;
