@@ -12,7 +12,7 @@ Welcome to **Davoice WakeWord / Keywords Detection** – Wake words and keyword 
 
 ## Latest news
 
-- **New Car Parking Example:** Checkout example_car_parking for voice activated Car parking application flow. All controlled by voice both in Foreground and Background.
+- **New Car Parking Example:** Checkout our new Voice activated Car Parking example, with voice control both in Foreground and Background: example_car_parking/.
 
 ## Features
 
