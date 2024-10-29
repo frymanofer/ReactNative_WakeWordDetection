@@ -10,6 +10,10 @@ By [DaVoice.io](https://davoice.io)
 
 Welcome to **Davoice WakeWord / Keywords Detection** – Wake words and keyword detection solution designed by **DaVoice.io**.
 
+## Latest news
+
+- **New Car Parking Example:** Checkout example_car_parking for voice activated Car parking application flow. All controlled by voice both in Foreground and Background.
+
 ## Features
 
 - **High Accuracy:** Our advanced machine learning models deliver top-notch accuracy.
