@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entity-sets>
+    <entity-set id="entity.set.feature">
+        <entity id="feature.open_spark">
+            <name>
+                <alias>spark</alias>
+                <alias>Spark</alias>
+            </name>
+        </entity>
+    </entity-set>
+</entity-sets>

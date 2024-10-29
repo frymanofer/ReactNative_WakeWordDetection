@@ -92,6 +92,30 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
 
     // Stop detection for a specific instance
     @ReactMethod
+    public void stopForegroundService(String instanceId, Promise promise) {
+        KeyWordsDetection instance = instances.get(instanceId);
+        if (instance != null) {
+            instance.stopForegroundService();
+            promise.resolve("stopForegroundService" + instanceId);
+        } else {
+            promise.reject("stopForegroundService", "No instance found with ID: " + instanceId);
+        }
+    }
+    
+    // Stop detection for a specific instance
+    @ReactMethod
+    public void startForegroundService(String instanceId, Promise promise) {
+        KeyWordsDetection instance = instances.get(instanceId);
+        if (instance != null) {
+            instance.startForegroundService();
+            promise.resolve("startForegroundService" + instanceId);
+        } else {
+            promise.reject("startForegroundService", "No instance found with ID: " + instanceId);
+        }
+    }
+
+    // Stop detection for a specific instance
+    @ReactMethod
     public void stopKeywordDetection(String instanceId, Promise promise) {
         KeyWordsDetection instance = instances.get(instanceId);
         if (instance != null) {

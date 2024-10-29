@@ -7,9 +7,11 @@ const keywordRNBridgeEmitter = new NativeEventEmitter(KeyWordRNBridge);
 export class KeyWordRNBridgeInstance {
     instanceId;
     listeners = [];
+    isFirstInstance = false;
   
-    constructor(instanceId) {
+    constructor(instanceId, isSticky) {
       this.instanceId = instanceId;
+      this.isSticky = isSticky;
     }
   
     createInstance(
@@ -17,12 +19,18 @@ export class KeyWordRNBridgeInstance {
       threshold,
       bufferCnt) 
       {
-      return KeyWordRNBridge.createInstance(
+      instance = KeyWordRNBridge.createInstance(
         this.instanceId,
         modelName,
         threshold,
         bufferCnt
       );
+      if (instance && this.isFirstInstance)
+      {
+        this.isFirstInstance = false;
+        KeyWordRNBridge.startForegroundService(this.instanceId); 
+      }
+      return instance;
     }
 
     setKeywordDetectionLicense(license) {
@@ -32,7 +40,13 @@ export class KeyWordRNBridgeInstance {
     replaceKeywordDetectionModel(modelName, threshold, bufferCnt) {
         return KeyWordRNBridge.replaceKeywordDetectionModel(this.instanceId, modelName, threshold, bufferCnt);
     }
+    /*startForegroundService() {
+        return KeyWordRNBridge.startForegroundService(this.instanceId);
+    }
 
+    stopForegroundService() {
+        return KeyWordRNBridge.stopForegroundService(this.instanceId);
+    }*/
     setKeywordLicense(license) {
         return KeyWordRNBridge.setKeywordLicense(this.instanceId, license);
     }
@@ -64,6 +78,6 @@ export class KeyWordRNBridgeInstance {
     }
 }
 
-export const createKeyWordRNBridgeInstance = async (instanceId) => {
-    return new KeyWordRNBridgeInstance(instanceId);
+export const createKeyWordRNBridgeInstance = async (instanceId, isSticky) => {
+    return new KeyWordRNBridgeInstance(instanceId, isSticky);
 };

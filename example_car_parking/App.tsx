@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -32,8 +32,6 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import BackgroundTimer from 'react-native-background-timer';
-
 // Get screen width
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -45,12 +43,18 @@ import Sound from 'react-native-sound';
 // Enable playback in silence mode on iOS
 Sound.setCategory('Playback');
 
+let isPlaying = false;
+
 const playSound = (fileName: String) => {
+  //while (isPlaying == true) {
+
+  //}
   const sound = new Sound(fileName, Sound.MAIN_BUNDLE, (error) => {
     if (error) {
       console.log('Failed to load the sound', error);
       return;
     }
+    isPlaying = true;
     // Play the sound
     sound.play((success) => {
       if (success) {
@@ -59,21 +63,30 @@ const playSound = (fileName: String) => {
         console.log('Playback failed');
       }
     });
+    isPlaying = false;
   });
 };
 
 
 import LinearGradient from 'react-native-linear-gradient';
 //import RNFS from 'react-native-fs';
-
 import { NativeModules } from 'react-native';
+
+// Import the setup file first
+//import './BackgroundTimerSetup';
+import BackgroundTimer from 'react-native-background-timer';
+
+// Now use BackgroundTimer as usual
+BackgroundTimer.start();
+
 import { AppState } from 'react-native';
 
 import { setupTrackPlayer, playTrackPlayer, playTrackPlayer_1 } from './src/player';
 
 const { ForegroundServiceModule } = NativeModules;
 // Start the foreground service when you start playing audio
-ForegroundServiceModule.startAudioForegroundService();
+if (Platform.OS != 'ios')
+  ForegroundServiceModule.startAudioForegroundService();
 
 import { useModel } from './src/useModel';
 
@@ -100,15 +113,15 @@ function bringAppToForeground() {
 const detectionCallback = async (keywordIndex: any) => {
   //bringAppToForeground();
   console.log("detectionCallback !!!!!!!!!!!!!!!!!!");
-    /*playTrackPlayer()
-      .then(() => {
-        console.log("Track started playing successfully.");
-      })
-      .catch((error) => {
-        console.error("Failed to play track:", error);
-      });*/
-    // playSound('carparkoptions.mp3');
-     playSound('options_park_stop_gaz.mp3');
+  /*playTrackPlayer()
+    .then(() => {
+      console.log("Track started playing successfully.");
+    })
+    .catch((error) => {
+      console.error("Failed to play track:", error);
+    });*/
+  // playSound('carparkoptions.mp3');
+  playSound('activationcommand.mp3');
 };
 
 /*
@@ -139,11 +152,11 @@ const AudioPermissionComponent = async () => {
     console.log("AudioPermissionComponent() after request();");
     let MicStatus = await check(permission);
     if (MicStatus !== RESULTS.GRANTED) {
-        console.log("MicStatus !== RESULTS.GRANTED calling request()");
+      console.log("MicStatus !== RESULTS.GRANTED calling request()");
 
-        MicStatus = await request(permission);
+      MicStatus = await request(permission);
 
-        console.log("request() returned with MicStatus == ", MicStatus == RESULTS.GRANTED ?  "permission granted" : "No permissions");
+      console.log("request() returned with MicStatus == ", MicStatus == RESULTS.GRANTED ? "permission granted" : "No permissions");
 
     }
 
@@ -177,7 +190,7 @@ type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
@@ -220,7 +233,7 @@ function App(): React.JSX.Element {
 
   const sparkMain = `sPark Your\n'Hands Free'\nParking Companion`;
   const endOfDemo = `\n          END OF DEMO \n       For info contact \n         ofer@davoice.io\n`
-  
+
   // State to handle the display message
   const [message, setMessage] = useState(sparkMain);
   const [message1, setMessage1] = useState(`\n\n\nYou can say:\n`);
@@ -233,17 +246,18 @@ function App(): React.JSX.Element {
   let innerDetectionCallback: (keywordIndex: any) => Promise<void>;
 
   useEffect(() => {
+    const step0 = () => {
+      // State to handle the display message
+      setMessage(sparkMain);
+      setMessage1(`\n\n\nYou can say:\n`);
+      setMessage2(`'${wakeWord}'\n`);
+      setMessage3(`to activate voice commands`);
+      setMessage4_1(``);
+      setMessage4(``);
+    }
+
     const initializeKeywordDetection = async () => {
       try {
-        const step0 = () => {
-          // State to handle the display message
-          setMessage(sparkMain);
-          setMessage1(`\n\n\nYou can say:\n`);
-          setMessage2(`'${wakeWord}'\n`);
-          setMessage3(`to activate voice commands`);
-          setMessage4_1(``);
-          setMessage4(``);
-        }
         step0();
 
         const innerDetectionCallbackStage3 = async (keywordIndex: string) => {
@@ -256,119 +270,125 @@ function App(): React.JSX.Element {
 
         const innerDetectionCallbackStage2 = async (keywordIndex: string) => {
           console.log("innerDetectionCallbackStage2()", keywordIndex);
+          playSound('you_chose.mp3');
           await stopListening();
           loadModel('step_back', innerDetectionCallback);
+          const timeoutId = BackgroundTimer.setTimeout(async () => {
+            BackgroundTimer.clearTimeout(timeoutId);
+            //          setIsFlashing(true);  // Start flashing effect (Line 122)
+            if (keywordIndex.includes("step_back")) {
+              console.log("Stepping back");
+              playSound('to_step_back.mp3');
+              step0();
+              loadModel('state1', innerDetectionCallback);
+              return;
+            } else if (keywordIndex.includes("nearest_gaz_station")) {
+              console.log("Nearest gas station");
+              playSound('to_find_the_nearest_gas_station.mp3');
+              setMessage(`\nyou chose:\n`);
+              setMessage1(`\n\n\nFind the nearest gas station`);
+              setMessage2('');
+              setMessage3(endOfDemo);
+              setMessage4_1(``);
+              setMessage4(``);
+            } else if (keywordIndex.includes("i_want_to_stop_park")) {
+              console.log("stop parking");
+              playSound('to_stop_parking.mp3');
+              setMessage(`\nyou chose:\n`);
+              setMessage1(`\n\n\nTo stop parking`);
+              setMessage2(``);
+              setMessage3(endOfDemo);
+              setMessage4_1(``);
+              setMessage4(``);
+            } else if (keywordIndex.includes("electric_vehicle_parking")) {
+              console.log("electric_vehicle_parking");
+              playSound('to_find_an_electical_vehicle_parking.mp3');
+              setMessage(`\nyou chose:\n`);
+              setMessage1(`\n\n\n To find electric vehicle parking`);
+              setMessage2(``);
+              setMessage3(endOfDemo);
+              setMessage4_1(``);
+              setMessage4(``);
+            } else {
+              playSound('to_park_your_car.mp3');
+              setMessage(`\nyou chose:\n`);
+              setMessage1(`\n\n\nTo park your car`);
+              setMessage2(``);
+              setMessage3(``);
+              setMessage4(``);
+              setMessage4_1(``);
+              //await detectionCallback(keywordIndex);
+              // if (1 || !AppState.currentState.match(/background/)) {
+              setTimeout(() => {
+                (async () => {
+                  setMessage1(`\n\n\nTo park your car`);
+                  setTimeout(() => {
+                    (async () => {
+                      setMessage3(`When do you want to start parking?\n`);
+                      setTimeout(() => {
+                        (async () => {
+                          setMessage4(endOfDemo);
+                        })();
+                      }, 2500); // 1 seconds delay      
+                    })();
+                  }, 2500); // 1 seconds delay      
+                })();
+              }, 2500); // 1 seconds delay
+            }
+            BackgroundTimer.setTimeout(async () => {
+              playSound('contact_us.mp3');
+            }, 2000);
+          }, 1500);
+        };
 
-//          setIsFlashing(true);  // Start flashing effect (Line 122)
+        innerDetectionCallback = async (keywordIndex: any) => {
+          let innerDetectionCallbackTimeCalled = false;
+          innerDetectionCallbackTimeCalled = false;
           if (keywordIndex.includes("step_back")) {
             console.log("Stepping back");
             step0();
             loadModel('state1', innerDetectionCallback);
             return;
-          } else if (keywordIndex.includes("nearest_gaz_station")) {
-            console.log("nearest gaz station back");
-            playSound('chosenearestgazstation.mp3');
-            setMessage(`\nYou choose:\n`);
-            setMessage1(`\n\n\nFind the nearest gaz station`);
-            setMessage2('');
-            setMessage3(endOfDemo);
-            setMessage4_1(``);
-            setMessage4(``);
-              return;
-          } else if (keywordIndex.includes("i_want_to_stop_park")) {
-          console.log("stop parking");
-          playSound('chose_stop_parking.mp3');
-          setMessage(`\nYou choose:\n`);
-          setMessage1(`\n\n\nTo stop parking`);
-          setMessage2(``);
-          setMessage3(endOfDemo);
-          setMessage4_1(``);
-          setMessage4(``);
-            return;
-        } else if (keywordIndex.includes("electric_vehicle_parking")) {
-        console.log("electric_vehicle_parking");
-        //playSound('chose_stop_parking.mp3');
-        setMessage(`\nYou choose:\n`);
-        setMessage1(`\n\n\n To find electric vehicle parking`);
-        setMessage2(``);
-        setMessage3(endOfDemo);
-        setMessage4_1(``);
-        setMessage4(``);
-          return;
-      }
-
-          playSound('you_chose_to_park_your_car.mp3');
-          setMessage(`\nYou choose:\n`);
-          setMessage1(`\n\n\nTo park your car`);
-          setMessage2(``);
-          setMessage3(``);
-          setMessage4(``);
-          setMessage4_1(``);
-          //await detectionCallback(keywordIndex);
-          if (1 || !AppState.currentState.match(/background/)) {
-            setTimeout(() => {
-              (async () => {
-                  setMessage1(`\n\n\nTo park your car`);
-                  setTimeout(() => {
-                    (async () => {
-                      setMessage3(`When do you want to start parking?\n`);
-                        setTimeout(() => {
-                          (async () => {
-                              setMessage4(endOfDemo);
-                          })();
-                          }, 2500); // 1 seconds delay      
-                    })();
-                    }, 2500); // 1 seconds delay      
-              })();
-              }, 2500); // 1 seconds delay
-          } else {
-                // Setup react-native-background-fetch 
           }
-          // Revert back to the listening message after 10 seconds
-          setTimeout(() => {
-            //setMessage(`Listening to WakeWord '${wakeWord}'...`);
-          }, 10000); // 10 seconds delay      
-        };
-        
-        innerDetectionCallback = async (keywordIndex: any) => {
+          await stopListening();
           console.log("innerDetectionCallback()");
+          await detectionCallback(keywordIndex);
           setMessage(`\nChoose option:\n`);
           setMessage1(``);
           setMessage2(``);
           setMessage3(``);
           setMessage4_1(``);
           setMessage4(``);
-          await detectionCallback(keywordIndex);
-          if (1 || !AppState.currentState.match(/background/)) {
-//            setTimeout(() => {
-//              (async () => {
-            BackgroundTimer.runBackgroundTimer(async () => {
-                  await stopListening();
-                  setMessage1(`\n\n\nSay: I want to park`);
-                  BackgroundTimer.runBackgroundTimer(async () => {
-                    //setTimeout(() => {
-                    //(async () => {
-                        setMessage3(`Say: I want to stop parking?\n`);
-                        BackgroundTimer.runBackgroundTimer(async () => {
-//                          setTimeout(() => {
-                          //(async () => {
-                            setMessage4(`Say: Nearest gaz station\n`);
-                            BackgroundTimer.runBackgroundTimer(async () => {
-//                              setTimeout(() => {
-                              //(async () => {
-                                setMessage4_1(`Say: Electric vehicle parking\n`);
-                                loadModel('state2', innerDetectionCallbackStage2);
-                              //})();
-                            }, 1000); // 1 seconds delay      
-                        //})();
-                      }, 1000); // 1 seconds delay      
-                    //})();
-                    }, 1000); // 1 seconds delay      
-  //            })();
-              }, 1000); // 1 seconds delay
-              // Setup react-native-background-fetch 
-          }
-        };
+          //let timeoutId = BackgroundTimer.setTimeout(() => {
+          setMessage1(`\n\n\nSay: I want to park`);
+          //BackgroundTimer.runBackgroundTimer(async () => {
+          //setTimeout(() => {
+          //(async () => {
+          setMessage3(`Say: I want to stop parking\n`);
+          //BackgroundTimer.runBackgroundTimer(async () => {
+          //                          setTimeout(() => {
+          //(async () => {
+          setMessage4(`Say: Nearest gas station\n`);
+          //BackgroundTimer.runBackgroundTimer(async () => {
+          //                              setTimeout(() => {
+          //(async () => {
+          setMessage4_1(`Say: Electric vehicle parking\n`);
+          // Start a timer that runs once after X milliseconds
+          const timeoutId = BackgroundTimer.setTimeout(async () => {
+            await loadModel('state2', innerDetectionCallbackStage2);
+            //BackgroundTimer.clearTimeout(timeoutId);
+          }, 12000);
+
+          // Cancel the timeout if necessary
+          //})();
+          //}, 1000); // 1 seconds delay      
+          //})();
+          //}, 1000); // 1 seconds delay      
+          //            })();
+          //}, 1000); // 1 seconds delay
+          // Setup react-native-background-fetch 
+        }
+        loadModel('step_back', innerDetectionCallback);
         loadModel('state1', innerDetectionCallback);
 
         console.log("Calling setupTrackPlayer()");
@@ -389,89 +409,91 @@ function App(): React.JSX.Element {
     AudioPermissionComponent();
     console.log("After calling AudioPermissionComponent();");
 
-}, []);  // Empty dependency array ensures it runs once when the component mounts
+  }, []);  // Empty dependency array ensures it runs once when the component mounts
 
-return (
-  <LinearGradient
-    colors={isDarkMode ? ['#232526', '#414345'] : ['#e0eafc', '#cfdef3']}
-    style={styles.linearGradient}>
-    <StatusBar
-      barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-      backgroundColor={backgroundStyle.backgroundColor}
-    />
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      style={backgroundStyle}>
-      <View 
-      style={[styles.container, 
-      { backgroundColor: 
-        isFlashing ? (isDarkMode ? '#ff4d4d' : '#ffcccc') : isDarkMode ? Colors.black : Colors.white }]}>
-        <Text style={styles.title}>{message}</Text>
-        <Text style={styles.header}>{message1}</Text>
-        <Text style={styles.normal}>{message2}</Text>
-        <Text style={styles.header}>{message3}</Text>
-        <Text style={styles.header}>{message4}</Text>
-        <Text style={styles.header}>{message41}</Text>
-        <Text style={styles.stepback}>{message5}</Text>
-      </View>
-    </ScrollView>
+  return (
+    <LinearGradient
+      colors={isDarkMode ? ['#232526', '#414345'] : ['#e0eafc', '#cfdef3']}
+      style={styles.linearGradient}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={backgroundStyle.backgroundColor}
+      />
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={backgroundStyle}>
+        <View
+          style={[styles.container,
+          {
+            backgroundColor:
+              isFlashing ? (isDarkMode ? '#ff4d4d' : '#ffcccc') : isDarkMode ? Colors.black : Colors.white
+          }]}>
+          <Text style={styles.title}>{message}</Text>
+          <Text style={styles.header}>{message1}</Text>
+          <Text style={styles.normal}>{message2}</Text>
+          <Text style={styles.header}>{message3}</Text>
+          <Text style={styles.header}>{message4}</Text>
+          <Text style={styles.header}>{message41}</Text>
+          <Text style={styles.stepback}>{message5}</Text>
+        </View>
+      </ScrollView>
     </LinearGradient>
-);
+  );
 }
 
 const styles = StyleSheet.create({
-container: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: 0,
-  marginTop: 32,
-  textAlign: 'left', // Align all text to the left
-},
-linearGradient: {
-  flex: 1,
-},
-title: {
-  fontSize: scaleFontSize(35),
-  fontWeight: 'bold',
-  color: '#4a4a4a',
-  textAlign: 'center',
-  paddingHorizontal: 20,
-  backgroundColor: '#ffffff99',
-  borderRadius: 12,
-  paddingVertical: 20,
-  marginHorizontal: 10,
-  elevation: 4, // Android shadow
-  shadowColor: '#000', // iOS shadow
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 3,
-},
-header: {
-  fontSize: scaleFontSize(20),
-  textAlign: 'left', // Align all text to the left
-  fontWeight: 'bold',
-  color: 'black',
-},
-stepback: {
-  fontSize: scaleFontSize(14),
-  textAlign: 'left', // Align all text to the left
-  fontWeight: 'bold',
-  color: 'blue',
-  fontStyle: 'italic', // Make the text italic
-},
-normal: {
-  textAlign: 'left', // Align all text to the left
-  fontSize: scaleFontSize(25),
-  color: 'blue',
-  fontWeight: 'bold',
-},
-highlight: {
-  textAlign: 'left', // Align all text to the left
-  fontSize: scaleFontSize(18),
-  fontWeight: 'bold',
-  color: 'red'
-},
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0,
+    marginTop: 32,
+    textAlign: 'left', // Align all text to the left
+  },
+  linearGradient: {
+    flex: 1,
+  },
+  title: {
+    fontSize: scaleFontSize(35),
+    fontWeight: 'bold',
+    color: '#4a4a4a',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#ffffff99',
+    borderRadius: 12,
+    paddingVertical: 20,
+    marginHorizontal: 10,
+    elevation: 4, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  header: {
+    fontSize: scaleFontSize(20),
+    textAlign: 'left', // Align all text to the left
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  stepback: {
+    fontSize: scaleFontSize(14),
+    textAlign: 'left', // Align all text to the left
+    fontWeight: 'bold',
+    color: 'blue',
+    fontStyle: 'italic', // Make the text italic
+  },
+  normal: {
+    textAlign: 'left', // Align all text to the left
+    fontSize: scaleFontSize(25),
+    color: 'blue',
+    fontWeight: 'bold',
+  },
+  highlight: {
+    textAlign: 'left', // Align all text to the left
+    fontSize: scaleFontSize(18),
+    fontWeight: 'bold',
+    color: 'red'
+  },
 });
 
 export default App;

@@ -17,6 +17,7 @@ interface instanceConfig {
     modelName: string;
     threshold: number;
     bufferCnt: number;
+    sticky: boolean;
 }
 
 const keyWordRNBridgeInstances: keyWordRNBridgeInstanceConfig[] = [];
@@ -25,13 +26,14 @@ function findInstanceById(id: string): keyWordRNBridgeInstanceConfig | undefined
 }
 
 // Create an array of instance configurations
-const instanceConfigs = [
-    { id: 'hey_pango', modelName: 'hey_pango.onnx', threshold: 0.9999, bufferCnt: 2 },
-    { id: 'i_want_to_park', modelName: 'i_want_to_park.onnx', threshold: 0.9999, bufferCnt: 2 },
-    { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 2 },
-    { id: 'step_back', modelName: 'step_back.onnx', threshold: 0.9999, bufferCnt: 2 },
-    { id: 'nearest_gaz_station', modelName: 'nearest_gaz_station.onnx', threshold: 0.9999, bufferCnt: 6 },
-    { id: 'i_want_to_stop_park', modelName: 'i_want_to_stop_park.onnx', threshold: 0.9999, bufferCnt: 2 }
+const instanceConfigs:instanceConfig[] = [
+    { id: 'hey_pango', modelName: 'hey_pango.onnx', threshold: 0.9999, bufferCnt: 1, sticky: false },
+    { id: 'i_want_to_park', modelName: 'i_want_to_park.onnx', threshold: 0.9999, bufferCnt: 2, sticky: false  },
+    { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 2, sticky: false  },
+    { id: 'step_back', modelName: 'step_back.onnx', threshold: 0.9999, bufferCnt: 2, sticky: true  },
+    { id: 'electric_vehicle_parking', modelName: 'electric_vehicle_parking.onnx', threshold: 0.9999, bufferCnt: 2 , sticky: false },
+    { id: 'nearest_gaz_station', modelName: 'nearest_gaz_station.onnx', threshold: 0.9999, bufferCnt: 6 , sticky: false },
+    { id: 'i_want_to_stop_park', modelName: 'i_want_to_stop_park.onnx', threshold: 0.9999, bufferCnt: 2 , sticky: false }
 ];
 
 // Function to add a new instance dynamically
@@ -41,11 +43,12 @@ async function addInstance(conf: instanceConfig, callback:any): KeyWordRNBridgeI
     const id = conf.id;
     const instanceConf = findInstanceById(id);
     if (instanceConf != null) {
+        console.log("Found Instance: ", id, "starting to listen");
         const instance = instanceConf.instance;
         instance.startKeywordDetection(conf.threshold);
         return instance;
     }
-    const instance = await createKeyWordRNBridgeInstance(id);
+    const instance = await createKeyWordRNBridgeInstance(id, conf.sticky);
     let isLicesed = false;
   
     if (!instance) {
@@ -133,7 +136,7 @@ export const useModel = () => {
                     break;
                 case 'state2':
                     searchIds = ['i_want_to_park', 'need_help_now',
-                        'nearest_gaz_station', 'i_want_to_stop_park', 'step_back'];
+                        'nearest_gaz_station', 'i_want_to_stop_park', 'electric_vehicle_parking', 'step_back'];
                     //searchIds = ['i_want_to_park', 'i_want_to_stop_park', 'need_help_now', 'step_back'];
                     break;
                 case 'step_back':
@@ -161,7 +164,8 @@ export const useModel = () => {
         try {
             keyWordRNBridgeInstances.forEach(element => {
                 const instance = element.instance;
-                instance.stopKeywordDetection();   
+                if (!instance.isSticky)
+                    instance.stopKeywordDetection();   
             }); 
             setIsListening(false);
         } catch (error) {

@@ -4,8 +4,9 @@ import { Platform } from 'react-native';
 const { KeyWordRNBridge } = NativeModules;
 
 class KeyWordRNBridgeWrapper {
-    constructor(instanceId) {
+    constructor(instanceId, isSticky) {
         this.instanceId = instanceId; // Unique identifier for each instance
+        this.isSticky = isSticky;
         this.eventEmitter = new NativeEventEmitter(KeyWordRNBridge); // New EventEmitter per instance
     }
 
@@ -39,6 +40,6 @@ class KeyWordRNBridgeWrapper {
 }
 
 // Factory to create multiple instances
-export const createKeyWordRNBridgeInstance = (instanceId) => {
-    return new KeyWordRNBridgeWrapper(instanceId);
+export const createKeyWordRNBridgeInstance = (instanceId, isSticky) => {
+    return new KeyWordRNBridgeWrapper(instanceId, isSticky);
 };

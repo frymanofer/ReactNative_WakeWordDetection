@@ -8,3 +8,4 @@ rm encryptionkey.img encryptionkey.img.qcow2
 rm multiinstance.lock
 rm bootcompleted.ini tmpAdbCmds
 rm -rf tmpAdbCmds
+cd -

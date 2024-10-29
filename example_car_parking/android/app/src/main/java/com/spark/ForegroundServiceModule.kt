@@ -40,6 +40,19 @@ class ForegroundServiceModule(reactContext: ReactApplicationContext) : ReactCont
         val serviceIntent = Intent(context, MicrophoneService::class.java)
         context.stopService(serviceIntent)
     }
+
+    @ReactMethod
+    fun startAudioForegroundService() {
+        val serviceIntent = Intent(context, MicrophoneService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
+        }
+        
+        showForegroundNotification(context)
+    }
+
     @ReactMethod
     fun bringAppToForeground(promise: Promise) {
         val activity = currentActivity
@@ -97,6 +110,37 @@ class ForegroundServiceModule(reactContext: ReactApplicationContext) : ReactCont
     }
 
     fun showForegroundNotification(context: Context) {
+        val channelId = "audio_playback_channel_id"
+        val channelName = "Audio Playback Channel"
+    
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    
+        // Create notification channel for Android O and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
+    
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Spark Audio Playback")
+            .setContentText("Audio is playing in the background")
+            .setSmallIcon(R.drawable.ic_launcher) // Replace with your app's icon
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+    
+        notificationManager.notify(1, notification)
+    }
+/*     
+    fun showForegroundNotification(context: Context) {
         val channelId = "foreground_channel_id"
         val channelName = "Foreground Channel"
 
@@ -126,4 +170,5 @@ class ForegroundServiceModule(reactContext: ReactApplicationContext) : ReactCont
 
         notificationManager.notify(1, notification)
     }
+    */
 }
