@@ -1,4 +1,4 @@
-# ReactNative Wake Word by Davoice - Hands Free Car Parking
+# Hands Free Car Parking Wake Word by Davoice 
 
 [![GitHub release](https://img.shields.io/github/release/frymanofer/KeyWordDetectionIOSFramework.svg)](https://github.com/frymanofer/KeyWordDetectionIOSFramework/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
