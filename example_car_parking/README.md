@@ -1,4 +1,4 @@
-# Hands Free Car Parking Wake Word by Davoice 
+# Hands Free Car Parking Wake Word App by Davoice 
 
 [![GitHub release](https://img.shields.io/github/release/frymanofer/KeyWordDetectionIOSFramework.svg)](https://github.com/frymanofer/KeyWordDetectionIOSFramework/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -7,7 +7,7 @@ By [DaVoice.io](https://davoice.io)
 
 [![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FDaVoiceAI)](https://twitter.com/DaVoiceAI)
 
-Welcome to **Davoice Wake Word Hands Free Car Parkink solution designed by **DaVoice.io**.
+Welcome to **Davoice **Hands Free Car Parking## Wake Word solution designed by **DaVoice.io**.
 
 # Details
 This is a simple React-Native application, with the necessary Native code for both IOS and Android.
