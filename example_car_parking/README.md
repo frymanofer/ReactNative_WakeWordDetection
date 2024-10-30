@@ -1,3 +1,8 @@
+# Details
+This is a simple React-Native application, with the necessary Native code for both IOS and Android.
+
+Demonstrating how easy it is to build a voice activated car parking Application.
+
 # Getting Started
 In ios and android directory there is a static library for Keyword detection
 
