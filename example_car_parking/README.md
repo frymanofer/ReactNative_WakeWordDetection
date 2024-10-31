@@ -15,8 +15,11 @@ This is a simple React-Native application, with the necessary Native code for bo
 Demonstrating how easy it is to build a voice activated car parking Application.
 
 # So what is exciting about the App?
-## It understands your commands and it talks back.
-## It works when the App is in the background! On both IOS and Android.
+## 🔵 **It understands your commands and it talks back.**
+## 🔵 **It works when the App is in the background! On both IOS and Android.**
+
+# Please note
+## 🔵 **Although we support accuracy above 99.99..%, the accuracy of wake word models in this demo is currently around 70% we may change it in the near future**
 
 # Instalation
 
