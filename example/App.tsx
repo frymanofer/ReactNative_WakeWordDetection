@@ -39,6 +39,13 @@ import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
 import { NativeModules } from 'react-native';
 import { AppState } from 'react-native';
 
+// Import the setup file first
+//import './BackgroundTimerSetup';
+import BackgroundTimer from 'react-native-background-timer';
+
+// Now use BackgroundTimer as usual
+BackgroundTimer.start();
+
 //const { ForegroundServiceModule } = NativeModules;
 
 function bringAppToForeground() {
@@ -253,9 +260,8 @@ function App(): React.JSX.Element {
 
           setIsFlashing(true);  // Start flashing effect (Line 122)
 
-          //if (!AppState.currentState.match('background')) {
-            setTimeout(() => {
-              (async () => {
+          const timeoutId1 = BackgroundTimer.setTimeout(async () => {
+            BackgroundTimer.clearTimeout(timeoutId1);
                   KeyWordRNBridge.stopKeywordDetection();
                   setMessage(`Paying back '${wakeWord}' which activated the App`);
 
@@ -267,14 +273,14 @@ function App(): React.JSX.Element {
                     const cleanedFilePath = wavFilePath.startsWith('file://') ? wavFilePath.slice(7) : wavFilePath;
                     playSoundFile(cleanedFilePath);
                   }
-              })();
               }, 1000); // 5 seconds delay
             //} else {
             //    KeyWordRNBridge.stopKeywordDetection();
                 // Setup react-native-background-fetch 
             //}
           // Revert back to the listening message after 10 seconds
-          setTimeout(() => {
+          const timeoutId2 = BackgroundTimer.setTimeout(async () => {
+            BackgroundTimer.clearTimeout(timeoutId2);
             //KeyWordRNBridge.startKeywordDetection();    
             KeyWordRNBridge.stopKeywordDetection();
             KeyWordRNBridge.stopKeywordDetection();
@@ -283,11 +289,12 @@ function App(): React.JSX.Element {
             //setIsFlashing(false);  // Stop flashing effect (Line 126)
           }, 5000); // 5 seconds delay
 
-          setTimeout(() => {
+          const timeoutId3 = BackgroundTimer.setTimeout(async () => {
+            BackgroundTimer.clearTimeout(timeoutId3);
             KeyWordRNBridge.startKeywordDetection();    
             setMessage(`Listening to WakeWord '${wakeWord}'...`);
             setIsFlashing(false);  // Stop flashing effect (Line 126)
-          }, 15000); // 15 seconds delay
+          }, 8000); // 8 econds delay
 
           detectionCallback(event);
      });

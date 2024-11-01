@@ -57,20 +57,20 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
     }
         
     @ReactMethod
-    public String gerKeywordDetectionModel(Promise promise) {
+    public String getKeywordDetectionModel(Promise promise) {
         String modelName = "";
         if (keyWordsDetection != null) {
-            modelName = keyWordsDetection.gerKeywordDetectionModel();
+            modelName = keyWordsDetection.getKeywordDetectionModel();
         }
         promise.resolve(modelName);
         return modelName;
     }
 
     @ReactMethod
-    public String gerRecordingWav(Promise promise) {
+    public String getRecordingWav(Promise promise) {
         String wavFilePath = "";
         if (keyWordsDetection != null) {
-            wavFilePath = keyWordsDetection.gerRecordingWav ();
+            wavFilePath = keyWordsDetection.getRecordingWav ();
         }
         promise.resolve(wavFilePath);
         return wavFilePath;
@@ -112,8 +112,9 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
     public void startKeywordDetection() throws OrtException {
         if (keyWordsDetection != null) {
             keyWordsDetection.startListening(keyThreshold);
+            keyWordsDetection.initialize(this::onKeywordDetected);
         } else {
-            // Handle error
+            Log.d(TAG, "ERROR startKeywordDetection(): keyWordsDetection == null ");
         }
     }
 
@@ -126,6 +127,28 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
         }
     }
 
+    // Stop detection for a specific instance
+    @ReactMethod
+    public void stopForegroundService(Promise promise) {
+        if (keyWordsDetection != null) {
+            keyWordsDetection.stopForegroundService();
+            promise.resolve("stopForegroundService");
+        } else {
+            promise.reject("stopForegroundService", "No instance found with ID: ");
+        }
+    }
+    
+    // Stop detection for a specific instance
+    @ReactMethod
+    public void startForegroundService(String instanceId, Promise promise) {
+        if (keyWordsDetection != null) {
+            keyWordsDetection.startForegroundService();
+            promise.resolve("startForegroundService" );
+        } else {
+            promise.reject("startForegroundService", "No instance found with ID: ");
+        }
+    }
+    
     public static void callback() {
         //Log.d(TAG, "KeyWord detected! meanPrediction: " + meanPrediction);
         WritableMap params = Arguments.createMap();
