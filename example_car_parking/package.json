@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-voice/voice": "^3.1.2",
     "@xstate/react": "^4.1.3",
     "react": "18.3.1",
     "react-native": "0.75.2",
@@ -19,6 +20,7 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-sound": "^0.11.2",
     "react-native-track-player": "^4.1.1",
+    "react-native-tts": "^4.1.1",
     "xstate": "^5.18.2"
   },
   "devDependencies": {

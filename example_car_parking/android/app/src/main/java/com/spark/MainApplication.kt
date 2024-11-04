@@ -11,6 +11,7 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 import com.spark.keywordspotting.KeyWordRNBridgePackage;
+import com.wenkesj.voice.VoicePackage; // <------ Add this!
 
 class MainApplication : Application(), ReactApplication {
 

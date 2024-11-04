@@ -9,6 +9,8 @@
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+  	<string>App may use speach recognition to identify commands</string>
 	<key>CFBundleDisplayName</key>
 	<string>Spark</string>
 	<key>CFBundleExecutable</key>

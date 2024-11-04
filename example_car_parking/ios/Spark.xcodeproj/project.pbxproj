@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* SparkTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* SparkTests.m */; };
+		090A482A63F611EBF6C10085 /* libPods-Spark-SparkTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B61F5DB74D94AEED313CC83 /* libPods-Spark-SparkTests.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		53F0F44B43D271EF851EBC41 /* libPods-Spark.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DBE27BA9E40675D01C378F06 /* libPods-Spark.a */; };
 		5411D847DD9B9D40AF61D629 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 0F9666B97F31F82F187B3C7C /* PrivacyInfo.xcprivacy */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		83A06AD52CC93E3F0053F04D /* hey_pango.onnx in Resources */ = {isa = PBXBuildFile; fileRef = 83A06AD02CC93E3E0053F04D /* hey_pango.onnx */; };
@@ -39,8 +41,6 @@
 		83C1A3592C92F538001F84E1 /* KeyWordRNBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 83C1A3562C92F538001F84E1 /* KeyWordRNBridge.mm */; };
 		83D5EF592CAD62440017B91C /* KeyWordDetection.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83C1A34A2C9087C0001F84E1 /* KeyWordDetection.xcframework */; };
 		83D5EF5A2CAD62440017B91C /* KeyWordDetection.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83C1A34A2C9087C0001F84E1 /* KeyWordDetection.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		962AC196A7F5BD24A5140A50 /* libPods-Spark-SparkTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F30BB26EB85616B962F4E503 /* libPods-Spark-SparkTests.a */; };
-		DCB5551869AE41FBE41D47CE /* libPods-Spark.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C8656E5F2AAABF917A8E27AD /* libPods-Spark.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +79,8 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Spark/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Spark/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Spark/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1783213E37B229ADAF772632 /* Pods-Spark-SparkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark-SparkTests.debug.xcconfig"; path = "Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		3B61F5DB74D94AEED313CC83 /* libPods-Spark-SparkTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Spark-SparkTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Spark/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		83A06AD02CC93E3E0053F04D /* hey_pango.onnx */ = {isa = PBXFileReference; lastKnownFileType = file; name = hey_pango.onnx; path = Spark/models/hey_pango.onnx; sourceTree = "<group>"; };
 		83A06AD12CC93E3E0053F04D /* i_want_to_stop_park.onnx */ = {isa = PBXFileReference; lastKnownFileType = file; name = i_want_to_stop_park.onnx; path = Spark/models/i_want_to_stop_park.onnx; sourceTree = "<group>"; };
@@ -108,13 +110,11 @@
 		83C1A3552C92F538001F84E1 /* KeyWordRNBridgeSwift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeyWordRNBridgeSwift.h; path = Spark/KeyWordRNBridgeSwift.h; sourceTree = "<group>"; };
 		83C1A3562C92F538001F84E1 /* KeyWordRNBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = KeyWordRNBridge.mm; path = Spark/KeyWordRNBridge.mm; sourceTree = "<group>"; };
 		83C1A3572C92F538001F84E1 /* KeyWordRNBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeyWordRNBridge.h; path = Spark/KeyWordRNBridge.h; sourceTree = "<group>"; };
-		BAA1EA8977ABC524E0FFC3E4 /* Pods-Spark.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark.debug.xcconfig"; path = "Target Support Files/Pods-Spark/Pods-Spark.debug.xcconfig"; sourceTree = "<group>"; };
-		C5CE8BFB520267D759DEC93E /* Pods-Spark-SparkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark-SparkTests.debug.xcconfig"; path = "Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests.debug.xcconfig"; sourceTree = "<group>"; };
-		C8656E5F2AAABF917A8E27AD /* libPods-Spark.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Spark.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D3E95CEB1FF24F328EEF3860 /* Pods-Spark.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark.release.xcconfig"; path = "Target Support Files/Pods-Spark/Pods-Spark.release.xcconfig"; sourceTree = "<group>"; };
-		DF6C2A62E6CE7ECCDE12EA52 /* Pods-Spark-SparkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark-SparkTests.release.xcconfig"; path = "Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests.release.xcconfig"; sourceTree = "<group>"; };
+		92143D8999DD9883710FE243 /* Pods-Spark.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark.debug.xcconfig"; path = "Target Support Files/Pods-Spark/Pods-Spark.debug.xcconfig"; sourceTree = "<group>"; };
+		BFF78CA1DDB5F67BF2CB2AF5 /* Pods-Spark.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark.release.xcconfig"; path = "Target Support Files/Pods-Spark/Pods-Spark.release.xcconfig"; sourceTree = "<group>"; };
+		D5D34B81C33CFA27F257A638 /* Pods-Spark-SparkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spark-SparkTests.release.xcconfig"; path = "Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests.release.xcconfig"; sourceTree = "<group>"; };
+		DBE27BA9E40675D01C378F06 /* libPods-Spark.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Spark.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F30BB26EB85616B962F4E503 /* libPods-Spark-SparkTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Spark-SparkTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,7 +122,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				962AC196A7F5BD24A5140A50 /* libPods-Spark-SparkTests.a in Frameworks */,
+				090A482A63F611EBF6C10085 /* libPods-Spark-SparkTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +131,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83D5EF592CAD62440017B91C /* KeyWordDetection.xcframework in Frameworks */,
-				DCB5551869AE41FBE41D47CE /* libPods-Spark.a in Frameworks */,
+				53F0F44B43D271EF851EBC41 /* libPods-Spark.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,8 +202,8 @@
 			children = (
 				83C1A34A2C9087C0001F84E1 /* KeyWordDetection.xcframework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				C8656E5F2AAABF917A8E27AD /* libPods-Spark.a */,
-				F30BB26EB85616B962F4E503 /* libPods-Spark-SparkTests.a */,
+				DBE27BA9E40675D01C378F06 /* libPods-Spark.a */,
+				3B61F5DB74D94AEED313CC83 /* libPods-Spark-SparkTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -242,10 +242,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				BAA1EA8977ABC524E0FFC3E4 /* Pods-Spark.debug.xcconfig */,
-				D3E95CEB1FF24F328EEF3860 /* Pods-Spark.release.xcconfig */,
-				C5CE8BFB520267D759DEC93E /* Pods-Spark-SparkTests.debug.xcconfig */,
-				DF6C2A62E6CE7ECCDE12EA52 /* Pods-Spark-SparkTests.release.xcconfig */,
+				92143D8999DD9883710FE243 /* Pods-Spark.debug.xcconfig */,
+				BFF78CA1DDB5F67BF2CB2AF5 /* Pods-Spark.release.xcconfig */,
+				1783213E37B229ADAF772632 /* Pods-Spark-SparkTests.debug.xcconfig */,
+				D5D34B81C33CFA27F257A638 /* Pods-Spark-SparkTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -257,12 +257,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "SparkTests" */;
 			buildPhases = (
-				69764BCF178EB130D0BB2E43 /* [CP] Check Pods Manifest.lock */,
+				0BB0E64D556ACFBB0E9085D4 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				861432551DA3F93B951928D1 /* [CP] Embed Pods Frameworks */,
-				A94938DF3182D9E172188399 /* [CP] Copy Pods Resources */,
+				6FE39E59D8372B1DC3E294CF /* [CP] Embed Pods Frameworks */,
+				D63BDD734E728B6C2484C4E4 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -278,14 +278,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Spark" */;
 			buildPhases = (
-				8CB79D6AC090C237E2B4651F /* [CP] Check Pods Manifest.lock */,
+				2C2E13C62B50D52EB4BC5849 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				83D5EF5C2CB2B3980017B91C /* Bundle React Native code and images */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				83D5EF5B2CAD62440017B91C /* Embed Frameworks */,
-				1BCE30D58D43665F0E1EC3BE /* [CP] Embed Pods Frameworks */,
-				3739E9BC88B5E348800B64B1 /* [CP] Copy Pods Resources */,
+				31CF8D74DEB78312D5140749 /* [CP] Embed Pods Frameworks */,
+				A0970FAA1F153CA8B5FDF9BA /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -375,41 +375,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1BCE30D58D43665F0E1EC3BE /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3739E9BC88B5E348800B64B1 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		69764BCF178EB130D0BB2E43 /* [CP] Check Pods Manifest.lock */ = {
+		0BB0E64D556ACFBB0E9085D4 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -431,43 +397,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		83D5EF5C2CB2B3980017B91C /* Bundle React Native code and images */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Bundle React Native code and images";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport NODE_BINARY=$(which node)\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
-		};
-		861432551DA3F93B951928D1 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8CB79D6AC090C237E2B4651F /* [CP] Check Pods Manifest.lock */ = {
+		2C2E13C62B50D52EB4BC5849 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -489,7 +419,77 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A94938DF3182D9E172188399 /* [CP] Copy Pods Resources */ = {
+		31CF8D74DEB78312D5140749 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6FE39E59D8372B1DC3E294CF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Spark-SparkTests/Pods-Spark-SparkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		83D5EF5C2CB2B3980017B91C /* Bundle React Native code and images */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Bundle React Native code and images";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport NODE_BINARY=$(which node)\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
+		};
+		A0970FAA1F153CA8B5FDF9BA /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Spark/Pods-Spark-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D63BDD734E728B6C2484C4E4 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -541,7 +541,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C5CE8BFB520267D759DEC93E /* Pods-Spark-SparkTests.debug.xcconfig */;
+			baseConfigurationReference = 1783213E37B229ADAF772632 /* Pods-Spark-SparkTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -568,7 +568,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DF6C2A62E6CE7ECCDE12EA52 /* Pods-Spark-SparkTests.release.xcconfig */;
+			baseConfigurationReference = D5D34B81C33CFA27F257A638 /* Pods-Spark-SparkTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -592,7 +592,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BAA1EA8977ABC524E0FFC3E4 /* Pods-Spark.debug.xcconfig */;
+			baseConfigurationReference = 92143D8999DD9883710FE243 /* Pods-Spark.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -622,7 +622,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D3E95CEB1FF24F328EEF3860 /* Pods-Spark.release.xcconfig */;
+			baseConfigurationReference = BFF78CA1DDB5F67BF2CB2AF5 /* Pods-Spark.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -721,7 +721,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -794,7 +797,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

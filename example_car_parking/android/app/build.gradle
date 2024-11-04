@@ -128,6 +128,10 @@ dependencies {
     implementation 'ai.picovoice:android-voice-processor:1.0.2'
     implementation fileTree(dir: "libs", include: ["*.aar"])
 
+    implementation("androidx.core:core:1.9.0") {
+        exclude group: "com.android.support", module: "support-compat"
+    }
+
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
