@@ -6,6 +6,7 @@
  */
 
 import RNFS from 'react-native-fs';
+import Tts from 'react-native-tts';
 
 import React, { useEffect, useState } from 'react';
 
@@ -39,6 +40,39 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scaleFontSize = (size) => (SCREEN_WIDTH / 390) * size; // 390 is the width of iPhone 11
 
 import Sound from 'react-native-sound';
+
+import useVoiceRecognition from './src/voiceRecog'; // adjust path if necessary
+import TextToVoiceService from './src/textToVoice';
+
+
+async function setVoiceService() {
+  // Set language, rate, pitch, and voice
+  TextToVoiceService.setLanguage('en-US');
+  TextToVoiceService.setRate(0.5);
+  TextToVoiceService.setPitch(1.0);
+
+  // Get available voices and choose one
+  const voices = await TextToVoiceService.getAvailableVoices();
+  if (voices.length > 0) {
+    let voiceID = '';
+    console.log("Available voices:");
+    voices.forEach((voice) => {
+      if (voice.language.match('en-US')) {
+        console.log(voice.id);
+        //console.log("Voice ID:", voice.id);
+        //console.log("Voice Name:", voice.name);
+        //console.log("Language:", voice.language);
+        TextToVoiceService.setVoice(voice.id);
+        //return;
+      }
+      // Add any other actions you want to perform with each voice
+    });
+    //TextToVoiceService.setVoice(voiceID);
+  }
+  if (Platform.OS == 'ios') {
+    TextToVoiceService.setVoice('com.apple.voice.compact.en-US.Samantha');
+  }
+}
 
 // Enable playback in silence mode on iOS
 Sound.setCategory('Playback');
@@ -121,7 +155,6 @@ const detectionCallback = async (keywordIndex: any) => {
       console.error("Failed to play track:", error);
     });*/
   // playSound('carparkoptions.mp3');
-  playSound('activationcommand.mp3');
 };
 
 /*
@@ -134,6 +167,16 @@ const AudioPermissionComponent = async () => {
   }
 }
 */
+
+function formatTime(timeStr) {
+  if (timeStr == null || timeStr == undefined)
+    return '';
+  
+  if (timeStr.length !== 4) {
+    return timeStr;
+  }
+  return timeStr.slice(0, 2) + ':' + timeStr.slice(2);
+}
 
 // Helper function to format the ONNX file name
 const formatWakeWord = (fileName) => {
@@ -177,7 +220,7 @@ const AudioPermissionComponent = async () => {
     }
     */
     if (MicStatus !== RESULTS.GRANTED) {
-      console.log("calling AudioPermissionComponent() again");
+      console.log("calling AudioPermissionComponent() again", MicStatus);
       await AudioPermissionComponent();
     }
   } catch (error) {
@@ -217,6 +260,14 @@ function Section({ children, title }: SectionProps): React.JSX.Element {
   );
 }
 
+function extractTime(text) {
+  // Regular expression to match "HH:MM" or "HHMM" formats
+  const timePattern = /\b(\d{2}:\d{2}|\d{4})\b/;
+  const match = text.match(timePattern);
+  // Return the matched time or null if not found
+  return match ? match[0] : null;
+}
+
 type DetectionCallback = (event: any) => void;
 
 
@@ -226,6 +277,8 @@ function App(): React.JSX.Element {
   const wakeWordFile = "hey_pango.onnx";
   const wakeWord = formatWakeWord(wakeWordFile);
   const { stopListening, loadModel } = useModel();
+
+  AudioPermissionComponent();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -242,6 +295,9 @@ function App(): React.JSX.Element {
   const [message4, setMessage4] = useState(``);
   const [message41, setMessage4_1] = useState(``);
   const [message5, setMessage5] = useState(`Say: "step back" for main menue`);
+ // const language = 'he-IL';
+  const language = 'en-US';
+  const { getTextDetected, recognizedText, vrClearBuffer, vrIsListening, vrStartListening, vrStopListening } = useVoiceRecognition(language);
 
   let innerDetectionCallback: (keywordIndex: any) => Promise<void>;
 
@@ -257,6 +313,10 @@ function App(): React.JSX.Element {
     }
 
     const initializeKeywordDetection = async () => {
+      await setVoiceService();
+      console.log("**************** TextToVoiceService.speak *************** ");
+      await TextToVoiceService.speak("Welcome to Spark, Your 'Hands Free' Parking Service.");
+      
       try {
         step0();
 
@@ -269,22 +329,30 @@ function App(): React.JSX.Element {
         };
 
         const innerDetectionCallbackStage2 = async (keywordIndex: string) => {
-          console.log("innerDetectionCallbackStage2()", keywordIndex);
-          playSound('you_chose.mp3');
           await stopListening();
-          loadModel('step_back', innerDetectionCallback);
+          console.log("innerDetectionCallbackStage2()", keywordIndex);
+          //playSound('you_chose.mp3');
+          let initialMessage = "You Chose, ";
+
+          //loadModel('step_back', innerDetectionCallback);
           const timeoutId = BackgroundTimer.setTimeout(async () => {
             BackgroundTimer.clearTimeout(timeoutId);
             //          setIsFlashing(true);  // Start flashing effect (Line 122)
+            console.log("keywordIndex == ", keywordIndex);
+
             if (keywordIndex.includes("step_back")) {
               console.log("Stepping back");
-              playSound('to_step_back.mp3');
+              //playSound('to_step_back.mp3');
+              await TextToVoiceService.speak(initialMessage + "To, step back");
+
               step0();
               loadModel('state1', innerDetectionCallback);
               return;
             } else if (keywordIndex.includes("nearest_gaz_station")) {
               console.log("Nearest gas station");
-              playSound('to_find_the_nearest_gas_station.mp3');
+              //playSound('to_find_the_nearest_gas_station.mp3');
+              await TextToVoiceService.speak(initialMessage + "To, find the nearest gas station");
+
               setMessage(`\nyou chose:\n`);
               setMessage1(`\n\n\nFind the nearest gas station`);
               setMessage2('');
@@ -293,7 +361,8 @@ function App(): React.JSX.Element {
               setMessage4(``);
             } else if (keywordIndex.includes("i_want_to_stop_park")) {
               console.log("stop parking");
-              playSound('to_stop_parking.mp3');
+              await TextToVoiceService.speak(initialMessage + "To, stop parking");
+              //playSound('to_stop_parking.mp3');
               setMessage(`\nyou chose:\n`);
               setMessage1(`\n\n\nTo stop parking`);
               setMessage2(``);
@@ -302,7 +371,7 @@ function App(): React.JSX.Element {
               setMessage4(``);
             } else if (keywordIndex.includes("electric_vehicle_parking")) {
               console.log("electric_vehicle_parking");
-              playSound('to_find_an_electical_vehicle_parking.mp3');
+              await TextToVoiceService.speak(initialMessage + 'to_find_an_electical_vehicle_parking.mp3');
               setMessage(`\nyou chose:\n`);
               setMessage1(`\n\n\n To find electric vehicle parking`);
               setMessage2(``);
@@ -310,49 +379,75 @@ function App(): React.JSX.Element {
               setMessage4_1(``);
               setMessage4(``);
             } else {
-              playSound('to_park_your_car.mp3');
+              //playSound('to_park_your_car.mp3');
+              await TextToVoiceService.speak(initialMessage + "To, park your car, when do you want to start parking?");
               setMessage(`\nyou chose:\n`);
               setMessage1(`\n\n\nTo park your car`);
               setMessage2(``);
               setMessage3(``);
               setMessage4(``);
               setMessage4_1(``);
-              //await detectionCallback(keywordIndex);
-              // if (1 || !AppState.currentState.match(/background/)) {
-              setTimeout(() => {
-                (async () => {
-                  setMessage1(`\n\n\nTo park your car`);
-                  setTimeout(() => {
-                    (async () => {
-                      setMessage3(`When do you want to start parking?\n`);
-                      setTimeout(() => {
-                        (async () => {
-                          setMessage4(endOfDemo);
-                        })();
-                      }, 2500); // 1 seconds delay      
-                    })();
-                  }, 2500); // 1 seconds delay      
-                })();
-              }, 2500); // 1 seconds delay
+              setMessage1(`\n\n\nTo park your car`);
+              setMessage3(`When do you want to start parking?\n`);
+              stopListening();
+              stopListening();
+              //vrStartListening();
+              var timeOutId = BackgroundTimer.setTimeout(async () => {
+                BackgroundTimer.clearTimeout(timeOutId);
+                vrStartListening();
+              }, 2000);
+              var timeOutId3 = BackgroundTimer.setTimeout(async () => {
+                BackgroundTimer.clearTimeout(timeOutId3);
+                const text = formatTime(extractTime(getTextDetected()));
+                console.log("*** getTextDetected() *** == ", text);
+                const timestamp = Date.parse(text);
+                console.log("*** timestamp == *** == ", timestamp);
+
+                if (!isNaN(timestamp)) {
+                  setMessage3(`You chose to start parking at: ${timestamp} \n`);
+                  await TextToVoiceService.speak(`You chose, to start parking at: ${timestamp}`);
+
+                } else {
+                  setMessage3(`You chose to start parking at: ${text} \n`);
+                  await TextToVoiceService.speak(`You chose, to start parking at: ${text}`);
+                }
+                vrClearBuffer();
+                loadModel('step_back', innerDetectionCallback);
+              }, 10000);
+              setMessage4(endOfDemo);
+              const timeOutId2 = BackgroundTimer.setTimeout(async () => {
+                BackgroundTimer.clearTimeout(timeOutId2);
+                await TextToVoiceService.speak(`End of Demo, If you want to see more please contact us at Davoice dot io`);
+                //playSound('contact_us.mp3');
+              }, 14000);
+              return;
             }
-            BackgroundTimer.setTimeout(async () => {
-              playSound('contact_us.mp3');
+            const timeOutId2 = BackgroundTimer.setTimeout(async () => {
+              BackgroundTimer.clearTimeout(timeOutId2);
+              await TextToVoiceService.speak(`End of Demo, If you want to see more please contact us at Davoice dot io`);
+              //playSound('contact_us.mp3');
             }, 2000);
           }, 1500);
         };
 
         innerDetectionCallback = async (keywordIndex: any) => {
-          let innerDetectionCallbackTimeCalled = false;
-          innerDetectionCallbackTimeCalled = false;
+          await stopListening();
           if (keywordIndex.includes("step_back")) {
             console.log("Stepping back");
             step0();
             loadModel('state1', innerDetectionCallback);
             return;
           }
-          await stopListening();
           console.log("innerDetectionCallback()");
           await detectionCallback(keywordIndex);
+          //playSound('activationcommand.mp3');
+          const sentance = "Wait for this message to be over,    , then," +
+            "you will be able to control the app,   , by saying commands such as,       ,:" +
+           "I want to park, I want to stop parking, I want to find the neareast gas station, or, nearest electric vehicle parking";
+          //const timeoutIdx = BackgroundTimer.setTimeout(async () => {
+            //BackgroundTimer.clearTimeout(timeoutIdx);
+            await TextToVoiceService.speak(sentance);
+         // }, 500);
           setMessage(`\nChoose option:\n`);
           setMessage1(``);
           setMessage2(``);
@@ -375,8 +470,8 @@ function App(): React.JSX.Element {
           setMessage4_1(`Say: Electric vehicle parking\n`);
           // Start a timer that runs once after X milliseconds
           const timeoutId = BackgroundTimer.setTimeout(async () => {
+            BackgroundTimer.clearTimeout(timeoutId);
             await loadModel('state2', innerDetectionCallbackStage2);
-            //BackgroundTimer.clearTimeout(timeoutId);
           }, 12000);
 
           // Cancel the timeout if necessary
@@ -403,13 +498,20 @@ function App(): React.JSX.Element {
         console.error('Error during keyword detection initialization:', error);
       }
     };
-    initializeKeywordDetection();  // Call the async function inside useEffect
-    console.log("Calling AudioPermissionComponent();");
-    // Wait for audio permission to be granted
-    AudioPermissionComponent();
-    console.log("After calling AudioPermissionComponent();");
+
+    var calledOnce = false;
+    if (calledOnce == false) {
+      console.log("Calling AudioPermissionComponent();");
+      AudioPermissionComponent();
+  
+      initializeKeywordDetection();  // Call the async function inside useEffect
+      // Wait for audio permission to be granted
+      console.log("After calling AudioPermissionComponent();");  
+    }
+    calledOnce = true;
 
   }, []);  // Empty dependency array ensures it runs once when the component mounts
+
 
   return (
     <LinearGradient
