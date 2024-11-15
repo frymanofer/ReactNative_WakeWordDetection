@@ -135,8 +135,6 @@ example*/App.js_new
 README.md.ofer
 example*/need_help_now_prediction.wav
 example*/android/app-release.apk
-example_car_parking/android/app/debug.keystore
-example_car_parking/android/gradlew.bat
 example/App1.tsx
 example/index.js_new
 example/index1.js
@@ -151,11 +149,6 @@ example_car_parking/index1.js
 example_car_parking/android/app/src/main/assets/genious.onnx
 example_car_parking/android/app/src/main/assets/hey_vickie.onnx
 example_car_parking/android/app/src/main/assets/hotel_genie.onnx
-example_car_parking/android/gradle/wrapper/gradle-wrapper.jar
-example_car_parking/android/gradle/wrapper/gradle-wrapper.properties
-example_car_parking/ios/.xcode.env
-example_car_parking/ios/ExampleApp/Images.xcassets/Contents.json
-example_car_parking/ios/ExampleApp/Images.xcassets/AppIcon.appiconset/Contents.json
 example_car_parking/ios/Spark/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.apple.dyld/ExampleApp.dyld4
 example_car_parking/ios/Spark/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db
 example_car_parking/ios/Spark/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Library/Caches/com.davoice.keyworddetection/Cache.db-shm
