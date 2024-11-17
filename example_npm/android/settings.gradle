@@ -1,0 +1,8 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'ExampleApp'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
+include ':@react-native-voice_voice', ':app'
+project(':@react-native-voice_voice').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-voice/voice/android')
