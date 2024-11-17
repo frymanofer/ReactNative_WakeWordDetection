@@ -34,7 +34,7 @@ import {
 
 import LinearGradient from 'react-native-linear-gradient';
 //import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
-import useModel from 'keyword-detection-rn';
+import useModel from 'react-native-wakeword';
 
 //import RNFS from 'react-native-fs';
 
