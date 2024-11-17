@@ -34,7 +34,9 @@ For any questions, requirements, or more support for React-Native, please contac
 
 ### npm install - package
 
-(Soon to be released. You will be able to use: `npm install react-native-davoice-keywordsdetection`)
+npm install keyword-detection-rn
+New: see example_npm for an example using npm. Supporting Android only with npm install
+Soon to be released and IOS supporting version.
 
 ### Demo Instructions
 
