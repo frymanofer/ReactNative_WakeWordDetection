@@ -12,6 +12,8 @@ Welcome to **Davoice WakeWord / Keywords Detection** – Wake words and keyword 
 
 ## Latest news
 
+- **New npm install:** Now you can integrate Davoice without any additional integrations by using "npm install react-native-wakeword" make sure you install version >= 1.0.25.
+
 - **New Car Parking Example:** Checkout our new Voice Activated Car Parking example, with voice control both in Foreground and Background: example_car_parking/.
 
 ## Features
