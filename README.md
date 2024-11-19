@@ -34,13 +34,11 @@ For any questions, requirements, or more support for React-Native, please contac
 
 ## Installation and Usage
 
-### npm install - package
+### Simply using npm install - package
 
 npm install react-native-wakeword
 
-New: see example_npm for an example using npm. Supporting Android only with npm install
-
-Soon to be released and IOS supporting version.
+See example_npm for a specific example of using the code.
 
 ### Demo Instructions
 
