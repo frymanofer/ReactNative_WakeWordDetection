@@ -35,121 +35,24 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 //import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
 import useModel from 'react-native-wakeword';
+interface instanceConfig {
+  id: string;
+  modelName: string;
+  threshold: number;
+  bufferCnt: number;
+  sticky: boolean;
+}
+// Create an array of instance configurations
+const instanceConfigs:instanceConfig[] = [
+  { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+  { id: 'default', modelName: "", threshold: 0.9999, bufferCnt: 2 , sticky: false }
+];
 
 //import RNFS from 'react-native-fs';
 
 import { NativeModules } from 'react-native';
 import { AppState } from 'react-native';
 
-//const { ForegroundServiceModule } = NativeModules;
-
-function bringAppToForeground() {
-  if (Platform.OS === 'ios')
-    return;
-  /*
-    console.log("ForegroundServiceModule == ", ForegroundServiceModule);
-  // Call the native module method to bring the app to the foreground
-  ForegroundServiceModule.bringAppToForeground()
-    .then(() => {
-      console.log('Called bringing app to foreground');
-    })
-    .catch((error) => {
-      console.error('Error bringing app to foreground:', error);
-    });*/
-}
-
-// Call this function when your callback is triggered
-
-
-//import { useModel } from "./useModel";
-//const { loadModel, startListening, stopListening } = useModel();
-
-import Sound from 'react-native-sound';
-
-// Enable playback in silence mode (iOS)
-Sound.setCategory('Playback');
-
-const playSoundFile = (fileName) => {
-  try {
-    // Initialize the sound object with the file path
-    const sound = new Sound(fileName, '', (error) => {
-      if (error) {
-        console.error('Failed to load the sound', error);
-        return;
-      }
-
-      // Get the duration of the audio file in seconds
-      const duration = sound.getDuration();
-
-      // Calculate the start time (last three seconds)
-      const startTime = Math.max(0, duration - 3);
-
-      // Seek to the start time
-      sound.setCurrentTime(startTime);
-
-      // Play the sound
-      sound.play((success) => {
-        if (success) {
-          console.log('Successfully played the sound');
-        } else {
-          console.error('Playback failed due to audio decoding errors');
-        }
-
-        // Release the sound when done
-        sound.release();
-      });
-    });
-  } catch (error) {
-    console.error('Error playing sound file:', error);
-  }
-};
-
-/*
-const playAudio = (filePath) => {
-  const sound = new Sound(filePath, Sound.DOCUMENT, (error) => {
-    if (error) {
-      console.log('Failed to load the sound', error);
-      return;
-    }
-    // Play the sound
-    sound.play((success) => {
-      if (success) {
-        console.log('Successfully finished playing');
-      } else {
-        console.log('Playback failed due to audio decoding errors');
-      }
-    });
-  });
-};
-*/
-
-// Call playAudio with the path to your wav file
-//playAudio('/data/user/0/com.exampleapp/files/need_help_now_prediction.wav');
-
-const playAllSoundFile = async (fileName) => {
-  try {
-    playAudio(fileName);
-    console.log('File :', fileName);
-  } catch (error) {
-    console.error('Error moving file:', error);
-  }
-};
-
-const detectionCallback = async (keywordIndex: any) => {
-  bringAppToForeground();
-  console.log("detectionCallback detectionCallback detectionCallback!!!!!!!!!!!!!!!!!!");
-};
-
-/*
-const AudioPermissionComponent = async () => {
-  const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.MICROPHONE : PERMISSIONS.ANDROID.RECORD_AUDIO;
-  await request(permission);
-  const status = await check(permission);
-  if (status !== RESULTS.GRANTED) {
-      await request(permission);
-  }
-}
-*/
 
 // Helper function to format the ONNX file name
 const formatWakeWord = (fileName) => {
@@ -220,7 +123,7 @@ type DetectionCallback = (event: any) => void;
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(false);
-  const wakeWordFile = "need_help_now.onnx";
+  const wakeWordFile = instanceConfigs[0].modelName;
   const wakeWord = formatWakeWord(wakeWordFile);
   console.log("useModel == ", useModel)
   const { stopListening, loadModel, setKeywordDetectionLicense} = useModel();
@@ -239,6 +142,7 @@ function App(): React.JSX.Element {
       console.log ("detected keyword: ", keywordIndex);
       setMessage(`WakeWord '${keywordIndex}' DETECTED`);
       setIsFlashing(true);  // Start flashing effect (Line 122)
+
       const timeout = setTimeout(() => {
         console.log('5 seconds have passed!');
         setMessage(`Listening to WakeWord '${wakeWord}'...`);
@@ -246,6 +150,10 @@ function App(): React.JSX.Element {
         // Perform your action here
       }, 5000);
     }
+    // Create an array of instance configurations
+    const instanceConfigs:instanceConfig[] = [
+      { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+    ];
 
     const initializeKeywordDetection = async () => {
       try {
@@ -254,7 +162,7 @@ function App(): React.JSX.Element {
         await setKeywordDetectionLicense(
           "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
         const models = [wakeWordFile]
-        loadModel(models, innerDetectionCallback);
+        loadModel(instanceConfigs, innerDetectionCallback);
       } catch (error) {
         console.error('Error during keyword detection initialization:', error);
       }
