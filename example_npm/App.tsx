@@ -161,8 +161,7 @@ function App(): React.JSX.Element {
         await AudioPermissionComponent();
         await setKeywordDetectionLicense(
           "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
-        const models = [wakeWordFile]
-        loadModel(instanceConfigs, innerDetectionCallback);
+        await loadModel(instanceConfigs, innerDetectionCallback);
       } catch (error) {
         console.error('Error during keyword detection initialization:', error);
       }
