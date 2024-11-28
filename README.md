@@ -38,7 +38,7 @@ For any questions, requirements, or more support for React-Native, please contac
 
 npm install react-native-wakeword
 
-# On Android:
+### On Android:
 Please add the following to android/build.gradle
 ....
 allprojects {
