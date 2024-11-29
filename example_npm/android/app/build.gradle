@@ -112,9 +112,11 @@ android {
 }
 
 repositories {
- //   flatDir {
- //        dirs 'libs'
- //   }
+/*
+    flatDir {
+         dirs 'libs'
+    }
+    */
  //   maven {
  //       url 'https://maven.pkg.github.com/microsoft/onnxruntime'
  //   }   
@@ -126,6 +128,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     //implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.13.1'
     //implementation 'ai.picovoice:android-voice-processor:1.0.2'
+    //implementation fileTree(dir: "libs", include: ["*.aar"])
     //implementation fileTree(dir: "libs", include: ["*.aar"])
 
     if (hermesEnabled.toBoolean()) {

@@ -24,6 +24,14 @@ apply plugin: "com.facebook.react.rootproject"
 
 allprojects {
     repositories {
+        // react-native-wakeword added
+	    maven { url "${project(":react-native-wakeword").projectDir}/libs" }
+        maven { url("${project(':react-native-wakeword').projectDir}/libs") } 
+        maven {
+            url("${project(':react-native-wakeword').projectDir}/libs")
+        }
+        // End react-native-wakeword added
+
 // @generated begin react-native-background-fetch-maven - expo prebuild (DO NOT MODIFY) sync-b86324ce2eb77b03cc8b69ba206ef8275cd006ff
 	maven { url "${project(":react-native-background-fetch").projectDir}/libs" }
 
