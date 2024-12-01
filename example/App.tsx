@@ -141,8 +141,8 @@ const playAllSoundFile = async (fileName) => {
 };
 
 const detectionCallback = async (keywordIndex: any) => {
-  bringAppToForeground();
   console.log("detectionCallback detectionCallback detectionCallback!!!!!!!!!!!!!!!!!!");
+  bringAppToForeground();
 };
 
 /*
@@ -242,17 +242,17 @@ function App(): React.JSX.Element {
         await AudioPermissionComponent();
 
         // Initialize keyword detection after permission is granted
-        KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
+        await KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
-          "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
+          "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
         if (!isLicensed) {
           setMessage(`No license - please contact ofer@davoice.io`);
           return;
         }
 
-        const eventListener = KeyWordRNBridge.onKeywordDetectionEvent((event) => {         
+        const eventListener = KeyWordRNBridge.onKeywordDetectionEvent(async (event) => {         
           // Stop listening.
-          KeyWordRNBridge.stopKeywordDetection();
+          await KeyWordRNBridge.stopKeywordDetection();
           console.log("KeywordDetection event detected:", event);
           console.log("KeywordDetection AppState.currentState:", AppState.currentState);
           // Change the message to detected
@@ -262,7 +262,7 @@ function App(): React.JSX.Element {
 
           const timeoutId1 = BackgroundTimer.setTimeout(async () => {
             BackgroundTimer.clearTimeout(timeoutId1);
-                  KeyWordRNBridge.stopKeywordDetection();
+                  await KeyWordRNBridge.stopKeywordDetection();
                   setMessage(`Paying back '${wakeWord}' which activated the App`);
 
                   if (!AppState.currentState.match('background')) {
@@ -294,7 +294,7 @@ function App(): React.JSX.Element {
             KeyWordRNBridge.startKeywordDetection();    
             setMessage(`Listening to WakeWord '${wakeWord}'...`);
             setIsFlashing(false);  // Stop flashing effect (Line 126)
-          }, 8000); // 8 econds delay
+          }, 18000); // 8 econds delay
 
           detectionCallback(event);
      });
@@ -308,7 +308,7 @@ function App(): React.JSX.Element {
 
     initializeKeywordDetection();  // Call the async function inside useEffect
     // Call your native bridge function
-  //KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
+  //await KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
   //loadModel();
 }, []);  // Empty dependency array ensures it runs once when the component mounts
 

@@ -160,7 +160,8 @@ function App(): React.JSX.Element {
         // Wait for audio permission to be granted
         await AudioPermissionComponent();
         await setKeywordDetectionLicense(
-          "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
+          "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
+          
         await loadModel(instanceConfigs, innerDetectionCallback);
       } catch (error) {
         console.error('Error during keyword detection initialization:', error);

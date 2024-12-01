@@ -326,7 +326,7 @@ SWIFT_CLASS("_TtC16KeyWordDetection17KeyWordsDetection")
 - (BOOL)setKeywordDetectionLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)setLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (void)callBackWithFrame:(NSArray<NSNumber *> * _Nonnull)frame;
-- (BOOL)startListeningAndReturnError:(NSError * _Nullable * _Nullable)error;
+- (BOOL)startListening SWIFT_WARN_UNUSED_RESULT;
 - (void)stopListening;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -680,7 +680,7 @@ SWIFT_CLASS("_TtC16KeyWordDetection17KeyWordsDetection")
 - (BOOL)setKeywordDetectionLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)setLicenseWithLicenseKey:(NSString * _Nonnull)licenseKey SWIFT_WARN_UNUSED_RESULT;
 - (void)callBackWithFrame:(NSArray<NSNumber *> * _Nonnull)frame;
-- (BOOL)startListeningAndReturnError:(NSError * _Nullable * _Nullable)error;
+- (BOOL)startListening SWIFT_WARN_UNUSED_RESULT;
 - (void)stopListening;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
