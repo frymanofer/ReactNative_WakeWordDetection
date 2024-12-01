@@ -7,7 +7,8 @@ import { Platform } from "react-native";
   
 type DetectionCallback = (event: any) => void;
 
-const license = "MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=";
+const license = "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=";
+
 interface keyWordRNBridgeInstanceConfig {
     id: string;
     instance: KeyWordRNBridgeInstance;
@@ -28,7 +29,7 @@ function findInstanceById(id: string): keyWordRNBridgeInstanceConfig | undefined
 
 // Create an array of instance configurations
 const instanceConfigs:instanceConfig[] = [
-    { id: 'hey_pango', modelName: 'hey_pango.onnx', threshold: 0.9999, bufferCnt: 1, sticky: false },
+    { id: 'genious', modelName: 'genious.onnx', threshold: 0.9999, bufferCnt: 1, sticky: false },
     { id: 'i_want_to_park', modelName: 'i_want_to_park.onnx', threshold: 0.9999, bufferCnt: 2, sticky: false  },
     { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 2, sticky: false  },
     { id: 'step_back', modelName: 'step_back.onnx', threshold: 0.9999, bufferCnt: 2, sticky: true  },
@@ -133,7 +134,7 @@ export const useModel = () => {
         try {
             switch (state) {
                 case 'state1':
-                    searchIds = ['hey_pango'];
+                    searchIds = ['genious'];
                     break;
                 case 'state2':
                     searchIds = ['i_want_to_park', 'need_help_now',
@@ -155,6 +156,26 @@ export const useModel = () => {
             });
         } catch (error) {
             console.error("[useModel] Error loading model:", error);
+        }
+    }, []);
+
+    /**
+     * Stop listening for the keyword
+     */
+    const startListening = useCallback(async () => {
+        try {
+            keyWordRNBridgeInstances.forEach(element => {
+                const instance = element.instance;
+                instance.startKeywordDetection();
+                /*if (instance.isSticky == false) {
+                    instance.stopKeywordDetection();
+                } else if (Platform.OS != 'ios') {
+                    instance.stopKeywordDetection();
+                }*/
+            }); 
+            setIsListening(true);
+        } catch (error) {
+            console.error("Error starting keyword detection:", error);
         }
     }, []);
     
@@ -195,6 +216,7 @@ export const useModel = () => {
     return {
         isListening,
         // setLicense,
+        startListening,
         loadModel,
         stopListening,
     };

@@ -989,20 +989,19 @@
             "children": [
               {
                 "kind": "TypeNominal",
-                "name": "Void",
-                "printedName": "()"
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)startListeningAndReturnError:",
-            "mangledName": "$s16KeyWordDetection0a5WordsC0C14startListeningyyKF",
+            "usr": "c:@M@KeyWordDetection@objc(cs)KeyWordsDetection(im)startListening",
+            "mangledName": "$s16KeyWordDetection0a5WordsC0C14startListeningSbyF",
             "moduleName": "KeyWordDetection",
-            "objc_name": "startListeningAndReturnError:",
             "declAttributes": [
               "AccessControl",
               "ObjC"
             ],
-            "throwing": true,
             "funcSelfKind": "NonMutating"
           },
           {
@@ -1270,112 +1269,112 @@
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7040,
+      "offset": 7074,
       "length": 2,
       "value": "30"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "BooleanLiteral",
-      "offset": 7235,
+      "offset": 7269,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7386,
+      "offset": 7420,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7527,
+      "offset": 7561,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7532,
+      "offset": 7566,
       "length": 2,
       "value": "97"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7566,
+      "offset": 7600,
       "length": 4,
       "value": "1280"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7608,
+      "offset": 7642,
       "length": 5,
       "value": "16000"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7665,
+      "offset": 7699,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7747,
+      "offset": 7781,
       "length": 2,
       "value": "80"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 7783,
+      "offset": 7817,
       "length": 2,
       "value": "16"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "BooleanLiteral",
-      "offset": 7815,
+      "offset": 7849,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 8265,
+      "offset": 8299,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 8322,
+      "offset": 8356,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 8368,
+      "offset": 8402,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "IntegerLiteral",
-      "offset": 8453,
+      "offset": 8487,
       "length": 4,
       "value": "5000"
     },
     {
       "filePath": "\/Users\/oferfryman\/projects\/VAD_WAKEWORD_FILES\/wakewords\/KeyWordLibraryIOS3\/Sources\/KeyWordsDetection.swift",
       "kind": "StringLiteral",
-      "offset": 6596,
+      "offset": 6598,
       "length": 17,
       "value": "\"KeyWordDetection.KeyWordsDetection\""
     },

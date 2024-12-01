@@ -7,36 +7,37 @@ import {
 const { KeyWordRNBridge } = NativeModules;
 const keywordRNBridgeEmitter = new NativeEventEmitter(KeyWordRNBridge);
 
-const setKeywordDetectionLicense = (license) => {
-    return KeyWordRNBridge.setKeywordDetectionLicense(license);
+const setKeywordDetectionLicense = async (license) => {
+    return await KeyWordRNBridge.setKeywordDetectionLicense(license);
 };
 
-const initKeywordDetection = (modelName, threshold, buffer_cnt) => {    return KeyWordRNBridge.initKeywordDetection(modelName, threshold, buffer_cnt);
+const initKeywordDetection =  async (modelName, threshold, buffer_cnt) => {    
+    return await KeyWordRNBridge.initKeywordDetection(modelName, threshold, buffer_cnt);
 };
 
-const replaceKeywordDetectionModel = (modelName, threshold, buffer_cnt) => {
-    return KeyWordRNBridge.replaceKeywordDetectionModel(modelName, threshold, buffer_cnt);
+const replaceKeywordDetectionModel = async (modelName, threshold, buffer_cnt) => {
+    return await KeyWordRNBridge.replaceKeywordDetectionModel(modelName, threshold, buffer_cnt);
 };
 
-const getKeywordDetectionModel = () => {
-    return KeyWordRNBridge.getKeywordDetectionModel();
+const getKeywordDetectionModel = async () => {
+    return await KeyWordRNBridge.getKeywordDetectionModel();
 };
 
 //const getRecordingWav = (bla) => {
-const getRecordingWav = (bla) => {
+const getRecordingWav = async (bla) => {
     console.log("Calling RN bridge functionality getRecordingWav: ", KeyWordRNBridge.getRecordingWav);
     if (Platform.OS === 'ios') {
-        return KeyWordRNBridge.getRecordingWav(bla);
+        return await KeyWordRNBridge.getRecordingWav(bla);
     }
-    return KeyWordRNBridge.getRecordingWav();
+    return await KeyWordRNBridge.getRecordingWav();
 };
 
-const startKeywordDetection = () => {
-    KeyWordRNBridge.startKeywordDetection();
+const startKeywordDetection = async () => {
+    await KeyWordRNBridge.startKeywordDetection();
 };
 
-const stopKeywordDetection = () => {
-    KeyWordRNBridge.stopKeywordDetection();
+const stopKeywordDetection = async () => {
+    await KeyWordRNBridge.stopKeywordDetection();
 };
 
 // Event listeners
