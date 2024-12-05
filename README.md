@@ -25,7 +25,6 @@ Speech to Intent is often triggered after a wake word activates the app, making 
 component of more advanced voice-controlled applications. This layered approach allows for
 seamless and intuitive voice-driven user experiences.
 
-
 ## Latest news
 
 - **New npm install:** Now you can integrate Davoice without any additional integrations by using "npm install react-native-wakeword" make sure you install version >= 1.0.25.
