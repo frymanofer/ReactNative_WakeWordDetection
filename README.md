@@ -211,6 +211,35 @@ const handleAppStateChange = (nextAppState) => {
 }
 ```
 
+### Key words
+
+DaVoice.io Voice commands / Wake words / Voice to Intent / keyword detection npm for Android and IOS.
+"Wake word detection github"
+"react-native wake word",
+"Wake word detection github",
+"Wake word generator",
+"Custom wake word",
+"voice commands",
+"wake word",
+"wakeword",
+"wake words",
+"keyword detection",
+"keyword spotting",
+"speech to intent",
+"voice to intent",
+"phrase spotting",
+"react native wake word",
+"Davoice.io wake word",
+"Davoice wake word",
+"Davoice react native wake word",
+"Davoice react-native wake word",
+"wake",
+"word",
+"Voice Commands Recognition",
+"lightweight Voice Commands Recognition",
+"customized lightweight Voice Commands Recognition",
+"rn wake word"
+
 ## Links
 
 Here are wakeword detection GitHub links per platform:
@@ -222,3 +251,5 @@ Here are wakeword detection GitHub links per platform:
 - **For iOS framework:** 
   - With React Native bridge: [KeyWordDetectionIOSFramework](https://github.com/frymanofer/KeyWordDetectionIOSFramework)
   - Sole Framework: [KeyWordDetection](https://github.com/frymanofer/KeyWordDetection)
+ 
+  
