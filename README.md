@@ -135,6 +135,57 @@ To run the demo:
 
 ### Usage Example
 
+Below is a simple "wake word" detection example using npm install react-native-wakeword:
+
+```javascript
+//import useModel from react-native-wakeword;
+import useModel from 'react-native-wakeword';
+
+// Declare your wake word models:
+// Using the below interface:
+interface instanceConfig {
+  id: string;
+  modelName: string;
+  threshold: number;
+  bufferCnt: number;
+  sticky: boolean;
+}
+// Create an array of instance configurations or "wake words"
+const instanceConfigs:instanceConfig[] = [
+  { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+  { id: 'default', modelName: "", threshold: 0.9999, bufferCnt: 2 , sticky: false }
+];
+
+function App(): React.JSX.Element {
+   // ....
+    // your code ....
+    // Load the wake word functionality:
+   const { stopListening, loadModel, setKeywordDetectionLicense} = useModel();
+   //...
+
+   // Declare your wake word callback:
+    const keywordCallback = async (keywordIndex: any) => {
+    //...
+
+    const initializeKeywordDetection = async () => {
+      try {
+        // Wait for audio permission to be granted
+        // Call your audio permission function await AudioPermissionComponent();
+	// Setup the license
+	await setKeywordDetectionLicense(
+          "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
+        // Load the models - also starts listening.  
+        await loadModel(instanceConfigs, keywordCallback);
+      } catch (error) {
+        console.error('Error during keyword detection initialization:', error);
+      }
+    };
+    // Call initialization
+    initializeKeywordDetection();  // Call the async function inside useEffect
+
+```
+
+
 Below is a simple JavaScript code showing how to use Davoice KeywordsDetection:
 
 ```javascript
@@ -187,6 +238,8 @@ For detailed references or specific benchmark results, please contact us at ofer
 This example in the Git repository enables Android functionality in both the foreground and background, and iOS functionality in the foreground. However, we have developed an advanced SDK that allows the microphone to be activated from a complete shutdown state on Android and from the background state on iOS. If you require this capability for your app, please reach out to us at ofer@davoice.io.
 
 #### Example for iOS Background State
+
+The example below, built in React Native, demonstrates this approach. The function backgroundMicEmptyListener() creates a minimal listener with negligible CPU impact, only processing the function call and return.
 
 Apple restricts background microphone access for privacy and battery efficiency. However, certain applications, such as security apps, car controlling apps, apps for the blind or visually impaired may require this functionality.
 
