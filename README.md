@@ -92,12 +92,12 @@ To run the demo:
 
 2. Navigate to the example directory:
    ```
-   cd example
+   cd example_npm
    ```
 
 3. For Android:
    ```
-   npm run android
+   npx react-native run-android
    ```
    Depending on your system, you may be required to press "a" for Android.
 
@@ -105,7 +105,7 @@ To run the demo:
 
 4. For iOS:
    ```
-   npm run ios
+   npx react-native run-ios
    ```
    Depending on your system, you may be required to press "i" for iOS.
 
