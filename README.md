@@ -109,6 +109,11 @@ To run the demo:
    ```
    Depending on your system, you may be required to press "i" for iOS.
 
+   You may need to:
+
+   cd ios && pod cache clean --all && pod deintegrate && pod install --repo-update
+   
+   Than open Xcode and run in Xcode
    **Note:** If you don't have an iOS environment setup (Xcode, CocoaPods, iOS device or Emulator, etc.) and need help, please contact us at ofer@davoice.io.
 
 ## Screenshots from the demo App
