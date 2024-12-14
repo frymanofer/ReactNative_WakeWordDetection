@@ -33,18 +33,8 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import LinearGradient from 'react-native-linear-gradient';
-
-// Two wakes to use react-native-wakeword via hooks
-// sutible for react users or direct for simple js.
-// import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
-// React - Use this for hooks:
-// import useModel from 'react-native-wakeword';
-// Direct with JS:
-// import KeyWordRNBridge from 'react-native-wakeword'; 
-import { KeyWordRNBridgeInstance } from 'react-native-wakeword'; 
-import removeAllRNBridgeListeners from 'react-native-wakeword'; 
-import { createKeyWordRNBridgeInstance } from 'react-native-wakeword'; 
-
+//import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
+import useModel from 'react-native-wakeword';
 interface instanceConfig {
   id: string;
   modelName: string;
@@ -55,6 +45,7 @@ interface instanceConfig {
 // Create an array of instance configurations
 const instanceConfigs:instanceConfig[] = [
   { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+  { id: 'default', modelName: "", threshold: 0.9999, bufferCnt: 2 , sticky: false }
 ];
 
 //import RNFS from 'react-native-fs';
@@ -128,55 +119,14 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 
 type DetectionCallback = (event: any) => void;
 
-  
-// Function to add a new instance dynamically
-//async function addInstance(conf: instanceConfig) 
-async function addInstance(
-  conf: instanceConfig): Promise<KeyWordRNBridgeInstance> {
-  const id = conf.id;
-  const instance = await createKeyWordRNBridgeInstance(id, false);
-
-  if (!instance) {
-      console.error(`Failed to create instance ${id}`);
-  }
-  console.log(`Instance ${id} created ${instance}`);
-  await instance.createInstance(conf.modelName, conf.threshold, conf.bufferCnt);
-  console.log(`Instance ${id} createInstance() called`);
-  return instance;
-}
-
-async function set_callback(instance: KeyWordRNBridgeInstance, callback: (phrase: string) => void) { 
-  const eventListener = instance.onKeywordDetectionEvent((phrase: string) => {
-    phrase = formatWakeWord(instance.instanceId);
-    console.log(`Instance ${instance.instanceId} detected: ${instance.instanceId} with phrase`, phrase);
-    // callback(phrase); Does not work on IOS
-    callback(phrase);
-  });
-  console.log("eventListener == ", eventListener);
-  return eventListener;
-}
-
-// Function to remove the event listener
-function removeEventListener(eventListener: any) {
-  if (eventListener && typeof eventListener.remove === 'function') {
-    eventListener.remove();
-  }
-  else {
-    console.error("event listener.remove does not exist!!!!");
-  }
-}
-
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(false);
   const wakeWordFile = instanceConfigs[0].modelName;
   const wakeWord = formatWakeWord(wakeWordFile);
-// If you use useModel
-//  console.log("useModel == ", useModel)
-//  const { stopListening, startListening, loadModel, setKeywordDetectionLicense} = useModel();
-  let myInstance: KeyWordRNBridgeInstance;
-  let eventListener: any;
+  console.log("useModel == ", useModel)
+  const { stopListening, startListening, loadModel, setKeywordDetectionLicense} = useModel();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -188,51 +138,31 @@ function App(): React.JSX.Element {
   useEffect(() => {
 
     const keywordCallback = async (keywordIndex: any) => {
-      // Stop detection
-      await myInstance.stopKeywordDetection();
-      // remove the listener and callback
-      removeEventListener(eventListener);
-
+      //await stopListening();
       console.log ("detected keyword: ", keywordIndex);
       setMessage(`WakeWord '${keywordIndex}' DETECTED`);
       setIsFlashing(true);  // Start flashing effect (Line 122)
 
-      const timeout = setTimeout(async () => {
+      const timeout = setTimeout(() => {
         console.log('5 seconds have passed!');
         setMessage(`Listening to WakeWord '${wakeWord}'...`);
         setIsFlashing(false);  // Start flashing effect (Line 122)
         // Perform your action here
-        // Stop detection
-        eventListener = await set_callback(myInstance, keywordCallback);
-        await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
-        // remove the listener and callback
       }, 5000);
     }
+    // Create an array of instance configurations
+    const instanceConfigs:instanceConfig[] = [
+      { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+    ];
 
     const initializeKeywordDetection = async () => {
       try {
         // Wait for audio permission to be granted
         await AudioPermissionComponent();
-        // Add all instances:
-        
-        try {
-          console.log('Adding element:', instanceConfigs[0]);
-          myInstance = await addInstance(instanceConfigs[0]);
-        } catch (error) {
-            console.error("Error loading model:", error);
-            return;
-        }
-        eventListener = await set_callback(myInstance, keywordCallback);
-        await myInstance.setKeywordDetectionLicense(
-          "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
-        await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
-        /* Using use_model.tsx:
         await setKeywordDetectionLicense(
           "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
           
         await loadModel(instanceConfigs, keywordCallback);
-  */
-          
       } catch (error) {
         console.error('Error during keyword detection initialization:', error);
       }
