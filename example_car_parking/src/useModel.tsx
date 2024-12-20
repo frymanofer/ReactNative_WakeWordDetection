@@ -7,7 +7,7 @@ import { Platform } from "react-native";
   
 type DetectionCallback = (event: any) => void;
 
-const license = "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=";
+const license = "MTczODEwMTYwMDAwMA==-Vmv1jwEG+Fbog9LoblZnVT4TzAXDhZs7l9O18A+8ul8=";
 
 interface keyWordRNBridgeInstanceConfig {
     id: string;

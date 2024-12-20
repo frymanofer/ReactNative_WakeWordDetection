@@ -1,0 +1,4 @@
+framework module KeyWordDetection {
+  umbrella header "KeyWordDetection.h"
+  export *
+}

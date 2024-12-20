@@ -224,7 +224,7 @@ function App(): React.JSX.Element {
         }
         eventListener = await set_callback(myInstance, keywordCallback);
         const isLicensed = await myInstance.setKeywordDetectionLicense(
-          "MTczNDY0NTYwMDAwMA==-KyuASkB3Qk5SW/yWSwwzCtnd1nEuIMLPP8BxHWpfQno=");
+          "MTczODEwMTYwMDAwMA==-Vmv1jwEG+Fbog9LoblZnVT4TzAXDhZs7l9O18A+8ul8=");
         await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
         /* Using use_model.tsx:
         await setKeywordDetectionLicense(
