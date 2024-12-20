@@ -131,7 +131,7 @@ RCT_EXPORT_METHOD(startKeywordDetection:(NSString *)instanceId threshold:(float)
     KeyWordsDetection *instance = wrapper.keyWordsDetection;
     if (instance) {
         NSError *error = nil;
-        [instance startListeningAndReturnError:&error];
+        [instance startListening];
         if (error) {
             reject(@"StartError", [NSString stringWithFormat:@"Failed to start detection: %@", error.localizedDescription], nil);
         } else {

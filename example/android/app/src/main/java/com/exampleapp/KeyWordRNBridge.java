@@ -115,7 +115,7 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
                 keyWordsDetection.startListening(keyThreshold);
                 keyWordsDetection.initialize(this::onKeywordDetected);
             }
-            catch (OrtException e) {
+            catch (Exception e) {
                 Log.d(TAG, "ERROR startKeywordDetection(): Exception " + e);
             }
             return;

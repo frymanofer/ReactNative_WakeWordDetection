@@ -94,9 +94,8 @@ RCT_EXPORT_METHOD(setKeywordDetectionLicense:(NSString *)licenseKey resolver:(RC
 RCT_EXPORT_METHOD(startKeywordDetection)
 {
     KeyWordsDetection *keyWordsDetection = [GlobalVariables shared].keyWordsDetectionInstance;
-    NSError *error = nil;
     if (keyWordsDetection) {
-        [keyWordsDetection startListeningAndReturnError:&error];
+        [keyWordsDetection startListening];
     } else {
         //RCTLogError(@"KeywordDetection not initialized");
     }

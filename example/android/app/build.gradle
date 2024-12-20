@@ -57,7 +57,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -99,13 +99,17 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "LOGGING_ENABLED", "false"
+
         }
     }
 //    proguardFiles "${background_fetch.projectDir}/proguard-rules.pro"
@@ -124,7 +128,7 @@ repositories {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.13.1'
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.20.0'
     implementation 'ai.picovoice:android-voice-processor:1.0.2'
     implementation fileTree(dir: "libs", include: ["*.aar"])
 

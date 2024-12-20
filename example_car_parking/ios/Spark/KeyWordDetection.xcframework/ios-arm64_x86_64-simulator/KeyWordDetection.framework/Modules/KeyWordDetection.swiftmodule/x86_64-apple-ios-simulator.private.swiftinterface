@@ -33,7 +33,7 @@ import os
   @objc public func setKeywordDetectionLicense(licenseKey: Swift.String) -> Swift.Bool
   @objc public func setLicense(licenseKey: Swift.String) -> Swift.Bool
   @objc public func callBack(frame: [Swift.Int16])
-  @objc public func startListening() throws
+  @objc public func startListening() -> Swift.Bool
   @objc public func stopListening()
   @objc deinit
 }

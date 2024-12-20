@@ -244,7 +244,8 @@ function App(): React.JSX.Element {
         // Initialize keyword detection after permission is granted
         await KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
-          "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
+          //"MTczMjkxNzYwMDAwMA==-DDwBWs914KpHbWBBSqi28vhiM4l5CYG+YgS2n9Z3DMI=");
+          "MTczODEwMTYwMDAwMA==-Vmv1jwEG+Fbog9LoblZnVT4TzAXDhZs7l9O18A+8ul8=");
         if (!isLicensed) {
           setMessage(`No license - please contact ofer@davoice.io`);
           return;

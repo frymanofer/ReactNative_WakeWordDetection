@@ -192,3 +192,4 @@ example_npm/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.
 example_npm/ios/ExampleApp/com.davoice.keyworddetection 2024-10-07 19:35.52.472.xcappdata/AppData/Documents/embedding_model.onnx
 example_npm/android/examplenew1.apk
 example_npm/android/examplenew.apk
+example/android/app/src/main/java/com/exampleapp/ForegroundServicePackage.kt
