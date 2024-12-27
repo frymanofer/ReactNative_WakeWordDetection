@@ -232,6 +232,31 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const [isPermissionGranted, setIsPermissionGranted] = useState(false); // Track permission status
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState) => {
+      if (nextAppState === 'active') {
+        try {
+          await AudioPermissionComponent();
+          setIsPermissionGranted(true);
+        } catch (error) {
+          console.error("Error requesting permissions:", error);
+        }
+      }
+    };
+  
+    const eventListener = AppState.addEventListener("change", handleAppStateChange);
+  
+    // If the app is *already* active on mount:
+    if (AppState.currentState === 'active') {
+      handleAppStateChange('active');
+    }
+  
+    return () => {
+      eventListener.remove();
+    };
+  }, []);
+
   // State to handle the display message
   const [message, setMessage] = useState(`Listening to WakeWord '${wakeWord}'...`);
 
@@ -240,7 +265,8 @@ function App(): React.JSX.Element {
       try {
         // Wait for audio permission to be granted
         await AudioPermissionComponent();
-
+        if (!isPermissionGranted)
+          return;
         // Initialize keyword detection after permission is granted
         await KeyWordRNBridge.initKeywordDetection(wakeWordFile, 0.9999, 2);
         var isLicensed = await KeyWordRNBridge.setKeywordDetectionLicense(
@@ -311,7 +337,7 @@ function App(): React.JSX.Element {
     // Call your native bridge function
   //await KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
   //loadModel();
-}, []);  // Empty dependency array ensures it runs once when the component mounts
+  }, [isPermissionGranted]);
 
 
 return (
