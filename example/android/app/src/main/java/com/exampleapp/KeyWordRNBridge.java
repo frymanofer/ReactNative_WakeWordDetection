@@ -109,7 +109,7 @@ public class KeyWordRNBridge extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startKeywordDetection() throws OrtException {
+    public void startKeywordDetection() {
         if (keyWordsDetection != null) {
             try {
                 keyWordsDetection.startListening(keyThreshold);
