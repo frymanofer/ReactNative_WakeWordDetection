@@ -33,7 +33,16 @@ seamless and intuitive voice-driven user experiences.
 
 ## Features
 
-- **High Accuracy:** Our advanced machine learning models deliver top-notch accuracy.
+- **High Accuracy:** We have succesfully reached over 99% accurary for all our models. **Here is on of our customer's benchmarks**:
+
+```
+MODEL         DETECTION RATE
+===========================
+DaVoice        0.992481
+Top Player     0.874812
+Third          0.626567
+```
+
 - **Easy to deploy with React Native:** Check out our example: "rn_example/DetectingKeyWords.js". With a few simple lines of code, you have your own keyword detecting enabled app.
 - **Cross-Platform Support:** Integrate Davoice KeywordsDetection into React-Native Framework. Both iOS and Android are supported.
 - **Low Latency:** Experience near-instantaneous keyword detection.
@@ -72,6 +81,7 @@ In order to generate your custom wake word you will need to:
   
     Change:
 
+```
     // Create an array of instance configurations
 
     const instanceConfigs:instanceConfig[] = [
@@ -99,6 +109,7 @@ In order to generate your custom wake word you will need to:
       { id: 'hey sky', modelName: 'hey_sky.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
   
     ];
+```
 
 - **Last step - Rebuild your project**
 
@@ -116,7 +127,7 @@ npm install react-native-wakeword
 Please add the following to android/build.gradle
 
 
-....
+```
 
 allprojects {
 
@@ -137,6 +148,7 @@ allprojects {
         // End react-native-wakeword added
 	
         ... your other lines...
+```
 
 See example_npm for a specific example of using the code.
 
