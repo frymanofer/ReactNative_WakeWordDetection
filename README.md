@@ -158,7 +158,7 @@ To run the demo:
 
 1. Clone the repository:
    ```
-   git clone https://[YourGittName]:[Token].com/frymanofer/ReactNative_WakeWordDetection.git
+	git clone https://github.com/frymanofer/ReactNative_WakeWordDetection
    ```
 
 2. Navigate to the example directory:
