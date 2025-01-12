@@ -160,13 +160,16 @@ To run the demo:
    ```
 	git clone https://github.com/frymanofer/ReactNative_WakeWordDetection
    ```
+2. npm install
 
-2. Navigate to the example directory:
+Run 'npm install'
+
+3. Navigate to the example directory:
    ```
    cd example_npm
    ```
 
-3. For Android:
+4. For Android:
    ```
    npx react-native run-android
    ```
@@ -174,7 +177,7 @@ To run the demo:
 
    **Note:** If you don't have an Android environment setup (Gradle, Android device or Emulator, Java, etc.) and need help, please contact us at ofer@davoice.io.
 
-4. For iOS:
+5. For iOS:
    ```
    npx react-native run-ios
    ```
