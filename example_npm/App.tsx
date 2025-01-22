@@ -54,6 +54,7 @@ interface instanceConfig {
 }
 // Create an array of instance configurations
 const instanceConfigs:instanceConfig[] = [
+  { id: 'ola_policial', modelName: 'ola_policial.onnx', threshold: 0.99, bufferCnt: 1 , sticky: false },
   { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
 ];
 
@@ -177,10 +178,38 @@ function App(): React.JSX.Element {
 //  const { stopListening, startListening, loadModel, setKeywordDetectionLicense} = useModel();
   let myInstance: KeyWordRNBridgeInstance;
   let eventListener: any;
-
+  console.log("App.tsx");
+  console.log("App.tsx");
+  console.log("App.tsx");
+  
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  const [isPermissionGranted, setIsPermissionGranted] = useState(false); // Track permission status
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState) => {
+      if (nextAppState === 'active') {
+        try {
+          await AudioPermissionComponent();
+          setIsPermissionGranted(true);
+        } catch (error) {
+          console.error("Error requesting permissions:", error);
+        }
+      }
+    };
+  
+    const eventListener = AppState.addEventListener("change", handleAppStateChange);
+  
+    // If the app is *already* active on mount:
+    if (AppState.currentState === 'active') {
+      handleAppStateChange('active');
+    }
+  
+    return () => {
+      eventListener.remove();
+    };
+  }, []);
 
   // State to handle the display message
   const [message, setMessage] = useState(`Listening to WakeWord '${wakeWord}'...`);
@@ -242,7 +271,7 @@ function App(): React.JSX.Element {
     // Call your native bridge function
   //KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
   //loadModel();
-}, []);  // Empty dependency array ensures it runs once when the component mounts
+}, [isPermissionGranted]);  // Empty dependency array ensures it runs once when the component mounts
 
 
 return (
