@@ -12,7 +12,7 @@ Welcome to **Davoice WakeWord / Keywords Detection** – Wake words and keyword 
 
 ## About this project
 
-This is a **"wake word"** package for React Native. A wake word is a keyword that activates your device, like "Hey Siri" or "OK Google". "Wake Word" is also known as "keyword detection", "Phrase Recognition", "Phrase Spotting", “Voice triggered”, “hot word”, “trigger word”
+This is a **"wake word"** package for React Native. A wake word is a keyword that activates your device, like "Hey Siri" or "OK Google". "Wake Word" is also known as "keyword detection", "Phrase Recognition", "Phrase Spotting", “Voice triggered”, “hotword”, “trigger word”
 
 It also provide **Speech to Intent**. **Speech to Intent** refers to the ability to recognize a spoken word or phrase
 and directly associate it with a specific action or operation within an application. Unlike a **"wake word"**, which typically serves to activate or wake up the application,
@@ -355,7 +355,7 @@ DaVoice.io Voice commands / Wake words / Voice to Intent / keyword detection npm
 "Phrase Recognition"
 "Phrase Spotting"
 “Voice triggered”
-“hot word”
+“hotword”
 “trigger word”
 "react-native wake word",
 "Wake word detection github",
