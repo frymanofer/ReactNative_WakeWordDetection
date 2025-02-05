@@ -12,7 +12,7 @@ Welcome to **Davoice WakeWord / Keywords Detection** – Wake words and keyword 
 
 ## About this project
 
-This is a **"wake word"** package for React Native. A wake word is a keyword that activates your device, like "Hey Siri" or "OK Google". "Wake Word" is also known as "keyword detection", "Phrase Recognition", "Phrase Spotting", “Voice triggered”, “hot word”, “trigger word”
+This is a **"wake word"** package for React Native. A wake word is a keyword that activates your device, like "Hey Siri" or "OK Google". "Wake Word" is also known as "keyword detection", "Phrase Recognition", "Phrase Spotting", “Voice triggered”, “hotword”, “trigger word”
 
 It also provide **Speech to Intent**. **Speech to Intent** refers to the ability to recognize a spoken word or phrase
 and directly associate it with a specific action or operation within an application. Unlike a **"wake word"**, which typically serves to activate or wake up the application,
@@ -27,7 +27,8 @@ seamless and intuitive voice-driven user experiences.
 
 ## Latest news
 
-- **New npm install:** Now you can integrate Davoice without any additional integrations by using "npm install react-native-wakeword" make sure you install version >= 1.0.25.
+- **New npm install:** Now you can integrate Davoice without any additional integrations by using "npm install react-native-wakeword" make sure you install version >= 1.0.25. **Wake word npm package:**: https://www.npmjs.com/package/react-native-wakeword
+
 
 - **New Car Parking Example:** Checkout our new Voice Activated Car Parking example, with voice control both in Foreground and Background: example_car_parking/.
 
@@ -122,6 +123,8 @@ For any questions, requirements, or more support for React-Native, please contac
 ### Simply using npm install - package
 
 npm install react-native-wakeword
+
+**Wake word npm package From :**: https://www.npmjs.com/package/react-native-wakeword
 
 ### On Android:
 Please add the following to android/build.gradle
@@ -352,7 +355,7 @@ DaVoice.io Voice commands / Wake words / Voice to Intent / keyword detection npm
 "Phrase Recognition"
 "Phrase Spotting"
 “Voice triggered”
-“hot word”
+“hotword”
 “trigger word”
 "react-native wake word",
 "Wake word detection github",
@@ -380,6 +383,8 @@ DaVoice.io Voice commands / Wake words / Voice to Intent / keyword detection npm
 "rn wake word"
 
 ## Links
+
+- **Wake word npm package:** https://www.npmjs.com/package/react-native-wakeword
 
 Here are wakeword detection GitHub links per platform:
 
