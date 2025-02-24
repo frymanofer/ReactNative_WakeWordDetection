@@ -1,7 +1,7 @@
 // textToVoice.ts
 import Tts from 'react-native-tts';
 
-const silentMode = true;
+const silentMode = false;
 function Log(...args) {
   if (!silentMode)
     console.log(...args);

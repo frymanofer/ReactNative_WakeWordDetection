@@ -5,9 +5,6 @@
  * @format
  */
 
-import RNFS from 'react-native-fs';
-import Tts from 'react-native-tts';
-
 import React, { useEffect, useState } from 'react';
 
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -44,7 +41,6 @@ import Sound from 'react-native-sound';
 import useVoiceRecognition from './src/voiceRecog'; // adjust path if necessary
 import TextToVoiceService from './src/textToVoice';
 
-
 async function setVoiceService() {
   // Set language, rate, pitch, and voice
   TextToVoiceService.setLanguage('en-US');
@@ -75,11 +71,13 @@ async function setVoiceService() {
 }
 
 // Enable playback in silence mode on iOS
-Sound.setCategory('Playback');
+// Sound.setCategory('Playback');
+// The above is a BUG!!!! you need PlayAndRecord and true to MixwithOthers!!!
+Sound.setCategory('PlayAndRecord', true);
 
 let isPlaying = false;
 
-const playSound = (fileName: String) => {
+const playSound = async (fileName: String) => {
   //while (isPlaying == true) {
 
   //}
@@ -88,6 +86,8 @@ const playSound = (fileName: String) => {
       console.log('Failed to load the sound', error);
       return;
     }
+    sound.setSpeakerphoneOn(true);
+/*
     isPlaying = true;
     // Play the sound
     sound.play((success) => {
@@ -98,8 +98,9 @@ const playSound = (fileName: String) => {
       }
     });
     isPlaying = false;
+    */
   });
-};
+}
 
 
 import LinearGradient from 'react-native-linear-gradient';
@@ -270,15 +271,18 @@ function extractTime(text) {
 
 type DetectionCallback = (event: any) => void;
 
+var calledOnce = false;
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(true);
-  const wakeWordFile = "hey_pango.onnx";
+  // const wakeWordFile = "hey_pango.onnx";
+  const wakeWordFile = "genious.onnx";
+  
   const wakeWord = formatWakeWord(wakeWordFile);
   const { stopListening, loadModel } = useModel();
 
-  AudioPermissionComponent();
+  //AudioPermissionComponent();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -301,6 +305,26 @@ function App(): React.JSX.Element {
 
   let innerDetectionCallback: (keywordIndex: any) => Promise<void>;
 
+  const [isPermissionGranted, setIsPermissionGranted] = useState(false); // Track permission status
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState) => {
+      if (nextAppState === 'active') {
+        try {
+          await AudioPermissionComponent();
+          setIsPermissionGranted(true);
+        } catch (error) {
+          console.error("Error requesting permissions:", error);
+        }
+      }
+    };
+  
+    const eventListener = AppState.addEventListener("change", handleAppStateChange);
+    
+    return () => {
+      eventListener.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const step0 = () => {
       // State to handle the display message
@@ -315,9 +339,11 @@ function App(): React.JSX.Element {
     const initializeKeywordDetection = async () => {
       await setVoiceService();
       console.log("**************** TextToVoiceService.speak *************** ");
-      await TextToVoiceService.speak("Welcome to Spark, Your 'Hands Free' Parking Service.");
-      
+      //await TextToVoiceService.speak("Welcome to Spark, Your 'Hands Free' Parking Service.");
+      await TextToVoiceService.speak("Welcom to Spark, Voice Activated, hands free parking and public transportation app");
+
       try {
+        //await TextToVoiceService.speak("Welcom to Spark, Voice Activated, hands free parking app");
         step0();
 
         const innerDetectionCallbackStage3 = async (keywordIndex: string) => {
@@ -430,7 +456,7 @@ function App(): React.JSX.Element {
           }, 1500);
         };
 
-        innerDetectionCallback = async (keywordIndex: any) => {
+        const innerDetectionCallback = async (keywordIndex: any) => {
           await stopListening();
           if (keywordIndex.includes("step_back")) {
             console.log("Stepping back");
@@ -499,18 +525,18 @@ function App(): React.JSX.Element {
       }
     };
 
-    var calledOnce = false;
     if (calledOnce == false) {
+      calledOnce = true;
       console.log("Calling AudioPermissionComponent();");
-      AudioPermissionComponent();
-  
+      //AudioPermissionComponent();
+
+
       initializeKeywordDetection();  // Call the async function inside useEffect
       // Wait for audio permission to be granted
       console.log("After calling AudioPermissionComponent();");  
     }
-    calledOnce = true;
 
-  }, []);  // Empty dependency array ensures it runs once when the component mounts
+  }, [isPermissionGranted]);
 
 
   return (
