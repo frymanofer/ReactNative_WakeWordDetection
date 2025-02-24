@@ -20,6 +20,7 @@ import {
   Platform,
   useColorScheme,
   View,
+  AppState, // [STYLE CHANGE: moved from separate import to here for clarity]
 } from 'react-native';
 
 import {
@@ -34,7 +35,7 @@ import {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Define a scaling function based on screen width
-const scaleFontSize = (size) => (SCREEN_WIDTH / 390) * size; // 390 is the width of iPhone 11
+const scaleFontSize = (size: number) => (SCREEN_WIDTH / 390) * size; // 390 is iPhone 11 width for reference
 
 import Sound from 'react-native-sound';
 
@@ -55,15 +56,9 @@ async function setVoiceService() {
     voices.forEach((voice) => {
       if (voice.language.match('en-US')) {
         console.log(voice.id);
-        //console.log("Voice ID:", voice.id);
-        //console.log("Voice Name:", voice.name);
-        //console.log("Language:", voice.language);
         TextToVoiceService.setVoice(voice.id);
-        //return;
       }
-      // Add any other actions you want to perform with each voice
     });
-    //TextToVoiceService.setVoice(voiceID);
   }
   if (Platform.OS == 'ios') {
     TextToVoiceService.setVoice('com.apple.voice.compact.en-US.Samantha');
@@ -78,29 +73,15 @@ Sound.setCategory('PlayAndRecord', true);
 let isPlaying = false;
 
 const playSound = async (fileName: String) => {
-  //while (isPlaying == true) {
-
-  //}
   const sound = new Sound(fileName, Sound.MAIN_BUNDLE, (error) => {
     if (error) {
       console.log('Failed to load the sound', error);
       return;
     }
     sound.setSpeakerphoneOn(true);
-/*
-    isPlaying = true;
-    // Play the sound
-    sound.play((success) => {
-      if (success) {
-        console.log('Successfully finished playing');
-      } else {
-        console.log('Playback failed');
-      }
-    });
-    isPlaying = false;
-    */
+    // ... Any future usage of 'sound.play' was commented out in your code
   });
-}
+};
 
 
 import LinearGradient from 'react-native-linear-gradient';
@@ -114,14 +95,13 @@ import BackgroundTimer from 'react-native-background-timer';
 // Now use BackgroundTimer as usual
 BackgroundTimer.start();
 
-import { AppState } from 'react-native';
-
 import { setupTrackPlayer, playTrackPlayer, playTrackPlayer_1 } from './src/player';
 
 const { ForegroundServiceModule } = NativeModules;
 // Start the foreground service when you start playing audio
-if (Platform.OS != 'ios')
+if (Platform.OS != 'ios') {
   ForegroundServiceModule.startAudioForegroundService();
+}
 
 import { useModel } from './src/useModel';
 
@@ -129,7 +109,6 @@ function bringAppToForeground() {
   if (Platform.OS === 'ios')
     return;
   console.log("ForegroundServiceModule == ", ForegroundServiceModule);
-  // Call the native module method to bring the app to the foreground
   ForegroundServiceModule.bringAppToForeground()
     .then(() => {
       console.log('Called bringing app to foreground');
@@ -138,12 +117,6 @@ function bringAppToForeground() {
       console.error('Error bringing app to foreground:', error);
     });
 }
-
-// Call this function when your callback is triggered
-
-
-//import { useModel } from "./useModel";
-//const { loadModel, startListening, stopListening } = useModel();
 
 const detectionCallback = async (keywordIndex: any) => {
   //bringAppToForeground();
@@ -197,29 +170,10 @@ const AudioPermissionComponent = async () => {
     let MicStatus = await check(permission);
     if (MicStatus !== RESULTS.GRANTED) {
       console.log("MicStatus !== RESULTS.GRANTED calling request()");
-
       MicStatus = await request(permission);
-
       console.log("request() returned with MicStatus == ", MicStatus == RESULTS.GRANTED ? "permission granted" : "No permissions");
-
     }
 
-    /*
-    if (Platform.OS === 'ios' )
-    {
-
-    }
-    else {
-      // Bug FOREGROUND_SERVICE does not exist
-      const foregroundServicePermission = await request('android.permission.FOREGROUND_SERVICE');
-      if (foregroundServicePermission === RESULTS.GRANTED) {
-        console.log("Permissions granted", "Microphone and foreground service permissions granted.");
-          // Start your service or perform other actions
-      } else {
-        console.log("Permission denied", "Foreground service microphone permission is required.");
-      }
-    }
-    */
     if (MicStatus !== RESULTS.GRANTED) {
       console.log("calling AudioPermissionComponent() again", MicStatus);
       await AudioPermissionComponent();
@@ -227,8 +181,7 @@ const AudioPermissionComponent = async () => {
   } catch (error) {
     console.log('Error calling permissions:', error);
   }
-}
-
+};
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -261,37 +214,28 @@ function Section({ children, title }: SectionProps): React.JSX.Element {
   );
 }
 
-function extractTime(text) {
+function extractTime(text: string) {
   // Regular expression to match "HH:MM" or "HHMM" formats
   const timePattern = /\b(\d{2}:\d{2}|\d{4})\b/;
   const match = text.match(timePattern);
-  // Return the matched time or null if not found
   return match ? match[0] : null;
 }
-
-type DetectionCallback = (event: any) => void;
 
 var calledOnce = false;
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(true);
-  // const wakeWordFile = "hey_pango.onnx";
+
+  // Example .onnx file
   const wakeWordFile = "genious.onnx";
-  
   const wakeWord = formatWakeWord(wakeWordFile);
+
   const { stopListening, loadModel } = useModel();
 
-  //AudioPermissionComponent();
+  const sparkMain = `sPark\n'Hands Free'\nParking App`;
+  const endOfDemo = `\n          END OF DEMO \n       For info contact \n         ofer@davoice.io\n`;
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  const sparkMain = `sPark Your\n'Hands Free'\nParking Companion`;
-  const endOfDemo = `\n          END OF DEMO \n       For info contact \n         ofer@davoice.io\n`
-
-  // State to handle the display message
   const [message, setMessage] = useState(sparkMain);
   const [message1, setMessage1] = useState(`\n\n\nYou can say:\n`);
   const [message2, setMessage2] = useState(`'${wakeWord}'\n`);
@@ -299,7 +243,7 @@ function App(): React.JSX.Element {
   const [message4, setMessage4] = useState(``);
   const [message41, setMessage4_1] = useState(``);
   const [message5, setMessage5] = useState(`Say: "step back" for main menue`);
- // const language = 'he-IL';
+
   const language = 'en-US';
   const { getTextDetected, recognizedText, vrClearBuffer, vrIsListening, vrStartListening, vrStopListening } = useVoiceRecognition(language);
 
@@ -317,7 +261,6 @@ function App(): React.JSX.Element {
         }
       }
     };
-  
     const eventListener = AppState.addEventListener("change", handleAppStateChange);
     
     return () => {
@@ -327,23 +270,20 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     const step0 = () => {
-      // State to handle the display message
       setMessage(sparkMain);
       setMessage1(`\n\n\nYou can say:\n`);
       setMessage2(`'${wakeWord}'\n`);
       setMessage3(`to activate voice commands`);
       setMessage4_1(``);
       setMessage4(``);
-    }
+    };
 
     const initializeKeywordDetection = async () => {
       await setVoiceService();
       console.log("**************** TextToVoiceService.speak *************** ");
-      //await TextToVoiceService.speak("Welcome to Spark, Your 'Hands Free' Parking Service.");
       await TextToVoiceService.speak("Welcom to Spark, Voice Activated, hands free parking and public transportation app");
 
       try {
-        //await TextToVoiceService.speak("Welcom to Spark, Voice Activated, hands free parking app");
         step0();
 
         const innerDetectionCallbackStage3 = async (keywordIndex: string) => {
@@ -480,82 +420,69 @@ function App(): React.JSX.Element {
           setMessage3(``);
           setMessage4_1(``);
           setMessage4(``);
-          //let timeoutId = BackgroundTimer.setTimeout(() => {
+
+          // Just simulating some prompt updates
           setMessage1(`\n\n\nSay: I want to park`);
-          //BackgroundTimer.runBackgroundTimer(async () => {
-          //setTimeout(() => {
-          //(async () => {
           setMessage3(`Say: I want to stop parking\n`);
-          //BackgroundTimer.runBackgroundTimer(async () => {
-          //                          setTimeout(() => {
-          //(async () => {
           setMessage4(`Say: Nearest gas station\n`);
-          //BackgroundTimer.runBackgroundTimer(async () => {
-          //                              setTimeout(() => {
-          //(async () => {
           setMessage4_1(`Say: Electric vehicle parking\n`);
-          // Start a timer that runs once after X milliseconds
+
+          // Example delayed load
           const timeoutId = BackgroundTimer.setTimeout(async () => {
             BackgroundTimer.clearTimeout(timeoutId);
             await loadModel('state2', innerDetectionCallbackStage2);
           }, 12000);
+        };
 
-          // Cancel the timeout if necessary
-          //})();
-          //}, 1000); // 1 seconds delay      
-          //})();
-          //}, 1000); // 1 seconds delay      
-          //            })();
-          //}, 1000); // 1 seconds delay
-          // Setup react-native-background-fetch 
-        }
         loadModel('step_back', innerDetectionCallback);
         loadModel('state1', innerDetectionCallback);
 
         console.log("Calling setupTrackPlayer()");
-        //await setupTrackPlayer();
-        console.log("Calling playTrackPlayer()");
-        //await playTrackPlayer_1();
-        //await playTrackPlayer_1();
-        //await playTrackPlayer_1();
-        //await playTrackPlayer();
-        //await playTrackPlayer();
+        // Optional track player setup if needed
       } catch (error) {
         console.error('Error during keyword detection initialization:', error);
       }
     };
 
-    if (calledOnce == false) {
+    if (!calledOnce) {
       calledOnce = true;
       console.log("Calling AudioPermissionComponent();");
-      //AudioPermissionComponent();
-
-
-      initializeKeywordDetection();  // Call the async function inside useEffect
-      // Wait for audio permission to be granted
-      console.log("After calling AudioPermissionComponent();");  
+      // AudioPermissionComponent();
+      initializeKeywordDetection();
+      console.log("After calling AudioPermissionComponent();");
     }
-
   }, [isPermissionGranted]);
 
+  // [STYLE CHANGE] Updated gradient colors for a luxurious look
+  const gradientColors = isDarkMode
+    ? ['#232526', '#414345']
+    : ['#e0eafc', '#cfdef3'];
+
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
 
   return (
+    // [STYLE CHANGE] Wrap root in a gradient
     <LinearGradient
-      colors={isDarkMode ? ['#232526', '#414345'] : ['#e0eafc', '#cfdef3']}
+      colors={gradientColors}
       style={styles.linearGradient}>
+
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        backgroundColor="transparent"
+        translucent
       />
+
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <View
-          style={[styles.container,
-          {
-            backgroundColor:
-              isFlashing ? (isDarkMode ? '#ff4d4d' : '#ffcccc') : isDarkMode ? Colors.black : Colors.white
-          }]}>
+
+        {/* [STYLE CHANGE] Container with some "card" styling inside the gradient */}
+        <View style={[styles.container, {
+          // Using color if you want a slight overlay background
+          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.3)'
+        }]}>
           <Text style={styles.title}>{message}</Text>
           <Text style={styles.header}>{message1}</Text>
           <Text style={styles.normal}>{message2}</Text>
@@ -570,59 +497,76 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 0,
-    marginTop: 32,
-    textAlign: 'left', // Align all text to the left
-  },
   linearGradient: {
     flex: 1,
   },
+  container: {
+    flex: 1,
+    minHeight: Dimensions.get('window').height * 0.85, // Enough height so we have space
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 32,
+    textAlign: 'left',
+    borderRadius: 16,               // [STYLE CHANGE] Rounded corners
+    marginHorizontal: 10,
+    marginBottom: 30,
+    shadowColor: '#000',            // [STYLE CHANGE] Subtle shadow for iOS
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 5,                   // [STYLE CHANGE] Shadow for Android
+  },
   title: {
-    fontSize: scaleFontSize(35),
+    fontSize: scaleFontSize(30),
     fontWeight: 'bold',
     color: '#4a4a4a',
     textAlign: 'center',
     paddingHorizontal: 20,
-    backgroundColor: '#ffffff99',
-    borderRadius: 12,
     paddingVertical: 20,
     marginHorizontal: 10,
-    elevation: 4, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   header: {
     fontSize: scaleFontSize(20),
-    textAlign: 'left', // Align all text to the left
+    textAlign: 'left',
     fontWeight: 'bold',
-    color: 'black',
+    color: '#2b2b2b',
+    marginBottom: 6, // [STYLE CHANGE] Spacing
   },
   stepback: {
     fontSize: scaleFontSize(14),
-    textAlign: 'left', // Align all text to the left
+    textAlign: 'left',
     fontWeight: 'bold',
     color: 'blue',
-    fontStyle: 'italic', // Make the text italic
+    fontStyle: 'italic',
+    marginTop: 20,
   },
   normal: {
-    textAlign: 'left', // Align all text to the left
+    textAlign: 'left',
     fontSize: scaleFontSize(25),
-    color: 'blue',
+    color: '#BF3A85',  // [STYLE CHANGE] More luxurious color
     fontWeight: 'bold',
+    marginBottom: 6,
   },
   highlight: {
-    textAlign: 'left', // Align all text to the left
+    textAlign: 'left',
     fontSize: scaleFontSize(18),
     fontWeight: 'bold',
-    color: 'red'
+    color: 'red',
+  },
+  sectionContainer: {
+    marginTop: 32,
+    paddingHorizontal: 24,
+  },
+  sectionTitle: {
+    fontSize: scaleFontSize(24),
+    fontWeight: '600',
+  },
+  sectionDescription: {
+    marginTop: 8,
+    fontSize: scaleFontSize(18),
+    fontWeight: '400',
   },
 });
 
 export default App;
-

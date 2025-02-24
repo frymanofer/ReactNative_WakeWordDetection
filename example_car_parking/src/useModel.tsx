@@ -36,7 +36,7 @@ const instanceConfigs:instanceConfig[] = [
     { id: 'step_back', modelName: 'step_back.onnx', threshold: 0.9999, bufferCnt: 2, sticky: true  },
     { id: 'electric_vehicle_parking', modelName: 'electric_vehicle_parking.onnx', threshold: 0.9999, bufferCnt: 2 , sticky: false },
     { id: 'nearest_gaz_station', modelName: 'nearest_gaz_station.onnx', threshold: 0.9999, bufferCnt: 6 , sticky: false },
-    { id: 'i_want_to_stop_park', modelName: 'i_want_to_stop_park.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false }
+    { id: 'i_want_to_stop_park', modelName: 'i_want_to_stop_park.onnx', threshold: 0.99999, bufferCnt: 7 , sticky: false }
 ];
 
 // Function to add a new instance dynamically
