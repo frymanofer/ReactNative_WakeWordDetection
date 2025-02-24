@@ -124,7 +124,6 @@ repositories {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.13.1'
     implementation 'ai.picovoice:android-voice-processor:1.0.2'
     implementation fileTree(dir: "libs", include: ["*.aar"])
 
