@@ -35,10 +35,11 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 
 // Two wakes to use react-native-wakeword via hooks
-// sutible for react users or direct for simple js.
-// import KeyWordRNBridge from "./rnkeywordspotter/KeyWordRNBridge";
+// suitable for react users.
 // React - Use this for hooks:
 // import useModel from 'react-native-wakeword';
+
+//  or direct for simple js.
 // Direct with JS:
 // import KeyWordRNBridge from 'react-native-wakeword'; 
 import { KeyWordRNBridgeInstance } from 'react-native-wakeword'; 
@@ -54,7 +55,6 @@ interface instanceConfig {
 }
 // Create an array of instance configurations
 const instanceConfigs:instanceConfig[] = [
-  { id: 'ola_policial', modelName: 'ola_policial.onnx', threshold: 0.99, bufferCnt: 1 , sticky: false },
   { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
 ];
 
