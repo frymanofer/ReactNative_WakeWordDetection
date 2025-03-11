@@ -253,7 +253,13 @@ Run 'npm install'
 
 ### Usage Example
 
-Below is a simple "wake word" detection example using npm install react-native-wakeword:
+**For simple installation go to example_npm** and build the react native example based on package.json
+
+**For example working in the background on both IOS and Android go to example or example_car_parking** and build the react native app based on package.json
+
+Below is an example, however. **the best thing is to look at the update code in one of the example folders**
+
+Here is "wake word" detection example using npm install react-native-wakeword:
 
 ```javascript
 //import useModel from react-native-wakeword;
