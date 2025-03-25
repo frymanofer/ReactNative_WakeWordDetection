@@ -69,6 +69,8 @@ async function setVoiceService() {
 // Sound.setCategory('Playback');
 // The above is a BUG!!!! you need PlayAndRecord and true to MixwithOthers!!!
 Sound.setCategory('PlayAndRecord', true);
+//Sound.setCategory('PlayAndRecord', true);
+//Sound.setMode('VoiceChat');
 
 let isPlaying = false;
 
@@ -231,7 +233,7 @@ function App(): React.JSX.Element {
   const wakeWordFile = "genious.onnx";
   const wakeWord = formatWakeWord(wakeWordFile);
 
-  const { stopListening, loadModel } = useModel();
+  const { stopListening, loadModel, replaceAllCB } = useModel();
 
   const sparkMain = `sPark\n'Hands Free'\nParking App`;
   const endOfDemo = `\n          END OF DEMO \n       For info contact \n         ofer@davoice.io\n`;
@@ -279,9 +281,6 @@ function App(): React.JSX.Element {
     };
 
     const initializeKeywordDetection = async () => {
-      await setVoiceService();
-      console.log("**************** TextToVoiceService.speak *************** ");
-      await TextToVoiceService.speak("Welcom to Spark, Voice Activated, hands free parking and public transportation app");
 
       try {
         step0();
@@ -289,18 +288,20 @@ function App(): React.JSX.Element {
         const innerDetectionCallbackStage3 = async (keywordIndex: string) => {
           if (keywordIndex.includes("step_back")) {
             step0();
-            loadModel('state1', innerDetectionCallback);
+            await loadModel('state1', innerDetectionCallback);
             return;
           }
         };
+        //Sound.setMode('VoiceChat');
 
         const innerDetectionCallbackStage2 = async (keywordIndex: string) => {
-          await stopListening();
+          //await stopListening();
           console.log("innerDetectionCallbackStage2()", keywordIndex);
           //playSound('you_chose.mp3');
           let initialMessage = "You Chose, ";
 
-          //loadModel('step_back', innerDetectionCallback);
+          //await loadModel('step_back', innerDetectionCallback);
+          //await replaceAllCB(innerDetectionCallback);
           const timeoutId = BackgroundTimer.setTimeout(async () => {
             BackgroundTimer.clearTimeout(timeoutId);
             //          setIsFlashing(true);  // Start flashing effect (Line 122)
@@ -312,7 +313,9 @@ function App(): React.JSX.Element {
               await TextToVoiceService.speak(initialMessage + "To, step back");
 
               step0();
-              loadModel('state1', innerDetectionCallback);
+              await replaceAllCB(innerDetectionCallback);
+
+              await loadModel('state1', innerDetectionCallback);
               return;
             } else if (keywordIndex.includes("nearest_gaz_station")) {
               console.log("Nearest gas station");
@@ -355,8 +358,8 @@ function App(): React.JSX.Element {
               setMessage4_1(``);
               setMessage1(`\n\n\nTo park your car`);
               setMessage3(`When do you want to start parking?\n`);
-              stopListening();
-              stopListening();
+              await stopListening();
+              //stopListening();
               //vrStartListening();
               var timeOutId = BackgroundTimer.setTimeout(async () => {
                 BackgroundTimer.clearTimeout(timeOutId);
@@ -378,7 +381,9 @@ function App(): React.JSX.Element {
                   await TextToVoiceService.speak(`You chose, to start parking at: ${text}`);
                 }
                 vrClearBuffer();
-                loadModel('step_back', innerDetectionCallback);
+                await replaceAllCB(innerDetectionCallback);
+
+                await loadModel('step_back', innerDetectionCallback);
               }, 10000);
               setMessage4(endOfDemo);
               const timeOutId2 = BackgroundTimer.setTimeout(async () => {
@@ -397,19 +402,22 @@ function App(): React.JSX.Element {
         };
 
         const innerDetectionCallback = async (keywordIndex: any) => {
-          await stopListening();
+          //await stopListening();
           if (keywordIndex.includes("step_back")) {
             console.log("Stepping back");
             step0();
-            loadModel('state1', innerDetectionCallback);
+            await replaceAllCB(innerDetectionCallback);
+
+            await loadModel('state1', innerDetectionCallback);
             return;
           }
           console.log("innerDetectionCallback()");
           await detectionCallback(keywordIndex);
           //playSound('activationcommand.mp3');
-          const sentance = "Wait for this message to be over,    , then," +
-            "you will be able to control the app,   , by saying commands such as,       ,:" +
-           "I want to park, I want to stop parking, I want to find the neareast gas station, or, nearest electric vehicle parking";
+          const sentance = // "Wait for this message to be over,    , then," +
+            // "you will be able to control the app,   , by saying commands such as,       ,:" +
+            "control the app, by saying commands such as,       ,:" +
+            "I want to park, I want to stop parking, find the neareast gas station, or, nearest electric vehicle parking";
           //const timeoutIdx = BackgroundTimer.setTimeout(async () => {
             //BackgroundTimer.clearTimeout(timeoutIdx);
             await TextToVoiceService.speak(sentance);
@@ -431,11 +439,18 @@ function App(): React.JSX.Element {
           const timeoutId = BackgroundTimer.setTimeout(async () => {
             BackgroundTimer.clearTimeout(timeoutId);
             await loadModel('state2', innerDetectionCallbackStage2);
-          }, 12000);
+            await replaceAllCB(innerDetectionCallbackStage2);
+ //         }, 12000);
+          // }, 8000);
+           }, 100);
         };
-
-        loadModel('step_back', innerDetectionCallback);
-        loadModel('state1', innerDetectionCallback);
+        await loadModel('all', innerDetectionCallback);
+        await setVoiceService();
+        console.log("**************** TextToVoiceService.speak *************** ");
+        await TextToVoiceService.speak("Welcom to Spark, Voice Activated, hands free parking and public transportation app");
+  
+        //await loadModel('step_back', innerDetectionCallback);
+        //await loadModel('state1', innerDetectionCallback);
 
         console.log("Calling setupTrackPlayer()");
         // Optional track player setup if needed
