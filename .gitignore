@@ -196,3 +196,6 @@ example/android/app/src/main/java/com/exampleapp/ForegroundServicePackage.kt
 example_car_parking/ios/Podfile.lock
 example_car_parking/ios/Pods/Manifest.lock
 example_car_parking/ios/Pods/**
+example**/android/app/.cxx/*
+example/.yarn/*
+example**/.yarn/*
