@@ -46,6 +46,8 @@ import { KeyWordRNBridgeInstance } from 'react-native-wakeword';
 import removeAllRNBridgeListeners from 'react-native-wakeword'; 
 import { createKeyWordRNBridgeInstance } from 'react-native-wakeword'; 
 
+var calledOnce = false;
+
 interface instanceConfig {
   id: string;
   modelName: string;
@@ -53,10 +55,10 @@ interface instanceConfig {
   bufferCnt: number;
   sticky: boolean;
 }
-// Create an array of instance configurations
-const instanceConfigs:instanceConfig[] = [
-  { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
-];
+  // Create an array of instance configurations
+  const instanceConfigs:instanceConfig[] = [
+    { id: 'need_help_now', modelName: 'need_help_now.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+  ];
 
 //import RNFS from 'react-native-fs';
 
@@ -239,11 +241,7 @@ function App(): React.JSX.Element {
     }
 
     const initializeKeywordDetection = async () => {
-      try {
-        // Wait for audio permission to be granted
-        await AudioPermissionComponent();
-        // Add all instances:
-        
+      try {        
         try {
           console.log('Adding element:', instanceConfigs[0]);
           myInstance = await addInstance(instanceConfigs[0]);
@@ -253,8 +251,11 @@ function App(): React.JSX.Element {
         }
         eventListener = await set_callback(myInstance, keywordCallback);
         const isLicensed = await myInstance.setKeywordDetectionLicense(
-          "MTczODEwMTYwMDAwMA==-Vmv1jwEG+Fbog9LoblZnVT4TzAXDhZs7l9O18A+8ul8=");
+          "MTc0NDY2NDQwMDAwMA==-m4g05tL50nMcnOp4mu6NghsgkfXk1ZNVTPo26+2/Z0E=");
         await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
+        if (!isLicensed) {
+          console.error("No License!!! - setKeywordDetectionLicense returned", isLicensed);
+        }
         /* Using use_model.tsx:
         await setKeywordDetectionLicense(
           "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
@@ -267,7 +268,13 @@ function App(): React.JSX.Element {
       }
     };
 
-    initializeKeywordDetection();  // Call the async function inside useEffect
+    if (!calledOnce) {
+      calledOnce = true;
+      console.log("Calling initializeKeywordDetection();");
+      initializeKeywordDetection();
+      console.log("After calling AudioPermissionComponent();");
+    }
+
     // Call your native bridge function
   //KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
   //loadModel();
