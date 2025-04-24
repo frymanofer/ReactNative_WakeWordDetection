@@ -218,10 +218,12 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
 
+    // Setup your callback
     const keywordCallback = async (keywordIndex: any) => {
       // Stop detection
       await myInstance.stopKeywordDetection();
-      // remove the listener and callback
+      
+      // remove the React Native listener!!!
       removeEventListener(eventListener);
 
       console.log ("detected keyword: ", keywordIndex);
@@ -241,33 +243,30 @@ function App(): React.JSX.Element {
     }
 
     const initializeKeywordDetection = async () => {
+      try {
+        console.log('Adding element:', instanceConfigs[0]);
+        // create your instance
+        myInstance = await addInstance(instanceConfigs[0]);
+      } catch (error) {
+          console.error("Error loading model:", error);
+          return;
+      }
       try {        
-        try {
-          console.log('Adding element:', instanceConfigs[0]);
-          myInstance = await addInstance(instanceConfigs[0]);
-        } catch (error) {
-            console.error("Error loading model:", error);
-            return;
-        }
+        // Setup your callback
         eventListener = await set_callback(myInstance, keywordCallback);
+        // Set the License
         const isLicensed = await myInstance.setKeywordDetectionLicense(
-          "MTc0NDY2NDQwMDAwMA==-m4g05tL50nMcnOp4mu6NghsgkfXk1ZNVTPo26+2/Z0E=");
+          "MTc0NzI1NjQwMDAwMA==-+8iM4SOprtUFdw7//VJCKj23UUr98HLUdvYDixtvRDo=");
         await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
         if (!isLicensed) {
           console.error("No License!!! - setKeywordDetectionLicense returned", isLicensed);
         }
-        /* Using use_model.tsx:
-        await setKeywordDetectionLicense(
-          "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
-          
-        await loadModel(instanceConfigs, keywordCallback);
-  */
           
       } catch (error) {
         console.error('Error during keyword detection initialization:', error);
       }
     };
-
+    // Make sure you initialize only once
     if (!calledOnce) {
       calledOnce = true;
       console.log("Calling initializeKeywordDetection();");
@@ -275,10 +274,7 @@ function App(): React.JSX.Element {
       console.log("After calling AudioPermissionComponent();");
     }
 
-    // Call your native bridge function
-  //KeyWordRNBridge.initKeywordDetection("bla", 0.9999, 2);
-  //loadModel();
-}, [isPermissionGranted]);  // Empty dependency array ensures it runs once when the component mounts
+}, [isPermissionGranted]); // Only call this when you have permissions
 
 
 return (

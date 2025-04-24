@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import android.os.PowerManager
 import android.net.Uri
 import android.provider.Settings
+import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService
 
 class MainActivity : ReactActivity() {
 
@@ -29,17 +30,17 @@ class MainActivity : ReactActivity() {
     if (intent != null && intent.hasCategory(Intent.CATEGORY_VOICE)) {
       // This means Google Assistant or another assistant service opened the app
       Log.d("MyApp", "App opened by Google Assistant")
-  }
+    }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       requestDisableBatteryOptimization()
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      requestMicrophonePermissions()
+      startForegroundIfPermission()
     }
     else {
-      checkPermissions();
+      startForegroundIfPermissionOlderVer();
     }
   }
   // MainActivity.kt
@@ -49,7 +50,7 @@ class MainActivity : ReactActivity() {
   }
 
   @RequiresApi(Build.VERSION_CODES.O)
-  private fun requestMicrophonePermissions() {
+  private fun startForegroundIfPermission() {
       val permissions = arrayOf(
           Manifest.permission.FOREGROUND_SERVICE,
           Manifest.permission.RECORD_AUDIO
@@ -60,18 +61,18 @@ class MainActivity : ReactActivity() {
       }.toTypedArray()
   
       if (permissionsToRequest.isNotEmpty()) {
-          ActivityCompat.requestPermissions(this, permissionsToRequest, REQUEST_MICROPHONE_PERMISSIONS)
+          //ActivityCompat.requestPermissions(this, permissionsToRequest, REQUEST_MICROPHONE_PERMISSIONS)
       } else {
           startForegroundService()
       }
   }
   
   private fun startForegroundService() {
-//    val serviceIntent = Intent(this, MicrophoneService::class.java)
-//    ContextCompat.startForegroundService(this, serviceIntent)
+    val serviceIntent = Intent(this, MicrophoneService::class.java)
+    ContextCompat.startForegroundService(this, serviceIntent)
   }
 
-  private fun checkPermissions() {
+  private fun startForegroundIfPermissionOlderVer() {
     if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) 
             != PackageManager.PERMISSION_GRANTED) {
         ActivityCompat.requestPermissions(this, 
