@@ -17,10 +17,9 @@ This is an example of how to use the npm package and enable listening to wake wo
 
 **Android Background**
 
-**1)**
-Change mainActivity java or Kotlin:
+# 1) Change MainActivity java or Kotlin:
 
-**Java:**
+## Java:
 
 ```
 import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService;
@@ -80,7 +79,7 @@ import android.content.pm.PackageManager;
    }
 ```
 
-**Kotlin:**
+## Kotlin:
 
 
 **1 . Imports - place at top of MainActivity.kt**
@@ -146,8 +145,7 @@ private fun startForegroundServiceCompat() {
 }
 ```
 
-**2)**
-**Manifest - Add the following:**
+# 2) Manifest - Add the following:
 
 ```
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -180,9 +178,10 @@ private fun startForegroundServiceCompat() {
        android:exported="true"/>
 ```
 
-**3)**
-**Modify  node_modules/react-native-wakeword/android/build.gradle**
-**Or use the patch in the patches/ folder**
+# 3) Modify  node_modules/react-native-wakeword/android/build.gradle / Or use the patch in the patches/ folder
+
+**Change the following file directly or via patches directory:
+node_modules/react-native-wakeword/android/build.gradle**
 
 **PLEASE NOTE - most important change is "implementation" to "api"**
 
