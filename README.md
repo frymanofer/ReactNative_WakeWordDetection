@@ -314,42 +314,143 @@ Below is a simple JavaScript code showing how to use Davoice KeywordsDetection:
 
 ```javascript
 // Import the main class
-import KeyWordRNBridge from 'react-native-davoice-keywordsdetection';
 
-// Setup your callback on keyword / wakeword detected
-const onKeyWordDetected = async (keywordIndex) => {
-  // Do whatever you need on callback
-  // Stop searching for Keywords if it makes sense - KeyWordRNBridge.stopKeyWord();
-};
+import { KeyWordRNBridgeInstance } from 'react-native-wakeword'; 
+import removeAllRNBridgeListeners from 'react-native-wakeword'; 
+import { createKeyWordRNBridgeInstance } from 'react-native-wakeword'; 
 
-// Setup and activate keywords detection
-try {
-  let modelParams = {
-    modelName: "my_key_word.onnx", // replace with your model
-    threshold: 0.9999, // false positive sensitivity
-    falsePositiveChecks: 2 // How many checks for false positives
-  };
 
-  // Initialize the detection
-  const result = await KeyWordRNBridge.initKeywordDetection(
-    modelParams.modelName, 
-    modelParams.threshold, 
-    modelParams.falsePositiveChecks
-  );
-
-  await KeyWordRNBridge.setKeywordDetectionLicense(
-          "MTcyODkzOTYwMDAwMA==-XPLwWg6m4aFC9YMJZu0d0rKIh2AsExYixyeCpiVQmpE="); // Set a valid license!!!!
-
-  // Setup the callback
-  KeyWordRNBridge.onKeywordDetectionEvent((event) => {
-    onKeyWordDetected(event);
-  });
-
-  // Now we are set - you can start listening and detect key words
-  KeyWordRNBridge.startKeywordDetection();
-} catch (e) {
-  console.log("ERROR loadDavoice", e);
+interface instanceConfig {
+  id: string;
+  modelName: string;
+  threshold: number;
+  bufferCnt: number;
+  sticky: boolean;
 }
+  // Create an array of instance configurations
+  const instanceConfigs:instanceConfig[] = [
+    { id: 'my_wake_word', modelName: 'my_wake_word.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+  ];
+
+// Function to add a new instance dynamically
+//async function addInstance(conf: instanceConfig) 
+async function addInstance(
+  conf: instanceConfig): Promise<KeyWordRNBridgeInstance> {
+  const id = conf.id;
+  const instance = await createKeyWordRNBridgeInstance(id, false);
+
+  if (!instance) {
+      console.error(`Failed to create instance ${id}`);
+  }
+  console.log(`Instance ${id} created ${instance}`);
+  await instance.createInstance(conf.modelName, conf.threshold, conf.bufferCnt);
+  console.log(`Instance ${id} createInstance() called`);
+  return instance;
+}
+
+async function set_callback(instance: KeyWordRNBridgeInstance, callback: (phrase: string) => void) { 
+  const eventListener = instance.onKeywordDetectionEvent((phrase: string) => {
+    phrase = formatWakeWord(instance.instanceId);
+    console.log(`Instance ${instance.instanceId} detected: ${instance.instanceId} with phrase`, phrase);
+    // callback(phrase); Does not work on IOS
+    callback(phrase);
+  });
+  console.log("eventListener == ", eventListener);
+  return eventListener;
+}
+
+// Function to remove the event listener
+function removeEventListener(eventListener: any) {
+  if (eventListener && typeof eventListener.remove === 'function') {
+    eventListener.remove();
+  }
+  else {
+    console.error("event listener.remove does not exist!!!!");
+  }
+}
+
+  let myInstance: KeyWordRNBridgeInstance;
+  let eventListener: any;
+...
+  const [isPermissionGranted, setIsPermissionGranted] = useState(false); // Track permission status
+...
+  useEffect(() => {
+// Get permissions ....
+
+    const handleAppStateChange = async (nextAppState) => {
+      if (nextAppState === 'active') {
+        try {
+          await AudioPermissionComponent();
+          setIsPermissionGranted(true);
+        } catch (error) {
+          console.error("Error requesting permissions:", error);
+        }
+      }
+    };
+
+  }, []);
+
+  useEffect(() => {
+
+    // Setup your callback
+    const keywordCallback = async (keywordIndex: any) => {
+      // Stop detection
+      await myInstance.stopKeywordDetection();
+      
+      // remove the React Native listener!!!
+      removeEventListener(eventListener);
+
+      console.log ("detected keyword: ", keywordIndex);
+      setMessage(`WakeWord '${keywordIndex}' DETECTED`);
+      setIsFlashing(true);  // Start flashing effect (Line 122)
+
+      const timeout = setTimeout(async () => {
+        console.log('5 seconds have passed!');
+        setMessage(`Listening to WakeWord '${wakeWord}'...`);
+        setIsFlashing(false);  // Start flashing effect (Line 122)
+        // Perform your action here
+        // Stop detection
+        eventListener = await set_callback(myInstance, keywordCallback);
+        await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
+        // remove the listener and callback
+      }, 5000);
+    }
+
+    const initializeKeywordDetection = async () => {
+      try {
+        console.log('Adding element:', instanceConfigs[0]);
+        // create your instance
+        myInstance = await addInstance(instanceConfigs[0]);
+      } catch (error) {
+          console.error("Error loading model:", error);
+          return;
+      }
+      try {        
+        // Setup your callback
+        eventListener = await set_callback(myInstance, keywordCallback);
+        // Set the License
+        const isLicensed = await myInstance.setKeywordDetectionLicense(
+          "MTc0NDY2NDQwMDAwMA==-m4g05tL50nMcnOp4mu6NghsgkfXk1ZNVTPo26+2/Z0E=");
+        await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
+        if (!isLicensed) {
+          console.error("No License!!! - setKeywordDetectionLicense returned", isLicensed);
+        }
+          
+      } catch (error) {
+        console.error('Error during keyword detection initialization:', error);
+      }
+    };
+    // Make sure you initialize only once
+    if (!calledOnce) {
+      calledOnce = true;
+      console.log("Calling initializeKeywordDetection();");
+      initializeKeywordDetection();
+      console.log("After calling AudioPermissionComponent();");
+    }
+
+}, [isPermissionGranted]); // Only call this when you have permissions
+
+
 ```
 
 ## Benchmark.
