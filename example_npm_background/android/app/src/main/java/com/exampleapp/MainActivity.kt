@@ -19,6 +19,11 @@ import android.os.PowerManager
 import android.net.Uri
 import android.provider.Settings
 import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService
+// Looping waiting for permmissions
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+// End of Looping waiting for permmissions
 
 class MainActivity : ReactActivity() {
 
@@ -49,50 +54,61 @@ class MainActivity : ReactActivity() {
     setIntent(intent)
   }
 
-  @RequiresApi(Build.VERSION_CODES.O)
-  private fun startForegroundIfPermission() {
-      val permissions = arrayOf(
-          Manifest.permission.FOREGROUND_SERVICE,
-          Manifest.permission.RECORD_AUDIO
-      )
+    // Looping waiting for permmissions
+    private fun startForegroundIfPermissionOlderVer() {
+      lifecycleScope.launch {
+          while (true) {
+              val granted = ContextCompat.checkSelfPermission(
+                  this@MainActivity,
+                  Manifest.permission.RECORD_AUDIO
+              ) == PackageManager.PERMISSION_GRANTED
   
-      val permissionsToRequest = permissions.filter {
-          ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-      }.toTypedArray()
+              if (granted) {
+                  println("DaVoice, KeyWordDetection - Audio Permissions granted, starting foreground service to enable background operation!")
+                  startForegroundServiceCompat()
+                  break
+              } else {
+                  println("DaVoice, KeyWordDetection - Audio Permissions not granted yet")
+              }
   
-      if (permissionsToRequest.isNotEmpty()) {
-          //ActivityCompat.requestPermissions(this, permissionsToRequest, REQUEST_MICROPHONE_PERMISSIONS)
-      } else {
-          startForegroundService()
+              delay(500)
+          }
       }
   }
+  // Looping waiting for permmissions end
   
+  // Looping waiting for permmissions
+  @RequiresApi(Build.VERSION_CODES.O)
+  private fun startForegroundIfPermission() {
+      lifecycleScope.launch {
+          val required = arrayOf(
+              Manifest.permission.FOREGROUND_SERVICE,
+              Manifest.permission.RECORD_AUDIO
+          )
+  
+          while (true) {
+              val missing = required.filter {
+                  ContextCompat.checkSelfPermission(this@MainActivity, it) != PackageManager.PERMISSION_GRANTED
+              }
+  
+              if (missing.isEmpty()) {
+                  println("DaVoice, KeyWordDetection - Audio Permissions granted, starting foreground service to enable background operation!")
+                  startForegroundServiceCompat()
+                  break
+              } else {
+                  println("DaVoice, KeyWordDetection - Audio Permissions not granted yet")
+              }
+  
+              delay(500)
+          }
+      }
+  }
+  // Looping waiting for permmissions end
+
   private fun startForegroundService() {
     val serviceIntent = Intent(this, MicrophoneService::class.java)
     ContextCompat.startForegroundService(this, serviceIntent)
   }
-
-  private fun startForegroundIfPermissionOlderVer() {
-    if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) 
-            != PackageManager.PERMISSION_GRANTED) {
-        ActivityCompat.requestPermissions(this, 
-                arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_MICROPHONE_PERMISSIONS)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                  ActivityCompat.requestPermissions(
-                      this,
-                      arrayOf(
-                          Manifest.permission.FOREGROUND_SERVICE_MICROPHONE,
-                          Manifest.permission.RECORD_AUDIO
-                      ),
-                      REQUEST_MICROPHONE_PERMISSIONS
-                  )
-              }
-                      
-    } else {
-       startForegroundService()
-    }
-}
 
 private val REQUEST_MICROPHONE_PERMISSIONS = 1
 /*
