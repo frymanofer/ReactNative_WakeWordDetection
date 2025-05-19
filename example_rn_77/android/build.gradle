@@ -1,0 +1,78 @@
+buildscript {
+    ext {
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 29
+        compileSdkVersion = 35
+        targetSdkVersion = 35
+        ndkVersion = "27.1.12297006"
+        kotlinVersion = "2.0.21"
+    }
+    repositories {
+        google()
+        mavenCentral()
+        // react-native-wakeword added
+	    maven { url "${project(":react-native-wakeword").projectDir}/libs" }
+        maven { url("${project(':react-native-wakeword').projectDir}/libs") } 
+        maven {
+            url("${project(':react-native-wakeword').projectDir}/libs")
+        }
+                // react-native-wakeword added
+	    maven { url "${project(":react-native-wakeword").projectDir}/libs" }
+        maven { url("${project(':react-native-wakeword').projectDir}/libs") } 
+        maven {
+            url("${project(':react-native-wakeword').projectDir}/libs")
+        }
+        // End react-native-wakeword added
+
+    // @generated begin react-native-background-fetch-maven - expo prebuild (DO NOT MODIFY) sync-b86324ce2eb77b03cc8b69ba206ef8275cd006ff
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url(new File(['node', '--print', "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), '../android'))
+        }
+        maven {
+            // Android JSC is installed from npm
+            url(new File(['node', '--print', "require.resolve('jsc-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), '../dist'))
+        }
+
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+        mavenLocal()
+
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+    }
+}
+
+allprojects {
+    repositories {
+        // react-native-wakeword added
+	    maven { url "${project(":react-native-wakeword").projectDir}/libs" }
+        maven { url("${project(':react-native-wakeword').projectDir}/libs") } 
+        maven {
+            url("${project(':react-native-wakeword').projectDir}/libs")
+        }
+        // End react-native-wakeword added
+
+
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url(new File(['node', '--print', "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), '../android'))
+        }
+        maven {
+            // Android JSC is installed from npm
+            url(new File(['node', '--print', "require.resolve('jsc-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), '../dist'))
+        }
+
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+        mavenLocal()
+    }
+}
+
+
+apply plugin: "com.facebook.react.rootproject"

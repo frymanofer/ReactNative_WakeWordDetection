@@ -16,7 +16,7 @@
     "react-native-background-timer": "^2.4.1",
     "react-native-fs": "^2.20.0",
     "react-native-linear-gradient": "^2.8.3",
-    "react-native-wakeword": "^1.1.8"
+    "react-native-wakeword": "^1.1.9"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

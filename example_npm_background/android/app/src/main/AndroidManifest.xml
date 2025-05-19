@@ -49,6 +49,7 @@
             android:exported="true"/>
         <service
             android:name=".MicrophoneService"
+            android:permission="android.permission.FOREGROUND_SERVICE"
             android:foregroundServiceType="microphone"
             android:exported="true" />
         <service
@@ -59,6 +60,7 @@
     <service
        android:name=".MicrophoneService"
        android:foregroundServiceType="microphone"
+      android:permission="android.permission.FOREGROUND_SERVICE"
        android:exported="true" />
     <service
         android:name="com.davoice.keywordsdetection.keywordslibrary.MicrophoneService"
