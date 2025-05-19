@@ -73,17 +73,17 @@ def enableProguardInReleaseBuilds = true
 def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
-    ndkVersion rootProject.ext.ndkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdk rootProject.ext.compileSdkVersion
+    ndkVersion = rootProject.ext.ndkVersion
+    buildToolsVersion = rootProject.ext.buildToolsVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
-    namespace "com.exampleapp"
+    namespace = "com.exampleapp"
     defaultConfig {
-        applicationId "com.exampleapp"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        applicationId = "com.exampleapp"
+        minSdkVersion = rootProject.ext.minSdkVersion
+        targetSdkVersion = rootProject.ext.targetSdkVersion
+        versionCode = 1
+        versionName = "1.0"
     }
     Project background_fetch = project(':react-native-background-fetch')
 
@@ -98,20 +98,25 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.debug
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-
+            signingConfig = signingConfigs.debug
+//            proguardFiles "${android.sdkDirectory}/tools/proguard/proguard-android-optimize.txt", "proguard-rules.pro"
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs.debug
+            //minifyEnabled = enableProguardInReleaseBuilds
+  ///          proguardFiles = getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "boolean", "LOGGING_ENABLED", "false"
 
         }
     }
+    packagingOptions {
+        pickFirst '**/libc++_shared.so'
+        pickFirst '**/libfbjni.so'
+        pickFirst '**/libreact_featureflagsjni.so'
+    }
+
 //    proguardFiles "${background_fetch.projectDir}/proguard-rules.pro"
 }
 
@@ -119,16 +124,13 @@ repositories {
     flatDir {
          dirs 'libs'
     }
-    maven {
-        url 'https://maven.pkg.github.com/microsoft/onnxruntime'
-    }   
     mavenLocal()
 }
+
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.20.0'
     implementation 'ai.picovoice:android-voice-processor:1.0.2'
     implementation fileTree(dir: "libs", include: ["*.aar"])
 

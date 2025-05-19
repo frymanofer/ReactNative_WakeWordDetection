@@ -19,12 +19,19 @@ import android.os.PowerManager
 import android.net.Uri
 import android.provider.Settings
 import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService;
+import com.facebook.react.soloader.OpenSourceMergedSoMapping
+import com.facebook.soloader.SoLoader;
 
 class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.AppTheme)
-    super.onCreate(null)
+    super.onCreate(savedInstanceState)
+    SoLoader.init(this, OpenSourceMergedSoMapping)
+    //if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+      //SoLoader.loadLibrary("react_featureflagsjni")
+      // OpenSourceMergedSoMapping.loadLibrary("react_featureflagsjni")
+    //}
     Log.d("MainActivity", "On create!!!!! check for cobraMainClass:() ")
     // The intent is automatically provided when the activity is launched
     if (intent != null && intent.hasCategory(Intent.CATEGORY_VOICE)) {
@@ -43,6 +50,7 @@ class MainActivity : ReactActivity() {
       checkPermissions();
     }
   }
+  
   // MainActivity.kt
   override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)

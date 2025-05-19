@@ -1,8 +1,10 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
-// swift-module-flags: -target arm64-apple-ios13.4-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-experimental-feature OpaqueTypeErasure -enable-bare-slash-regex -module-name KeyWordDetection
+// swift-module-flags: -target arm64-apple-ios13.5-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-bare-slash-regex -module-name KeyWordDetection
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface
+import AVFAudio
 import AVFoundation
+import AudioToolbox
 import CommonCrypto
 import Foundation
 @_exported import KeyWordDetection
@@ -13,66 +15,53 @@ import _SwiftConcurrencyShims
 import os.log
 import onnxruntime_objc
 import os
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class GlobalVariables : ObjectiveC.NSObject {
-  @objc public static let shared: KeyWordDetection.GlobalVariables
-  @objc public var keyWordsDetectionInstance: KeyWordDetection.KeyWordsDetection?
-  @objc public var modelName: Swift.String?
-  @objc public var threshold: Swift.Float
-  @objc public var bufferCnt: Swift.Int
+public class AVAudioWrapperBufferCE {
+  public init(size: Swift.Int)
+  public func write(samples: [Swift.Float])
+  public func read(count: Swift.Int) -> [Swift.Float]
+  public func availableSamples() -> Swift.Int
   @objc deinit
 }
-@objc public protocol KeywordDetectionRNDelegate {
-  @objc func KeywordDetectionDidDetectEvent(_ eventInfo: [Swift.String : Any])
-}
-@objc public class KeyWordsDetection : ObjectiveC.NSObject {
-  @objc weak public var delegate: (any KeyWordDetection.KeywordDetectionRNDelegate)?
-  public var eventSink: (([Swift.String : Any]) -> Swift.Void)?
-  @objc public init(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int) throws
-  @objc public func replaceKeywordDetectionModel(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int) throws
-  @objc public func getKeywordDetectionModel() -> Swift.String
-  @objc public func getRecordingWav() -> Swift.String
-  @objc public func setKeywordDetectionLicense(licenseKey: Swift.String) -> Swift.Bool
-  @objc public func setLicense(licenseKey: Swift.String) -> Swift.Bool
-  @objc public func callBack(frame: [Swift.Int16])
-  @objc public func startListening() -> Swift.Bool
-  @objc public func stopListening()
-  @objc deinit
-}
-public class AVAudioWrapperError : Foundation.LocalizedError {
-  public init(_ message: Swift.String)
-  public var errorDescription: Swift.String {
-    get
-  }
-  public var name: Swift.String {
-    get
-  }
-  @objc deinit
-}
-@_inheritsConvenienceInitializers public class AVAudioWrapperArgumentError : KeyWordDetection.AVAudioWrapperError {
-  override public init(_ message: Swift.String)
-  @objc deinit
-}
-@_inheritsConvenienceInitializers public class AVAudioWrapperReadError : KeyWordDetection.AVAudioWrapperError {
-  override public init(_ message: Swift.String)
-  @objc deinit
-}
-@_inheritsConvenienceInitializers public class AVAudioWrapperRuntimeError : KeyWordDetection.AVAudioWrapperError {
-  override public init(_ message: Swift.String)
-  @objc deinit
-}
-public typealias AVAudioWrapperFrameCallback = ([Swift.Int16]) -> Swift.Void
+public typealias AVAudioWrapperFrameCallback = ([Swift.Float]) -> Swift.Void
 public class AVAudioWrapperFrameListener {
   public init(_ callback: @escaping KeyWordDetection.AVAudioWrapperFrameCallback)
-  public func onFrame(_ frame: [Swift.Int16])
+  public func onFrame(_ frame: [Swift.Float])
   @objc deinit
 }
-public typealias AVAudioWrapperErrorCallback = (KeyWordDetection.AVAudioWrapperError) -> Swift.Void
-public class AVAudioWrapperErrorListener {
-  public init(_ callback: @escaping KeyWordDetection.AVAudioWrapperErrorCallback)
-  public func onError(_ error: KeyWordDetection.AVAudioWrapperError)
+@_hasMissingDesignatedInitializers public class AVAudioWrapperCE {
+  public static let instance: KeyWordDetection.AVAudioWrapperCE
+  public var isRecording: Swift.Bool {
+    get
+  }
+  public var frameLength: Swift.UInt32? {
+    get
+  }
+  public var sampleRate: Swift.UInt32? {
+    get
+  }
+  public var numFrameListeners: Swift.Int {
+    get
+  }
+  public static var hasRecordAudioPermission: Swift.Bool {
+    get
+  }
+  public static func requestRecordAudioPermission(_ response: @escaping (Swift.Bool) -> Swift.Void)
+  public func addFrameListener(_ listener: KeyWordDetection.AVAudioWrapperFrameListener)
+  public func removeFrameListener(_ listener: KeyWordDetection.AVAudioWrapperFrameListener)
+  public func clearFrameListeners()
+  public func setSessionOptions(sessionOptions: AVFAudio.AVAudioSession.CategoryOptions)
+  public func start(frameLength: Swift.UInt32, sampleRate: Swift.UInt32)
+  public func stop() throws
   @objc deinit
 }
-@_hasMissingDesignatedInitializers public class AVAudioWrapper {
+public class AVAudioWrapperBuffer {
+  public init(size: Swift.Int)
+  public func write(samples: [Swift.Float]) -> Swift.Int16
+  public func read(count: Swift.Int) -> [Swift.Float]
+  public func availableSamples() -> Swift.Int
+  @objc deinit
+}
+public class AVAudioWrapper {
   public static let instance: KeyWordDetection.AVAudioWrapper
   public var isRecording: Swift.Bool {
     get
@@ -87,9 +76,7 @@ public class AVAudioWrapperErrorListener {
     get
   }
   public func setSessionOptions(sessionOptions: AVFAudio.AVAudioSession.CategoryOptions)
-  public var numErrorListeners: Swift.Int {
-    get
-  }
+  public init()
   public static var hasRecordAudioPermission: Swift.Bool {
     get
   }
@@ -99,18 +86,62 @@ public class AVAudioWrapperErrorListener {
   public func removeFrameListener(_ listener: KeyWordDetection.AVAudioWrapperFrameListener)
   public func removeFrameListeners(_ listeners: [KeyWordDetection.AVAudioWrapperFrameListener])
   public func clearFrameListeners()
-  public func addErrorListener(_ listener: KeyWordDetection.AVAudioWrapperErrorListener)
-  public func removeErrorListener(_ listener: KeyWordDetection.AVAudioWrapperErrorListener)
-  public func clearErrorListeners()
-  public func start(frameLength: Swift.UInt32, sampleRate: Swift.UInt32) throws
+  public func startAfterUnDucking()
+  public func start(frameLength: Swift.UInt32, sampleRate: Swift.UInt32, setActive: Swift.Bool = true, duckOthers: Swift.Bool = false, mixWithOthers: Swift.Bool = true, defaultToSpeaker: Swift.Bool = true)
   public func stop() throws
   @objc deinit
 }
-public class AVAudioWrapperBuffer {
-  public init(size: Swift.Int)
-  public func write(samples: [Swift.Int16]) throws
-  public func read(count: Swift.Int) -> [Swift.Int16]
-  public func availableSamples() -> Swift.Int
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class GlobalVariables : ObjectiveC.NSObject {
+  @objc public static let shared: KeyWordDetection.GlobalVariables
+  @objc public var keyWordsDetectionInstance: KeyWordDetection.KeyWordsDetection?
+  @objc public var modelName: Swift.String?
+  @objc public var threshold: Swift.Float
+  @objc public var bufferCnt: Swift.Int
+  @objc deinit
+}
+@objc public protocol KeywordDetectionRNDelegate {
+  @objc func KeywordDetectionDidDetectEvent(_ eventInfo: [Swift.String : Any])
+}
+@_inheritsConvenienceInitializers @objc(KWDRuntimeWrapper) public class KWDRuntimeWrapper : ObjectiveC.NSObject {
+  @objc(shared) public static let shared: KeyWordDetection.KWDRuntimeWrapper
+  @objc weak public var delegate: (any KeyWordDetection.KeywordDetectionRNDelegate)?
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc public class KeyWordsDetection : ObjectiveC.NSObject {
+  @objc weak public var delegate: (any KeyWordDetection.KeywordDetectionRNDelegate)?
+  public var eventSink: (([Swift.String : Any]) -> Swift.Void)?
+  @objc convenience public init(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int) throws
+  @objc public init(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int, cancelEcho: Swift.Bool = false) throws
+  @objc public func replaceKeywordDetectionModel(modelPath: Swift.String, threshold: Swift.Float, bufferCnt: Swift.Int) throws
+  @objc public func getKeywordDetectionModel() -> Swift.String
+  @objc public func getRecordingWav() -> Swift.String
+  @objc public func setKeywordDetectionLicense(licenseKey: Swift.String) -> Swift.Bool
+  @objc public func setLicense(licenseKey: Swift.String) -> Swift.Bool
+  @objc public func callBack(frame: [Swift.Float])
+  @objc public func startListening(setActive: Swift.Bool = true, duckOthers: Swift.Bool = false, mixWithOthers: Swift.Bool = true, defaultToSpeaker: Swift.Bool = true) -> Swift.Bool
+  @objc public func stopListening()
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc public class AudioSessionAndDuckingManager : ObjectiveC.NSObject {
+  @objc public static let shared: KeyWordDetection.AudioSessionAndDuckingManager
+  @objc public func initAudioSessAndDuckManage()
+  @objc public func disableDucking()
+  @objc public func _disableDucking()
+  @objc public func enableAggressiveDucking()
+  @objc public func _enableAggressiveDucking()
+  @objc public func enableAggressiveDuckingWorksMaxSilencing()
+  @objc public func enableAggressiveDuckingWorksOnSecondTime()
+  @objc public func disableDuckingWorks()
+  @objc public func disableDuckingDidNotUnDuck()
+  @objc public func disableDuckingOrg()
+  @objc public func restartListeningAfterDucking()
+  @objc public func disableDuckingAndCleanup()
+  @objc public func activateSessionForDucking()
+  @objc public func playInstructionSound(_ soundURL: Foundation.URL)
+  @objc public func speakInstruction(_ text: Swift.String)
+  @objc public func deactivateSession()
+  @objc override dynamic public init()
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class LicenseManager : ObjectiveC.NSObject {
