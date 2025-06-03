@@ -27,6 +27,13 @@ seamless and intuitive voice-driven user experiences.
 
 ## Latest news
 
+- **New 2 June 2025**:
+  
+   Fix **IOS build failure**.
+
+   **issue** - could not build IOS app when the Podfile was set to static linking. </br>
+   **solution** - fixed in react-native-wakeword npm package version "1.1.12".
+
 - **New npm install:** Now you can integrate Davoice without any additional integrations by using "npm install react-native-wakeword" make sure you install version >= 1.0.25. **Wake word npm package:**: https://www.npmjs.com/package/react-native-wakeword
 
 
