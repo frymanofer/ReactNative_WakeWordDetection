@@ -103,10 +103,20 @@ private void startForegroundIfPermission() {
     handler.post(permissionCheckerRunnable);
 }
 
-
    private void startForegroundService() {
        Intent serviceIntent = new Intent(this, MicrophoneService.class);
        ContextCompat.startForegroundService(this, serviceIntent);
+   }
+   @Override
+   protected void onDestroy() {
+    super.onDestroy();
+    // Stop the foreground service when MainActivity is destroyed
+    stopMicrophoneService();
+   }
+
+   private void stopMicrophoneService() {
+    Intent serviceIntent = new Intent(this, MicrophoneService.class);
+    stopService(serviceIntent);
    }
 ```
 
@@ -202,6 +212,17 @@ override fun onCreate(savedInstanceState: Bundle?) {
   private fun startForegroundServiceCompat() {
       val intent = Intent(this, MicrophoneService::class.java)
       ContextCompat.startForegroundService(this, intent)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    // Stop the foreground service when MainActivity is destroyed
+    stopMicrophoneService()
+  }
+
+  private fun stopMicrophoneService() {
+    val intent = Intent(this, MicrophoneService::class.java)
+    stopService(intent)
   }
 ```
 
