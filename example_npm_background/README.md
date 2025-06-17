@@ -22,16 +22,25 @@ This is an example of how to use the npm package and enable listening to wake wo
 ## Java:
 
 ```
-import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService;
-public class MainActivity extends ReactActivity {
-
 // Add this in the import section:
 import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService;
 import android.content.Intent;
 import android.os.Build;
 import android.Manifest;
+import android.os.Bundle;
 import androidx.core.content.ContextCompat;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import androidx.annotation.RequiresApi;
+import java.util.ArrayList;
+import java.util.List;
+import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService;
+
+public class MainActivity extends ReactActivity {
+
+private final Handler handler = new Handler();
+private Runnable permissionCheckerRunnable;
+
 
 // Add this in the onCreate
 // In java it looks like - protected void onCreate(Bundle savedInstanceState) {
@@ -41,36 +50,58 @@ import android.content.pm.PackageManager;
        } else {
            startForegroundIfPermissionOlderVer();
        }     
+
+
 // Add the following functions:
-   private void startForegroundIfPermissionOlderVer() {
-       if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-               != PackageManager.PERMISSION_GRANTED) {
-           // Do nothing
-       } else {
-           startForegroundService();
-       }
-   }
-  
-   @RequiresApi(Build.VERSION_CODES.O)
-   private void startForegroundIfPermission() {
-       String[] permissions = {
-           Manifest.permission.FOREGROUND_SERVICE,
-           Manifest.permission.RECORD_AUDIO
-       };
-  
-       List<String> permissionsToRequest = new ArrayList<>();
-       for (String permission : permissions) {
-           if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-               permissionsToRequest.add(permission);
-           }
-       }
-  
-       if (!permissionsToRequest.isEmpty()) {
-           // Davoice - You can ask for Permissions here and start the Service however Permissions should be granted elsewhere.
-       } else {
-           startForegroundService();
-       }
-   }
+private void startForegroundIfPermissionOlderVer() {
+    permissionCheckerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            boolean granted = ContextCompat.checkSelfPermission(
+                MainActivity.this,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED;
+
+            if (granted) {
+                System.out.println("DaVoice, KeyWordDetection - Audio Permissions granted, starting foreground service to enable background operation!");
+                startForegroundService();
+            } else {
+                System.out.println("DaVoice, KeyWordDetection - Audio Permissions not granted yet");
+                handler.postDelayed(this, 500);
+            }
+        }
+    };
+    handler.post(permissionCheckerRunnable);
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+private void startForegroundIfPermission() {
+    permissionCheckerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            String[] required = {
+                Manifest.permission.FOREGROUND_SERVICE,
+                Manifest.permission.RECORD_AUDIO
+            };
+
+            List<String> missing = new ArrayList<>();
+            for (String permission : required) {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    missing.add(permission);
+                }
+            }
+
+            if (missing.isEmpty()) {
+                System.out.println("DaVoice, KeyWordDetection - Audio Permissions granted, starting foreground service to enable background operation!");
+                startForegroundService();
+            } else {
+                System.out.println("DaVoice, KeyWordDetection - Audio Permissions not granted yet");
+                handler.postDelayed(this, 500);
+            }
+        }
+    };
+    handler.post(permissionCheckerRunnable);
+}
 
 
    private void startForegroundService() {
