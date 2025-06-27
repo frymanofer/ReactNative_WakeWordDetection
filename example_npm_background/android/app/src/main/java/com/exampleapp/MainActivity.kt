@@ -105,9 +105,25 @@ class MainActivity : ReactActivity() {
   }
   // Looping waiting for permmissions end
 
+  private fun startForegroundServiceCompat() {
+      val intent = Intent(this, MicrophoneService::class.java)
+      ContextCompat.startForegroundService(this, intent)
+  }
+
   private fun startForegroundService() {
     val serviceIntent = Intent(this, MicrophoneService::class.java)
     ContextCompat.startForegroundService(this, serviceIntent)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    // Stop the foreground service when MainActivity is destroyed
+    stopMicrophoneService()
+  }
+
+  private fun stopMicrophoneService() {
+    val intent = Intent(this, MicrophoneService::class.java)
+    stopService(intent)
   }
 
 private val REQUEST_MICROPHONE_PERMISSIONS = 1

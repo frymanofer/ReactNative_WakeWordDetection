@@ -140,6 +140,8 @@ dependencies {
     //implementation 'ai.picovoice:android-voice-processor:1.0.2'
     //implementation fileTree(dir: "libs", include: ["*.aar"])
     //implementation fileTree(dir: "libs", include: ["*.aar"])
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
