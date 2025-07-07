@@ -54,13 +54,14 @@ interface instanceConfig {
   threshold: number;
   bufferCnt: number;
   sticky: boolean;
+  msBetweenCallbacks:number;
 }
   // Create an array of instance configurations
   const instanceConfigs:instanceConfig[] = [
-    { id: 'hey_lookdeep', modelName: 'hey_lookdeep.onnx', threshold: 0.9999, bufferCnt: 3 , sticky: false },
+    { id: 'multi_model_instance', modelName: 'hey_lookdeep.onnx', threshold: 0.99, bufferCnt: 4 , sticky: false, msBetweenCallbacks: 1000 },
+    { id: 'multi_model_instance', modelName: 'need_help_now.onnx', threshold: 0.99, bufferCnt: 4 , sticky: false, msBetweenCallbacks: 1000 },
+    { id: 'multi_model_instance', modelName: 'coca_cola_model_28_05052025.onnx', threshold: 0.99, bufferCnt: 4 , sticky: false, msBetweenCallbacks: 1000 },
   ];
-
-//import RNFS from 'react-native-fs';
 
 import { NativeModules } from 'react-native';
 import { AppState } from 'react-native';
@@ -69,6 +70,7 @@ import { AppState } from 'react-native';
 // Helper function to format the ONNX file name
 const formatWakeWord = (fileName) => {
   return fileName
+    .replace(/(_model.*|_\d+.*)\.onnx$/, '')  // Remove _model... or _<digits>... before .onnx
     .replace(/_/g, ' ')  // Use global flag to replace all underscores
     .replace('.onnx', '')
     .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
@@ -132,6 +134,7 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 type DetectionCallback = (event: any) => void;
 
   
+// ** OLD ** 
 // Function to add a new instance dynamically
 //async function addInstance(conf: instanceConfig) 
 async function addInstance(
@@ -148,10 +151,37 @@ async function addInstance(
   return instance;
 }
 
+// ** NEW MULTI EFFICIENT MODELS **
+// Function to add a new instance dynamically
+// async function addInstance(conf: instanceConfig) 
+async function addInstanceMulti(
+  conf: instanceConfig): Promise<KeyWordRNBridgeInstance> {
+  const id = conf.id;
+  const instance = await createKeyWordRNBridgeInstance(id, false);
+
+  if (!instance) {
+      console.error(`Failed to create instance ${id}`);
+  }
+  console.log(`Instance ${id} created ${instance}`);
+  // Group configs under the same instance ID (you can customize how to group them)
+
+  const modelNames = instanceConfigs.map(conf => conf.modelName);
+  const thresholds = instanceConfigs.map(conf => conf.threshold);
+  const bufferCnts = instanceConfigs.map(conf => conf.bufferCnt);
+  const msBetweenCallbacks = instanceConfigs.map(conf => conf.msBetweenCallbacks);
+
+  await instance.createInstanceMulti(modelNames, thresholds, bufferCnts, msBetweenCallbacks);
+
+//  await instance.createInstance(conf.modelName, conf.threshold, conf.bufferCnt);
+  console.log(`Instance ${id} createInstance() called`);
+  return instance;
+}
+
+
 async function set_callback(instance: KeyWordRNBridgeInstance, callback: (phrase: string) => void) { 
   const eventListener = instance.onKeywordDetectionEvent((phrase: string) => {
-    phrase = formatWakeWord(instance.instanceId);
-    console.log(`Instance ${instance.instanceId} detected: ${instance.instanceId} with phrase`, phrase);
+    phrase = formatWakeWord(phrase);
+    console.log(`Instance ${instance.instanceId} detected: ${phrase} with phrase`, phrase);
     // callback(phrase); Does not work on IOS
     callback(phrase);
   });
@@ -173,8 +203,9 @@ function removeEventListener(eventListener: any) {
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const [isFlashing, setIsFlashing] = useState(false);
-  const wakeWordFile = instanceConfigs[0].modelName;
-  const wakeWord = formatWakeWord(wakeWordFile);
+  const wakeWords = instanceConfigs
+  .map((config) => formatWakeWord(config.modelName))
+  .join(", ");
 // If you use useModel
 //  console.log("useModel == ", useModel)
 //  const { stopListening, startListening, loadModel, setKeywordDetectionLicense} = useModel();
@@ -214,7 +245,7 @@ function App(): React.JSX.Element {
   }, []);
 
   // State to handle the display message
-  const [message, setMessage] = useState(`Listening to WakeWord '${wakeWord}'...`);
+  const [message, setMessage] = useState(`Listening to WakeWords '${wakeWords}'...`);
 
   useEffect(() => {
 
@@ -230,7 +261,7 @@ function App(): React.JSX.Element {
 
       const timeout = setTimeout(async () => {
         console.log('5 seconds have passed!');
-        setMessage(`Listening to WakeWord '${wakeWord}'...`);
+        setMessage(`Listening to WakeWord '${wakeWords}'...`);
         setIsFlashing(false);  // Start flashing effect (Line 122)
         // Perform your action here
         // Stop detection
@@ -244,15 +275,16 @@ function App(): React.JSX.Element {
       try {        
         try {
           console.log('Adding element:', instanceConfigs[0]);
-          myInstance = await addInstance(instanceConfigs[0]);
+          myInstance = await addInstanceMulti(instanceConfigs[0]);
         } catch (error) {
             console.error("Error loading model:", error);
             return;
         }
         eventListener = await set_callback(myInstance, keywordCallback);
         const isLicensed = await myInstance.setKeywordDetectionLicense(
-          "MTc0OTkzNDgwMDAwMA==-QOkSZvHDA+qRiN/vX2Kp2xt30+hro4jze3dzJJAeEMc=");
-        await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
+//          "MTc0OTkzNDgwMDAwMA==-QOkSZvHDA+qRiN/vX2Kp2xt30+hro4jze3dzJJAeEMc=");
+          "MTc1MjUyNjgwMDAwMA==-RbOr3R66OPByzZxLe7vgM6JDlrrejrgRzbo41+g8qrM=");
+       await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
         if (!isLicensed) {
           console.error("No License!!! - setKeywordDetectionLicense returned", isLicensed);
         }
