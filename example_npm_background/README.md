@@ -21,7 +21,7 @@ This is an example of how to use the npm package and enable listening to wake wo
 
 ## Java:
 
-```
+```java
 // Add this in the import section:
 import com.davoice.keywordsdetection.keywordslibrary.MicrophoneService;
 import android.content.Intent;
@@ -125,7 +125,7 @@ private void startForegroundIfPermission() {
 
 **1 . Imports - place at top of MainActivity.kt**
 
-```
+```kotlin
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -143,7 +143,7 @@ import kotlinx.coroutines.launch
 
 **2 . Inside onCreate()**
 
-```
+```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     // …
 
@@ -157,7 +157,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 **3 . Helper functions (add inside the same MainActivity class)**
 
-```
+```kotlin
     // Looping waiting for permmissions
     private fun startForegroundIfPermissionOlderVer() {
       lifecycleScope.launch {
@@ -225,6 +225,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
     stopService(intent)
   }
 ```
+
+**PLEASE NOTE: If you also required to start the foreground service only uppon initialization of keyworddetection
+ you can use MicrophoneService.isKeywordDetectionInitialized()**
 
 # 2) Manifest - Add the following:
 
