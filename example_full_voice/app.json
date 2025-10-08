@@ -1,0 +1,14 @@
+{
+  "name": "ExampleApp",
+  "displayName": "ExampleApp",
+  "android": {
+    "packageName": "com.exampleapp"
+  },
+  "expo": {
+    "name": "example",
+    "plugins": [
+      "react-native-wakeword",
+      "react-native-vad"
+    ]
+  }
+}

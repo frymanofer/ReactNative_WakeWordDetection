@@ -1,0 +1,638 @@
+{
+  "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example",
+  "reactNativePath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native",
+  "reactNativeVersion": "0.75",
+  "dependencies": {
+    "react-native-background-fetch": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-background-fetch",
+      "name": "react-native-background-fetch",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-background-fetch/RNBackgroundFetch.podspec",
+          "version": "4.2.8",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-background-fetch/android",
+          "packageImportPath": "import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;",
+          "packageInstance": "new RNBackgroundFetchPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-background-fetch/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-davoice-tts": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-davoice-tts",
+      "name": "react-native-davoice-tts",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-davoice-tts/TTSRNBridge.podspec",
+          "version": "1.0.45",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-davoice-tts/android",
+          "packageImportPath": "import com.davoice.tts.rn.DaVoicePackage;",
+          "packageInstance": "new DaVoicePackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-davoice-tts/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-fs": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-fs",
+      "name": "react-native-fs",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-fs/RNFS.podspec",
+          "version": "2.20.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-fs/android",
+          "packageImportPath": "import com.rnfs.RNFSPackage;",
+          "packageInstance": "new RNFSPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-fs/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-linear-gradient": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-linear-gradient",
+      "name": "react-native-linear-gradient",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-linear-gradient/BVLinearGradient.podspec",
+          "version": "2.8.3",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-linear-gradient/android",
+          "packageImportPath": "import com.BV.LinearGradient.LinearGradientPackage;",
+          "packageInstance": "new LinearGradientPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-linear-gradient/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-sound": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-sound",
+      "name": "react-native-sound",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-sound/RNSound.podspec",
+          "version": "0.11.2",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-sound/android",
+          "packageImportPath": "import com.zmxv.RNSound.RNSoundPackage;",
+          "packageInstance": "new RNSoundPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-sound/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-wakeword-aec": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-wakeword-aec",
+      "name": "react-native-wakeword-aec",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-wakeword-aec/KeyWordRNBridge.podspec",
+          "version": "1.1.67",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-wakeword-aec/android",
+          "packageImportPath": "import com.davoice.keywordspotting.KeyWordRNBridgePackage;",
+          "packageInstance": "new KeyWordRNBridgePackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-wakeword-aec/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-permissions": {
+      "root": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-permissions",
+      "name": "react-native-permissions",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-permissions/RNPermissions.podspec",
+          "version": "4.1.5",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-permissions/android",
+          "packageImportPath": "import com.zoontek.rnpermissions.RNPermissionsPackage;",
+          "packageInstance": "new RNPermissionsPackage()",
+          "buildTypes": [],
+          "libraryName": "RNPermissionsSpec",
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    }
+  },
+  "commands": [
+    {
+      "name": "bundle",
+      "description": "Build the bundle for the provided JavaScript entry file.",
+      "options": [
+        {
+          "name": "--entry-file <path>",
+          "description": "Path to the root JS file, either absolute or relative to JS root"
+        },
+        {
+          "name": "--platform <string>",
+          "description": "Either \"ios\" or \"android\"",
+          "default": "ios"
+        },
+        {
+          "name": "--transformer <string>",
+          "description": "Specify a custom transformer to be used"
+        },
+        {
+          "name": "--dev [boolean]",
+          "description": "If false, warnings are disabled and the bundle is minified",
+          "default": true
+        },
+        {
+          "name": "--minify [boolean]",
+          "description": "Allows overriding whether bundle is minified. This defaults to false if dev is true, and true if dev is false. Disabling minification can be useful for speeding up production builds for testing purposes."
+        },
+        {
+          "name": "--bundle-output <string>",
+          "description": "File name where to store the resulting bundle, ex. /tmp/groups.bundle"
+        },
+        {
+          "name": "--bundle-encoding <string>",
+          "description": "Encoding the bundle should be written in (https://nodejs.org/api/buffer.html#buffer_buffer).",
+          "default": "utf8"
+        },
+        {
+          "name": "--max-workers <number>",
+          "description": "Specifies the maximum number of workers the worker-pool will spawn for transforming files. This defaults to the number of the cores available on your machine."
+        },
+        {
+          "name": "--sourcemap-output <string>",
+          "description": "File name where to store the sourcemap file for resulting bundle, ex. /tmp/groups.map"
+        },
+        {
+          "name": "--sourcemap-sources-root <string>",
+          "description": "Path to make sourcemap's sources entries relative to, ex. /root/dir"
+        },
+        {
+          "name": "--sourcemap-use-absolute-path",
+          "description": "Report SourceMapURL using its full path",
+          "default": false
+        },
+        {
+          "name": "--assets-dest <string>",
+          "description": "Directory name where to store assets referenced in the bundle"
+        },
+        {
+          "name": "--unstable-transform-profile <string>",
+          "description": "Experimental, transform JS for a specific JS engine. Currently supported: hermes, hermes-canary, default",
+          "default": "default"
+        },
+        {
+          "name": "--asset-catalog-dest [string]",
+          "description": "Path where to create an iOS Asset Catalog for images"
+        },
+        {
+          "name": "--reset-cache",
+          "description": "Removes cached files",
+          "default": false
+        },
+        {
+          "name": "--read-global-cache",
+          "description": "Try to fetch transformed JS code from the global cache, if configured.",
+          "default": false
+        },
+        {
+          "name": "--config <string>",
+          "description": "Path to the CLI configuration file"
+        },
+        {
+          "name": "--resolver-option <string...>",
+          "description": "Custom resolver options of the form key=value. URL-encoded. May be specified multiple times."
+        }
+      ]
+    },
+    {
+      "name": "start",
+      "description": "Start the React Native development server.",
+      "options": [
+        {
+          "name": "--port <number>"
+        },
+        {
+          "name": "--host <string>",
+          "default": ""
+        },
+        {
+          "name": "--projectRoot <path>",
+          "description": "Path to a custom project root"
+        },
+        {
+          "name": "--watchFolders <list>",
+          "description": "Specify any additional folders to be added to the watch list"
+        },
+        {
+          "name": "--assetPlugins <list>",
+          "description": "Specify any additional asset plugins to be used by the packager by full filepath"
+        },
+        {
+          "name": "--sourceExts <list>",
+          "description": "Specify any additional source extensions to be used by the packager"
+        },
+        {
+          "name": "--max-workers <number>",
+          "description": "Specifies the maximum number of workers the worker-pool will spawn for transforming files. This defaults to the number of the cores available on your machine."
+        },
+        {
+          "name": "--transformer <string>",
+          "description": "Specify a custom transformer to be used"
+        },
+        {
+          "name": "--reset-cache, --resetCache",
+          "description": "Removes cached files"
+        },
+        {
+          "name": "--custom-log-reporter-path, --customLogReporterPath <string>",
+          "description": "Path to a JavaScript file that exports a log reporter as a replacement for TerminalReporter"
+        },
+        {
+          "name": "--https",
+          "description": "Enables https connections to the server"
+        },
+        {
+          "name": "--key <path>",
+          "description": "Path to custom SSL key"
+        },
+        {
+          "name": "--cert <path>",
+          "description": "Path to custom SSL cert"
+        },
+        {
+          "name": "--config <string>",
+          "description": "Path to the CLI configuration file"
+        },
+        {
+          "name": "--no-interactive",
+          "description": "Disables interactive mode"
+        },
+        {
+          "name": "--experimental-debugger",
+          "description": "[Experimental] Enable the new debugger experience and 'j' to debug. This enables the new frontend experience only: connection reliability and some basic features are unstable in this release."
+        }
+      ]
+    },
+    {
+      "name": "codegen",
+      "options": [
+        {
+          "name": "--path <path>",
+          "description": "Path to the React Native project root.",
+          "default": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example"
+        },
+        {
+          "name": "--platform <string>",
+          "description": "Target platform. Supported values: \"android\", \"ios\", \"all\".",
+          "default": "all"
+        },
+        {
+          "name": "--outputPath <path>",
+          "description": "Path where generated artifacts will be output to."
+        }
+      ]
+    },
+    {
+      "name": "log-ios",
+      "description": "starts iOS device syslog tail",
+      "options": [
+        {
+          "name": "-i --interactive",
+          "description": "Explicitly select simulator to tail logs from. By default it will tail logs from the first booted and available simulator."
+        }
+      ]
+    },
+    {
+      "name": "run-ios",
+      "description": "builds your app and starts it on iOS simulator",
+      "examples": [
+        {
+          "desc": "Run on a different simulator, e.g. iPhone SE (2nd generation)",
+          "cmd": "npx react-native run-ios --simulator \"iPhone SE (2nd generation)\""
+        },
+        {
+          "desc": "Run on a connected device, e.g. Max's iPhone",
+          "cmd": "npx react-native run-ios --device \"Max's iPhone\""
+        },
+        {
+          "desc": "Run on the AppleTV simulator",
+          "cmd": "npx react-native run-ios --simulator \"Apple TV\"  --scheme \"helloworld-tvOS\""
+        }
+      ],
+      "options": [
+        {
+          "name": "--no-packager",
+          "description": "Do not launch packager while running the app"
+        },
+        {
+          "name": "--port <number>",
+          "default": 8081
+        },
+        {
+          "name": "--terminal <string>",
+          "description": "Launches the Metro Bundler in a new window using the specified terminal path.",
+          "default": "vscode"
+        },
+        {
+          "name": "--binary-path <string>",
+          "description": "Path relative to project root where pre-built .app binary lives."
+        },
+        {
+          "name": "--list-devices",
+          "description": "List all available iOS devices and simulators and let you choose one to run the app. "
+        },
+        {
+          "name": "--udid <string>",
+          "description": "Explicitly set the device to use by UDID"
+        },
+        {
+          "name": "--simulator <string>",
+          "description": "Explicitly set the simulator to use. Optionally set the iOS version between parentheses at the end to match an exact version: \"iPhone 15 (17.0)\""
+        },
+        {
+          "name": "--device [string]",
+          "description": "Explicitly set the device to use by name or by unique device identifier . If the value is not provided,the app will run on the first available physical device."
+        },
+        {
+          "name": "--mode <string>",
+          "description": "Explicitly set the scheme configuration to use. This option is case sensitive."
+        },
+        {
+          "name": "--scheme <string>",
+          "description": "Explicitly set Xcode scheme to use"
+        },
+        {
+          "name": "--destination <string>",
+          "description": "Explicitly extend destination e.g. \"arch=x86_64\""
+        },
+        {
+          "name": "--verbose",
+          "description": "Do not use xcbeautify or xcpretty even if installed"
+        },
+        {
+          "name": "--xcconfig [string]",
+          "description": "Explicitly set xcconfig to use"
+        },
+        {
+          "name": "--buildFolder <string>",
+          "description": "Location for iOS build artifacts. Corresponds to Xcode's \"-derivedDataPath\"."
+        },
+        {
+          "name": "--extra-params <string>",
+          "description": "Custom params that will be passed to xcodebuild command."
+        },
+        {
+          "name": "--target <string>",
+          "description": "Explicitly set Xcode target to use."
+        },
+        {
+          "name": "-i --interactive",
+          "description": "Explicitly select which scheme and configuration to use before running a build"
+        },
+        {
+          "name": "--force-pods",
+          "description": "Force CocoaPods installation"
+        }
+      ]
+    },
+    {
+      "name": "build-ios",
+      "description": "builds your app for iOS platform",
+      "examples": [
+        {
+          "desc": "Build the app for all iOS devices in Release mode",
+          "cmd": "npx react-native build-ios --mode \"Release\""
+        }
+      ],
+      "options": [
+        {
+          "name": "--mode <string>",
+          "description": "Explicitly set the scheme configuration to use. This option is case sensitive."
+        },
+        {
+          "name": "--scheme <string>",
+          "description": "Explicitly set Xcode scheme to use"
+        },
+        {
+          "name": "--destination <string>",
+          "description": "Explicitly extend destination e.g. \"arch=x86_64\""
+        },
+        {
+          "name": "--verbose",
+          "description": "Do not use xcbeautify or xcpretty even if installed"
+        },
+        {
+          "name": "--xcconfig [string]",
+          "description": "Explicitly set xcconfig to use"
+        },
+        {
+          "name": "--buildFolder <string>",
+          "description": "Location for iOS build artifacts. Corresponds to Xcode's \"-derivedDataPath\"."
+        },
+        {
+          "name": "--extra-params <string>",
+          "description": "Custom params that will be passed to xcodebuild command."
+        },
+        {
+          "name": "--target <string>",
+          "description": "Explicitly set Xcode target to use."
+        },
+        {
+          "name": "-i --interactive",
+          "description": "Explicitly select which scheme and configuration to use before running a build"
+        },
+        {
+          "name": "--force-pods",
+          "description": "Force CocoaPods installation"
+        }
+      ]
+    },
+    {
+      "name": "log-android",
+      "description": "starts logkitty"
+    },
+    {
+      "name": "run-android",
+      "description": "builds your app and starts it on a connected Android emulator or device",
+      "options": [
+        {
+          "name": "--mode <string>",
+          "description": "Specify your app's build variant"
+        },
+        {
+          "name": "--tasks <list>",
+          "description": "Run custom Gradle tasks. By default it's \"assembleDebug\". Will override passed mode and variant arguments."
+        },
+        {
+          "name": "--active-arch-only",
+          "description": "Build native libraries only for the current device architecture for debug builds.",
+          "default": false
+        },
+        {
+          "name": "--extra-params <string>",
+          "description": "Custom params passed to gradle build command"
+        },
+        {
+          "name": "-i --interactive",
+          "description": "Explicitly select build type and flavour to use before running a build"
+        },
+        {
+          "name": "--no-packager",
+          "description": "Do not launch packager while running the app"
+        },
+        {
+          "name": "--port <number>",
+          "default": 8081
+        },
+        {
+          "name": "--terminal <string>",
+          "description": "Launches the Metro Bundler in a new window using the specified terminal path.",
+          "default": "vscode"
+        },
+        {
+          "name": "--appId <string>",
+          "description": "Specify an applicationId to launch after build. If not specified, `package` from AndroidManifest.xml will be used.",
+          "default": ""
+        },
+        {
+          "name": "--appIdSuffix <string>",
+          "description": "Specify an applicationIdSuffix to launch after build.",
+          "default": ""
+        },
+        {
+          "name": "--main-activity <string>",
+          "description": "Name of the activity to start"
+        },
+        {
+          "name": "--device <string>",
+          "description": "Explicitly set the device to use by name. The value is not required if you have a single device connected."
+        },
+        {
+          "name": "--deviceId <string>",
+          "description": "**DEPRECATED** Builds your app and starts it on a specific device/simulator with the given device id (listed by running \"adb devices\" on the command line)."
+        },
+        {
+          "name": "--list-devices",
+          "description": "Lists all available Android devices and simulators and let you choose one to run the app",
+          "default": false
+        },
+        {
+          "name": "--binary-path <string>",
+          "description": "Path relative to project root where pre-built .apk binary lives."
+        },
+        {
+          "name": "--user <number>",
+          "description": "Id of the User Profile you want to install the app on."
+        }
+      ]
+    },
+    {
+      "name": "build-android",
+      "description": "builds your app",
+      "options": [
+        {
+          "name": "--mode <string>",
+          "description": "Specify your app's build variant"
+        },
+        {
+          "name": "--tasks <list>",
+          "description": "Run custom Gradle tasks. By default it's \"assembleDebug\". Will override passed mode and variant arguments."
+        },
+        {
+          "name": "--active-arch-only",
+          "description": "Build native libraries only for the current device architecture for debug builds.",
+          "default": false
+        },
+        {
+          "name": "--extra-params <string>",
+          "description": "Custom params passed to gradle build command"
+        },
+        {
+          "name": "-i --interactive",
+          "description": "Explicitly select build type and flavour to use before running a build"
+        }
+      ]
+    }
+  ],
+  "healthChecks": [],
+  "platforms": {
+    "ios": {},
+    "android": {}
+  },
+  "assets": [],
+  "project": {
+    "ios": {
+      "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/ios",
+      "xcodeProject": {
+        "name": "ExampleApp.xcworkspace",
+        "path": ".",
+        "isWorkspace": true
+      },
+      "automaticPodsInstallation": false,
+      "assets": []
+    },
+    "android": {
+      "sourceDir": "/Volumes/T9/projects/ReactNative_WakeWordDetection/example/android",
+      "appName": "app",
+      "packageName": "com.exampleapp",
+      "applicationId": "com.exampleapp",
+      "mainActivity": ".MainActivity",
+      "assets": []
+    }
+  }
+}
