@@ -81,9 +81,6 @@ Porcupine (Picovoice)      0.924812
 OpenWakeWords              0.686567
 ```
 
-**Read Tyler Troy, CTO & Co-Founder of LookDeep, Reddit post:**  
-[Bulletproof Wakeword/Keyword Spotting](https://www.reddit.com/r/Python/comments/1ioo4yd/bulletproof_wakewordkeyword_spotting/)
-
 - Source: Customer-reported results received on Dec 20, 2024.
 - OS: [Linux Python].
 - Models/versions: [hey_look_deep_model_28_08122024.py2].
