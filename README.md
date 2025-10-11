@@ -51,7 +51,7 @@ seamless and intuitive voice-driven user experiences.
 
 ## <u>Customer Benchmark **Ⅰ**:</u>
 #### <u>Provided by **[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)**, CTO & Co-Founder of **[LookDeep Health](https://lookdeep.health/)**</u>  
-**[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)** conducted a benchmark at **[LookDeep Health](https://lookdeep.health/)** to select a **"phrase detection"** vendor.
+**[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)** at **[LookDeep Health](https://lookdeep.health/)** reported benchmark below, he did, to select a **"phrase detection"** vendor.
 
 ## **RESULTS BELOW:**
 
