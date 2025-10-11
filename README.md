@@ -49,17 +49,26 @@ seamless and intuitive voice-driven user experiences.
 
 # <u> 🟢🟢 Customer Benchmarks 🟢🟢 </u>
 
-## <u>Customer Benchmark **Ⅰ**:</u>
-#### <u>Provided by **[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)**, CTO & Co-Founder of **[LookDeep Health](https://lookdeep.health/)**</u>  
-**[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)** at **[LookDeep Health](https://lookdeep.health/)** reported benchmark below, he did, to select a **"phrase detection"** vendor.
+
+
+Provided by: Tyler Troy, CTO & Co-Founder, LookDeep Health
+Context: Tyler .
+
+🔵 Criterion I — False Positives (hospital relevance)
+
+## <u>Customer Benchmark **Ⅰ** — LookDeep Health (Customer-reported):</u>
+#### <u>Provided by **[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)**, Co-Founder at **[LookDeep Health](https://lookdeep.health/)**</u>  
+**[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)** at **[LookDeep Health](https://lookdeep.health/)** reported benchmark below as part of selecting a **"phrase detection"** vendor.
 
 ## **RESULTS BELOW:**
 
-### ** 🔵 Crucial Criteria **Ⅰ** - False Positives**
-- **This is THE most crucial criteria**, in hospital settings, false alerts are unacceptable—they waste valuable time and can compromise patient care.  
+### ** 🔵 Criteria **Ⅰ** - False Positives**
+- In hospital settings, false alerts waste valuable time and can compromise patient care.  
 - **✅ DaVoice: "ZERO FALSE POSITIVES" within a month duration of testing.**  
-- In contrast, Picovoice triggered several false alerts during testing, making it unsuitable for critical environments like hospitals.  
-- OpenWakeWord was not tested for false positives because its true positive rate was too low.  
+- Porcupine (Picovoice): Several false alerts triggered daily observed under a similar setup.
+- OpenWakeWord was not tested for false positives because its true positive rate was too low.
+
+**Definition used by the customer: a “false positive” is a wake event when no wake phrase was spoken, counted over the monitored period.**
 
 ### **🔵 Criteria II - True Positive**
 
