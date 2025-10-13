@@ -57,8 +57,8 @@ Context: Tyler .
 🔵 Criterion I — False Positives (hospital relevance)
 
 ## <u>Customer Benchmark **Ⅰ** — LookDeep Health (Customer-reported):</u>
-#### <u>Provided by **[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)**, Co-Founder at **[LookDeep Health](https://lookdeep.health/)**</u>  
-**[Tyler Troy](https://lookdeep.health/team/tyler-troy-phd/)** at **[LookDeep Health](https://lookdeep.health/)** reported benchmark below as part of selecting a **"phrase detection"** vendor.
+#### <u>Provided by **[Tyler Troy](https://www.lookdeep.health/about-us)**, Co-Founder at **[LookDeep Health](https://lookdeep.health/)**</u>  
+**[Tyler Troy](https://www.lookdeep.health/about-us/)** at **[LookDeep Health](https://lookdeep.health/)** reported benchmark below as part of selecting a **"phrase detection"** vendor.
 
 ## **RESULTS BELOW:**
 
