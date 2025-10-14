@@ -15,7 +15,7 @@
     "react": "19.1.1",
     "react-native": "0.82.0",
     "react-native-background-fetch": "^4.2.5",
-    "react-native-davoice-tts": "^1.0.197",
+    "react-native-davoice-tts": "^1.0.200",
     "react-native-davoice-tts-model2": "^1.0.30",
     "react-native-fs": "^2.20.0",
     "react-native-linear-gradient": "^2.8.3",

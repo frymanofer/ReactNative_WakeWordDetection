@@ -513,7 +513,7 @@ function App(): React.JSX.Element {
       setIsFlashing(true);
 
       try {
-        await Speech.initAll({ locale:'en-US', model: 'model.onnx' });
+        await Speech.initAll({ locale:'en-US', model: 'model2.onnx' });
         console.log('Calling Speech.start');
         const off = Speech.onFinishedSpeaking = () => {
           console.log('✅ Finished speaking (last WAV done).');
