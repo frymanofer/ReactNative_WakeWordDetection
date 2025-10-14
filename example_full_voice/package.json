@@ -15,12 +15,12 @@
     "react": "18.3.1",
     "react-native": "0.75.2",
     "react-native-background-fetch": "^4.2.5",
-    "react-native-davoice-tts": "^1.0.136",
+    "react-native-davoice-tts": "^1.0.193",
     "react-native-davoice-tts-model2": "^1.0.30",
     "react-native-fs": "^2.20.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-sound": "^0.11.2",
-    "react-native-wakeword-sid": "1.1.102"
+    "react-native-wakeword-sid": "1.1.103"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

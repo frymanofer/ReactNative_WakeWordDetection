@@ -65,7 +65,7 @@ buck-out/
 *.jsbundle
 
 # CocoaPods
-/ios/Pods/
+**/ios/Pods/
 package-lock.json
 
 #amplify-do-not-edit-begin
