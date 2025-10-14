@@ -9,7 +9,48 @@ import RNFS from 'react-native-fs';
 
 import React, { useEffect, useState, useRef } from 'react';
 
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { Platform, PermissionsAndroid, Linking, Alert } from 'react-native';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+  AppState,
+} from 'react-native';
+
+export async function ensureMicPermission(): Promise<boolean> {
+  if (Platform.OS === 'android') {
+    // 1) Check RECORD_AUDIO
+    const has = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+    );
+    if (has) return true;
+
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+    );
+
+    if (status === PermissionsAndroid.RESULTS.GRANTED) return true;
+
+    // Handle “never ask again”
+    if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      Alert.alert(
+        'Microphone permission required',
+        'Please enable microphone permission in Settings.',
+        [{ text: 'Open Settings', onPress: () => Linking.openSettings() }, { text: 'Cancel', style: 'cancel' }]
+      );
+    }
+    return false;
+  } else {
+    // iOS: there’s no RN core API to pre-request mic.
+    // The system prompt appears the first time you start recording.
+    // You can *optionally* guide users to Settings if they previously denied.
+    // Just return true here and ensure Info.plist is configured.
+    return true;
+  }
+}
 
 // If you want to use only TTS:
 //import { DaVoiceTTSInstance } from 'react-native-davoice-tts';
@@ -20,25 +61,16 @@ import Speech from 'react-native-davoice-tts/speech';
 // import Speech from '@react-native-voice/voice';
 
 import type { PropsWithChildren } from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  Platform,
-  useColorScheme,
-  View,
-  AppState,
-} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// put near the top of App.tsx
+const Colors = {
+  white: '#FFFFFF',
+  black: '#000000',
+  light: '#D1D5DB',   // light gray
+  dark: '#374151',    // dark gray
+  lighter: '#F3F4F6', // very light background
+  darker: '#111827',  // very dark background
+} as const;
 
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -78,21 +110,7 @@ const formatWakeWord = (fileName: string) => {
 };
 
 const AudioPermissionComponent = async () => {
-  const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.MICROPHONE : PERMISSIONS.ANDROID.RECORD_AUDIO;
-  await request(permission);
-  const status = await check(permission);
-  if (status !== RESULTS.GRANTED) {
-    await request(permission);
-  }
-  if (Platform.OS !== 'ios') {
-    // FOREGROUND_SERVICE on Android
-    const foregroundServicePermission = await request('android.permission.FOREGROUND_SERVICE' as any);
-    if (foregroundServicePermission === RESULTS.GRANTED) {
-      console.log('Permissions granted', 'Microphone and foreground service permissions granted.');
-    } else {
-      console.log('Permission denied', 'Foreground service microphone permission is required.');
-    }
-  }
+  return ensureMicPermission();
 };
 
 type SectionProps = PropsWithChildren<{
@@ -503,6 +521,8 @@ function App(): React.JSX.Element {
       } catch (err) {
         console.error('Failed to start speech recognition:', err);
       }
+
+      await Speech.speak("This is the first, react native package with full voice support!");
 
       await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
       // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");

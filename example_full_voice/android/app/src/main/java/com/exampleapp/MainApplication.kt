@@ -10,38 +10,39 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
-//React native does this automatically
-//import com.exampleapp.keywordspotting.KeyWordRNBridgePackage;
+import com.facebook.react.soloader.OpenSourceMergedSoMapping
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 
 class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
-      object : DefaultReactNativeHost(this) {
-        override fun getPackages(): List<ReactPackage> =
-            PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-//React native does this automatically
-//              add(KeyWordRNBridgePackage())
-//              add(KeyWordsDetectionPackage()) // Register the library package here
-            }
+    object : DefaultReactNativeHost(this) {
 
-        override fun getJSMainModuleName(): String = "index"
+      override fun getPackages(): List<ReactPackage> =
+        PackageList(this).packages.apply {
+          // Manually add non-autolinkable packages here if needed
+          // add(MyPackage())
+        }
 
-        override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
+      override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
-        override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
-        override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
-      }
+      override fun getJSMainModuleName(): String = "index"
+
+      override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+      override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
+    }
 
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
 
   override fun onCreate() {
     super.onCreate()
-    SoLoader.init(this, false)
+
+    // 👇 IMPORTANT: initialize SoLoader WITH the merged mapping BEFORE load()
+    SoLoader.init(this, OpenSourceMergedSoMapping)
+
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-      // If you opted-in for the New Architecture, we load the native entry point for this app.
-      load()
+      load() // keep New Architecture enabled
     }
   }
 }
