@@ -27,6 +27,10 @@ seamless and intuitive voice-driven user experiences.
 
 ## Latest news
 
+- **New 14 Oct 2025**:
+  
+   **Full Voice2Voice comunications** - See new folder example_full_voice/
+
 - **New 2 June 2025**:
   
    Fix **IOS build failure**.
