@@ -321,14 +321,6 @@ function App(): React.JSX.Element {
   };
   Speech.onSpeechEnd = async () => {
     console.log('***Sentence ended***:', lastTranscript);
-    if (lastTranscript == '') {
-      return;
-    }
-    Speech.speak(lastTranscript, 0);
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = null;
-    lastTranscript = '';
-    //await Speech.start('en-US');
   };
   Speech.onSpeechPartialResults = (e) => {
     const curr = e.value?.[0];
@@ -351,10 +343,10 @@ function App(): React.JSX.Element {
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(async () => {
       console.log('⏳ Silence timeout reached, speaking:', lastTranscript);
-      const newText = lastTranscript.slice(lastProcessed.length).trim();
+      const newText = lastTranscript.trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        //await Speech.speak(newText, 0);
+        await Speech.speak(newText, 0);
         lastProcessed = lastTranscript;
       }
       //await Speech.start('en-US');
@@ -362,6 +354,15 @@ function App(): React.JSX.Element {
   };
 
   Speech.onSpeechResults = async (e) => {
+    if (Platform.OS === 'android') {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = null;
+      console.log('Results: ', e.value?.[0]);
+      const current = e.value?.[0];
+      await Speech.speak(current, 0);
+      return;
+    }
+
     console.log('Results: ', e.value?.[0]);
     const current = e.value?.[0];
     if (!current || current === lastTranscript) return;
@@ -375,7 +376,7 @@ function App(): React.JSX.Element {
       const newText = lastTranscript.slice(lastProcessed.length).trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        await Speech.speak(newText, 0);
+        //await Speech.speak(newText, 0);
         lastProcessed = lastTranscript;
       }
     }, silenceThresholdMs);
@@ -412,6 +413,8 @@ function App(): React.JSX.Element {
       }
 
       await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
+      // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
+      // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
       /*
       await Speech.speak(
         "Hello. \
