@@ -315,12 +315,98 @@ function App(): React.JSX.Element {
       //await Speech.start('en-US');
     }
   };
+// === minimal coalescer that PRESERVES punctuation ===
 
+  // ASCII word spans (safe for your English prompts). If you need full Unicode,
+  // swap the regex to /\p{L}+\p{M}*|\p{N}+/gu (ensure your JS engine supports it).
+  const _wordSpans = (s) => {
+    const spans = [];
+    const re = /[A-Za-z0-9]+/g;
+    let m;
+    while ((m = re.exec(s))) {
+      spans.push({ w: m[0].toLowerCase(), start: m.index, end: m.index + m[0].length });
+    }
+    return spans;
+  };
+
+  const _stripPunc = (s) =>
+    (s || '').toLowerCase().replace(/[^A-Za-z0-9\s]+/g, '').replace(/\s+/g, ' ').trim();
+
+  const _overlapCount = (aWords, bWords) => {
+    const max = Math.min(aWords.length, bWords.length);
+    for (let k = max; k >= 1; k--) {
+      let ok = true;
+      for (let i = 0; i < k; i++) {
+        if (aWords[aWords.length - k + i] !== bWords[i]) { ok = false; break; }
+      }
+      if (ok) return k;
+    }
+    return 0;
+  };
+
+  const mergeSmartKeepPunct = (prev, curr, minOverlap = 2) => {
+    prev = (prev || '').trim();
+    curr = (curr || '').trim();
+    if (!prev) return curr;
+    if (!curr) return prev;
+
+    // Fast paths
+    if (curr.startsWith(prev)) return curr;   // normal growth
+    if (prev.startsWith(curr)) return prev;   // regression → keep longer
+
+    // Punctuation-insensitive prefix (e.g., "Hey." → "Hey, how")
+    const np = _stripPunc(prev);
+    const nc = _stripPunc(curr);
+    if (nc.startsWith(np)) return curr;
+
+    // Word-overlap splice (compute on tokens, splice on ORIGINAL string)
+    const pw = _wordSpans(prev).map(o => o.w);
+    const cwSpans = _wordSpans(curr);
+    const cw = cwSpans.map(o => o.w);
+
+    const k = _overlapCount(pw, cw);
+    if (k >= minOverlap) {
+      // cut point = end of k-th word in ORIGINAL curr
+      const cut = cwSpans[k - 1].end;
+      const tail = curr.slice(cut); // keeps punctuation/spacing exactly
+
+      // --- boundary de-dup JUST for merge-caused duplication of ?/! ---
+      // If prev ends with ?/! run and tail begins with the same mark run,
+      // drop the prev run and keep curr’s (so legit "???" from curr is preserved).
+      const prevRun = prev.match(/[?!]+$/);
+      const tailRun = tail.match(/^[?!]+/);
+      let left = prev;
+      if (
+        prevRun && tailRun &&
+        prevRun[0].length > 0 &&
+        tailRun[0].length > 0 &&
+        prevRun[0][0] === tailRun[0][0]
+      ) {
+        left = prev.slice(0, prev.length - prevRun[0].length);
+      }
+
+      const needSpace = left && /[A-Za-z0-9]$/.test(left) && /^[A-Za-z0-9]/.test(tail);
+      return needSpace ? (left + ' ' + tail) : (left + tail);
+    }
+
+    // Fallback: pick the one with more info (normalized length), but keep original text
+    return nc.length >= np.length ? curr : prev;
+  };
+
+  
   Speech.onSpeechStart = async () => {
     console.log('Speech started');
   };
   Speech.onSpeechEnd = async () => {
     console.log('***Sentence ended***:', lastTranscript);
+    if (lastTranscript == '') {
+      return;
+    }
+    //Speech.speak(lastTranscript, 0);
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = null;
+    lastTranscript = '';
+    //await Speech.start('en-US');
   };
   Speech.onSpeechPartialResults = (e) => {
     const curr = e.value?.[0];
@@ -338,7 +424,12 @@ function App(): React.JSX.Element {
       console.log('Partial is undefined!!!!!!');
       return;
     }
-    lastTranscript = curr;
+        // Android path
+    const merged = mergeSmartKeepPunct(lastTranscript, curr, 2);
+    if (merged === lastTranscript) return; // no new info
+
+    lastTranscript = merged;
+    console.log('Partial:', merged);
 
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(async () => {
@@ -348,6 +439,7 @@ function App(): React.JSX.Element {
         console.log('🗣️ Speaking:', newText);
         await Speech.speak(newText, 0);
         lastProcessed = lastTranscript;
+        lastTranscript = '';
       }
       //await Speech.start('en-US');
     }, silenceThresholdMs);
@@ -412,7 +504,7 @@ function App(): React.JSX.Element {
         console.error('Failed to start speech recognition:', err);
       }
 
-      await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
+      //await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
       // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
       // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
       /*
@@ -477,14 +569,30 @@ The first Speech to Speech! Package for react native!",
           console.error('No License!!! - setKeywordDetectionLicense returned', isLicensed);
         }
 
-        // // small scheduled TTS tests (kept structure)
-        // let ms = 5000;
-        // while (ms <= 10000) {
-        //   setTimeout(async () => {
-        //     await Speech.speak('Hey, Look deep', 0);
-        //   }, ms);
-        //   ms += 2000;
+        // // stress loop (kept) — now with safe listener lifecycle
+        // let cnt = 20;
+        // while (cnt > 0) {
+        //   console.log('in start / stop loop cnt == ', cnt);
+
+        //   // remove listener first, then stop, then re-attach and start
+        //   await detachListener();
+        //   try {
+        //     await inst.stopKeywordDetection();
+        //   } catch {}
+        //   await attachListenerOnce(inst, keywordCallback);
+        //   await inst.startKeywordDetection(instanceConfigs[0].threshold);
+
+        //   cnt = cnt - 1;
         // }
+
+        // small scheduled TTS tests (kept structure)
+        let ms = 5000;
+        while (ms <= 10000) {
+          setTimeout(async () => {
+            // await Speech.speak('Hey, Look deep', 0);
+          }, ms);
+          ms += 2000;
+        }
 
         // vadCBintervalID = setInterval(updateVoiceProps, 200);
       } catch (error) {

@@ -1519,7 +1519,7 @@ PODS:
   - RNSound/Core (0.11.2):
     - React-Core
   - SocketRocket (0.7.0)
-  - TTSRNBridge (1.0.66):
+  - TTSRNBridge (1.0.70):
     - onnxruntime-objc (~> 1.20.0)
     - React-Core
   - Yoga (0.0.0)
@@ -1815,7 +1815,7 @@ SPEC CHECKSUMS:
   RNPermissions: bbe6ead8d71f95f042d790bfa8e70c2864c64ff0
   RNSound: 314cc5226453ef4a3314a196c65e8a65e5106a7b
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
-  TTSRNBridge: 7878088f2c5910ba9591fce74bc28f911f6eb72b
+  TTSRNBridge: 505463e4987ce77bfd25525d3ea9c1972ec88946
   Yoga: a1d7895431387402a674fd0d1c04ec85e87909b8
 
 PODFILE CHECKSUM: a43360badb3227187dabd525372af88b1b813765
