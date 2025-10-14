@@ -477,30 +477,14 @@ The first Speech to Speech! Package for react native!",
           console.error('No License!!! - setKeywordDetectionLicense returned', isLicensed);
         }
 
-        // // stress loop (kept) — now with safe listener lifecycle
-        // let cnt = 20;
-        // while (cnt > 0) {
-        //   console.log('in start / stop loop cnt == ', cnt);
-
-        //   // remove listener first, then stop, then re-attach and start
-        //   await detachListener();
-        //   try {
-        //     await inst.stopKeywordDetection();
-        //   } catch {}
-        //   await attachListenerOnce(inst, keywordCallback);
-        //   await inst.startKeywordDetection(instanceConfigs[0].threshold);
-
-        //   cnt = cnt - 1;
+        // // small scheduled TTS tests (kept structure)
+        // let ms = 5000;
+        // while (ms <= 10000) {
+        //   setTimeout(async () => {
+        //     await Speech.speak('Hey, Look deep', 0);
+        //   }, ms);
+        //   ms += 2000;
         // }
-
-        // small scheduled TTS tests (kept structure)
-        let ms = 5000;
-        while (ms <= 10000) {
-          setTimeout(async () => {
-            // await Speech.speak('Hey, Look deep', 0);
-          }, ms);
-          ms += 2000;
-        }
 
         // vadCBintervalID = setInterval(updateVoiceProps, 200);
       } catch (error) {
