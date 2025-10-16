@@ -478,6 +478,8 @@ function App(): React.JSX.Element {
     if (!current || current === lastTranscript) return;
 
     const newWords = current.replace(lastTranscript, '').trim();
+    console.log('Heard new words:', newWords);
+
     lastTranscript = current;
 
     if (timeoutId) clearTimeout(timeoutId);
@@ -486,12 +488,11 @@ function App(): React.JSX.Element {
       const newText = lastTranscript.slice(lastProcessed.length).trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        //await Speech.speak(newText, 0);
+        await Speech.speak(newText, 0);
         lastProcessed = lastTranscript;
       }
     }, silenceThresholdMs);
 
-    console.log('Heard new words:', newWords);
   };
 
   useEffect(() => {
@@ -513,7 +514,8 @@ function App(): React.JSX.Element {
       setIsFlashing(true);
 
       try {
-        await Speech.initAll({ locale:'en-US', model: 'model2.onnx' });
+//        await Speech.initAll({ locale:'en-US', model: 'model2.onnx' }); // Voice of coach Rich
+        await Speech.initAll({ locale:'en-US', model: 'model.onnx' }); // Voice of coach Ariana
         console.log('Calling Speech.start');
         const off = Speech.onFinishedSpeaking = () => {
           console.log('✅ Finished speaking (last WAV done).');
@@ -522,20 +524,26 @@ function App(): React.JSX.Element {
         console.error('Failed to start speech recognition:', err);
       }
 
-      await Speech.speak("This is the first, react native package with full voice support!");
+      // await Speech.speak("245 . 23");
+      // await Speech.speak("45 . 223");
+      // await Speech.speak("five dot twenty three");
+      // await Speech.speak("Hi! Welcome to Lunafit! My name is Ariana. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
 
-      await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
-      // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
-      // await Speech.speak("Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
-      /*
-      await Speech.speak(
-        "Hello. \
-Wellcome to The Voice! \
-The first Speech to Speech! Package for react native!",
-        0
-      );
-*/
-      // Restart detection after timeout
+      // await Speech.speak("This is the first, \
+      //   react native package with full voice support! \
+      //   Luna fitness application is using this package. \
+      //   Inside Luna Fitness application you will here things like: \
+      //   Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
+
+      setTimeout(async () => {
+        await Speech.pauseMicrophone();
+        await Speech.speak("five dot twenty three");
+      }, 3000);
+      setTimeout(async () => {
+        await Speech.unPauseMicrophone();
+      }, 10000);
+      
+      //  Restart detection after timeout
       setTimeout(async () => {
         console.log('5 seconds have passed!');
         setMessage(`Listening to WakeWords '${wakeWords}'...`);
@@ -550,7 +558,7 @@ The first Speech to Speech! Package for react native!",
         // re-attach listener then start detection
         await attachListenerOnce(instance, keywordCallback);
         await instance.startKeywordDetection(instanceConfigs[0].threshold);
-      }, 50000);
+      }, 100000);
     };
 
     const updateVoiceProps = async () => {
