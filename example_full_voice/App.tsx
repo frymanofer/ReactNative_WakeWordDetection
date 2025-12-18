@@ -52,9 +52,13 @@ export async function ensureMicPermission(): Promise<boolean> {
   }
 }
 
+const moonRocksSound = require('./assets/cashRegisterSound.mp3');
+const subtractMoonRocksSound = require('./assets/bellServiceDeskPressXThree.mp3');
+
+
 // If you want to use only TTS:
-//import { DaVoiceTTSInstance } from 'react-native-davoice-tts';
-// let tts = new DaVoiceTTSInstance();
+import { DaVoiceTTSInstance } from 'react-native-davoice-tts';
+let tts = new DaVoiceTTSInstance();
 // If you want to use only STT
 //import STT from 'react-native-davoice-tts/stt';
 import Speech from 'react-native-davoice-tts/speech';
@@ -75,10 +79,158 @@ const Colors = {
 import LinearGradient from 'react-native-linear-gradient';
 
 // import KeyWordRNBridge from 'react-native-wakeword';
-import { KeyWordRNBridgeInstance } from 'react-native-wakeword-sid';
-import removeAllRNBridgeListeners from 'react-native-wakeword-sid';
-import { createKeyWordRNBridgeInstance } from 'react-native-wakeword-sid';
-import { createSpeakerIdInstance } from 'react-native-wakeword-sid/speakerid';
+import { KeyWordRNBridgeInstance } from 'react-native-wakeword';
+import { createKeyWordRNBridgeInstance } from 'react-native-wakeword';
+//import { createSpeakerIdInstance } from 'react-native-wakeword/speakerid';
+// If you created audioRoutingConfig.ts in the lib:
+import { setWakewordAudioRoutingConfig } from 'react-native-wakeword';
+import type { AudioRoutingConfig } from 'react-native-wakeword';
+
+// Ducking / Unducking
+import {disableDucking, enableDucking} from 'react-native-wakeword';
+
+// Set Audio session for IOS!!!!
+const defaultAudioRoutingConfig: AudioRoutingConfig = {
+  // Fallback when no special port match
+  default: {
+    category: 'playAndRecord',
+    mode: 'measurement',
+    options: [
+      'mixWithOthers',
+      'allowBluetooth',
+      'allowBluetoothA2DP',
+      'allowAirPlay',
+    ],
+    preferredInput: 'none',
+  },
+  byOutputPort: {
+    // 1. CarPlay: run in CarPlay
+    carAudio: {
+      category: 'playAndRecord',
+      mode: 'measurement',
+      options: [
+        'mixWithOthers',
+        'allowBluetooth',
+        'allowBluetoothA2DP',
+        'allowAirPlay',
+        'overrideMutedMicrophoneInterruption',
+      ],
+      preferredInput: 'none', // use CarPlay mic
+    },
+
+    // 2. Built-in receiver (earpiece): force speaker so user hears responses
+    builtInReceiver: {
+      category: 'playAndRecord',
+      mode: 'measurement',
+      options: [
+        'mixWithOthers',
+        'allowBluetooth',
+        'allowBluetoothA2DP',
+        'allowAirPlay',
+        'defaultToSpeaker',
+      ],
+      preferredInput: 'none',
+    },
+
+    // **** PLEASE NOTE - YOU MAY WANT TO KEEP SPOTIFY ON HD SOUND AND NOT ENABLE MIC WHILE IN A2DP **********
+    // 3. Bluetooth A2DP (Spotify etc) – capture from phone mic
+    bluetoothA2DP: {
+      category: 'playAndRecord',
+      mode: 'measurement',
+      options: [
+        'mixWithOthers',
+        'allowBluetooth',
+        'allowBluetoothA2DP',
+        'allowAirPlay',
+      ],
+      preferredInput: 'builtInMic',
+    },
+
+    // 4. Bluetooth HFP – call-like; you can later change this if needed
+    bluetoothHFP: {
+      category: 'playAndRecord',
+      mode: 'measurement',
+      options: [
+        'mixWithOthers',
+        'allowBluetooth',
+        'allowBluetoothA2DP',
+        'allowAirPlay',
+      ],
+      preferredInput: 'none', // use HFP mic by default
+    },
+
+    // 5. Wired headphones – play in ears, mic from phone
+    headphones: {
+      category: 'playAndRecord',
+      mode: 'measurement',
+      options: [
+        'mixWithOthers',
+        'allowBluetooth',
+        'allowBluetoothA2DP',
+        'allowAirPlay',
+      ],
+      preferredInput: 'none',
+    },
+  },
+};
+
+/*
+Ducking/Unducking TEMPORARY code until background timers are
+enabled!!
+ */
+
+let unDuckingTimerId:any = null;
+let unDuckingExpiration = 0;
+
+export const scheduleUnDucking = async seconds => {
+  const now = Date.now();
+  if (seconds <= 2) {
+    seconds = 2;
+  }
+  const newExpiration = now + seconds * 1000;
+
+  // If a timer exists and it's already longer, skip
+  if (unDuckingTimerId && newExpiration <= unDuckingExpiration) {
+    return;
+  }
+
+  // Cancel any existing timer
+  if (unDuckingTimerId) {
+    clearTimeout(unDuckingTimerId);
+    unDuckingTimerId = null;
+  }
+
+  unDuckingExpiration = newExpiration;
+
+  const delay = newExpiration - now;
+  unDuckingTimerId = setTimeout(async () => {
+    if (unDuckingTimerId == null) {
+      // Rat race for unducking.
+      unDuckingTimerId = null;
+      unDuckingExpiration = 0;
+      return;
+    }
+    unDuckingTimerId = null;
+    unDuckingExpiration = 0;
+    await disableDucking();
+  }, delay);
+};
+
+export const enableDuckingAndClearUnDucking = async () => {
+  await enableDucking();
+  if (unDuckingTimerId) {
+    clearTimeout(unDuckingTimerId);
+    unDuckingTimerId = null;
+  }
+  unDuckingExpiration = 0;
+};
+
+// Before playing wav file:
+// await enableDuckingAndClearUnDucking();
+// After playing wav file:
+// await scheduleUnDucking()
+
+// ******* END Ducking / Unducking ********
 
 const sidId = 'sid1';
 const sidScoreAccept = 0.65; // tweak to your taste
@@ -411,10 +563,10 @@ function App(): React.JSX.Element {
     return nc.length >= np.length ? curr : prev;
   };
 
-  
   Speech.onSpeechStart = async () => {
     console.log('Speech started');
   };
+
   Speech.onSpeechEnd = async () => {
     console.log('***Sentence ended***:', lastTranscript);
     if (lastTranscript == '') {
@@ -426,6 +578,7 @@ function App(): React.JSX.Element {
     lastTranscript = '';
     //await Speech.start('en-US');
   };
+
   Speech.onSpeechPartialResults = (e) => {
     const curr = e.value?.[0];
     if (Platform.OS === 'ios') {
@@ -496,7 +649,12 @@ function App(): React.JSX.Element {
   };
 
   useEffect(() => {
-    // === keyword callback ===
+    
+    // --> WAKE WORD CALLED ENTRY !!!!
+    // *** === keyword callback === ***
+    //
+    // THIS IS THE PLACE TO PLAY WITH ASR/STT and TTS
+    //
     const keywordCallback = async (keywordIndex: any) => {
       const instance = myInstanceRef.current;
       if (!instance) return;
@@ -524,10 +682,12 @@ function App(): React.JSX.Element {
         console.error('Failed to start speech recognition:', err);
       }
 
+      // You can play WAV files without initializing the Speech frameowrk
+      await Speech.playWav(moonRocksSound, true);
       // await Speech.speak("245 . 23");
       // await Speech.speak("45 . 223");
       // await Speech.speak("five dot twenty three");
-      // await Speech.speak("Hi! Welcome to Lunafit! My name is Ariana. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
+      await Speech.speak("Hi! Welcome to Lunafit! My name is Rich. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
 
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
@@ -535,17 +695,29 @@ function App(): React.JSX.Element {
       //   Inside Luna Fitness application you will here things like: \
       //   Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
 
-      setTimeout(async () => {
-        await Speech.pauseMicrophone();
-        await Speech.speak("five dot twenty three");
-      }, 3000);
-      setTimeout(async () => {
-        await Speech.unPauseMicrophone();
-      }, 10000);
-      
+      // setTimeout(async () => {
+      //   await Speech.pauseMicrophone();
+      //   setTimeout(async () => {
+      //     try {
+      //       await tts.initTTS({model: 'model2.onnx'});
+      //       await tts.speak("five dot twenty three");
+      //       await Speech.playWav(moonRocksSound, true);
+      //     }
+      //     catch (error) {
+      //       console.log("Speech.speak RAISE ERROR", error);
+      //       console.log("Speech.speak RAISE ERROR", error);
+      //       console.log("Speech.speak RAISE ERROR", error);
+      //       console.log("Speech.speak RAISE ERROR", error);
+      //       console.log("Speech.speak RAISE ERROR", error);
+      //     }
+      //   }, 300);
+      // }, 30000);
+      // setTimeout(async () => {
+      //   await Speech.unPauseMicrophone();
+      // }, 100000);
       //  Restart detection after timeout
       setTimeout(async () => {
-        console.log('5 seconds have passed!');
+        console.log('Restarting wake word');
         setMessage(`Listening to WakeWords '${wakeWords}'...`);
         setIsFlashing(false);
 
@@ -557,8 +729,8 @@ function App(): React.JSX.Element {
 
         // re-attach listener then start detection
         await attachListenerOnce(instance, keywordCallback);
-        await instance.startKeywordDetection(instanceConfigs[0].threshold);
-      }, 100000);
+        await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
+      }, 20000);
     };
 
     const updateVoiceProps = async () => {
@@ -572,8 +744,19 @@ function App(): React.JSX.Element {
       }
     };
 
+    // ************ INIT **************
+    // --> STARTING POINT - INIT OF KEYWORD DETECTION !!!!
     const initializeKeywordDetection = async () => {
       try {
+        // 🔹 *** NEW ***: configure routing once (iOS only) BEFORE creating instances
+        if (Platform.OS === 'ios') {
+          try {
+            await setWakewordAudioRoutingConfig(defaultAudioRoutingConfig);
+          } catch (e) {
+            console.warn('setWakewordAudioRoutingConfig failed (ignored):', e);
+          }
+        }
+
         try {
           console.log('Adding element:', instanceConfigs[0]);
           const instance = await addInstanceMulti(instanceConfigs[0]);
@@ -587,33 +770,18 @@ function App(): React.JSX.Element {
         await attachListenerOnce(inst, keywordCallback);
 
         const isLicensed = await inst.setKeywordDetectionLicense(
-          // "MTc0OTkzNDgwMDAwMA==-QOkSZvHDA+qRiN/vX2Kp2xt30+hro4jze3dzJJAeEMc=");
           'MTc2NzEzMjAwMDAwMA==-05jR9f/gn4F/SyNwjbdLHIfTaCJK4VYdikxSVxAJcDk='
         );
-
-        await inst.startKeywordDetection(instanceConfigs[0].threshold);
+        // await disableDucking();
+//        await enableDucking();
+//        await inst.startKeywordDetection(instanceConfigs[0].threshold, false);
+        await inst.startKeywordDetection(instanceConfigs[0].threshold, true);
+        //await disableDucking();
 
         if (!isLicensed) {
           console.error('No License!!! - setKeywordDetectionLicense returned', isLicensed);
         }
 
-        // // stress loop (kept) — now with safe listener lifecycle
-        // let cnt = 20;
-        // while (cnt > 0) {
-        //   console.log('in start / stop loop cnt == ', cnt);
-
-        //   // remove listener first, then stop, then re-attach and start
-        //   await detachListener();
-        //   try {
-        //     await inst.stopKeywordDetection();
-        //   } catch {}
-        //   await attachListenerOnce(inst, keywordCallback);
-        //   await inst.startKeywordDetection(instanceConfigs[0].threshold);
-
-        //   cnt = cnt - 1;
-        // }
-
-        // small scheduled TTS tests (kept structure)
         let ms = 5000;
         while (ms <= 10000) {
           setTimeout(async () => {
@@ -636,24 +804,6 @@ function App(): React.JSX.Element {
     }
 
   }, [isPermissionGranted && didInitSID]); // same dependency
-
-  /*
-  // 🔴 REAL UNMOUNT CLEANUP ONLY
-  useEffect(() => {
-    return () => {
-      (async () => {
-        try {
-          await detachListener();
-          if (myInstanceRef.current) {
-            try { await myInstanceRef.current.stopKeywordDetection(); } catch {}
-          }
-          await Speech.destroy();
-          if (intervalRef.current) clearInterval(intervalRef.current);
-        } catch {}
-      })();
-    };
-  }, []); // <-- empty deps => runs only on unmount (not on dep changes)
-*/
 
   return (
     <LinearGradient
