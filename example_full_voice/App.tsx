@@ -89,7 +89,12 @@ import type { AudioRoutingConfig } from 'react-native-wakeword';
 // Ducking / Unducking
 import {disableDucking, enableDucking} from 'react-native-wakeword';
 
+// 
+// 
+// --> *** IMPORTANT IOS AUDIO SESSION CONFIG ***
 // Set Audio session for IOS!!!!
+// 
+// 
 const defaultAudioRoutingConfig: AudioRoutingConfig = {
   // Fallback when no special port match
   default: {
@@ -772,9 +777,14 @@ function App(): React.JSX.Element {
         const isLicensed = await inst.setKeywordDetectionLicense(
           'MTc2NzEzMjAwMDAwMA==-05jR9f/gn4F/SyNwjbdLHIfTaCJK4VYdikxSVxAJcDk='
         );
+
+        /* Below code with enableDucking/disableDucking and startKeywordDetection(xxx, false, ...) - where
+        false is the second argument is used to initialze other audio sessions before wake word to duck others etc'
+        You can aslo make wake word use the same settings and not chaning audio session.
         // await disableDucking();
-//        await enableDucking();
-//        await inst.startKeywordDetection(instanceConfigs[0].threshold, false);
+        // await enableDucking();
+        // await inst.startKeywordDetection(instanceConfigs[0].threshold, false);
+        */
         await inst.startKeywordDetection(instanceConfigs[0].threshold, true);
         //await disableDucking();
 
