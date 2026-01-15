@@ -282,8 +282,7 @@ function App(): React.JSX.Element {
         }
         eventListener = await set_callback(myInstance, keywordCallback);
         const isLicensed = await myInstance.setKeywordDetectionLicense(
-//          "MTc0OTkzNDgwMDAwMA==-QOkSZvHDA+qRiN/vX2Kp2xt30+hro4jze3dzJJAeEMc=");
-          "MTc1Nzg4MzYwMDAwMA==-lULiXsf2XwqYXN5iJ8XddZTWT/r0T14dWX6zhyWGGO4=");
+          "MTc2OTg5NjgwMDAwMA==-tB+lDJbxczzL6uDqBm2939PfZDEu3jDMjF+FhD+pywI=");
        await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
         if (!isLicensed) {
           console.error("No License!!! - setKeywordDetectionLicense returned", isLicensed);

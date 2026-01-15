@@ -15,11 +15,10 @@
     "react": "19.1.1",
     "react-native": "0.82.0",
     "react-native-background-fetch": "^4.2.5",
-    "react-native-davoice-tts": "^1.0.246",
-    "react-native-davoice-tts-model2": "^1.0.30",
+    "react-native-davoice-tts": "^1.0.265",
     "react-native-fs": "^2.20.0",
     "react-native-linear-gradient": "^2.8.3",
-    "react-native-wakeword": "1.1.54"
+    "react-native-wakeword": "1.1.56"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -41,5 +40,6 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b"
 }

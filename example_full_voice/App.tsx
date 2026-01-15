@@ -10,6 +10,8 @@ import RNFS from 'react-native-fs';
 import React, { useEffect, useState, useRef } from 'react';
 
 import { Platform, PermissionsAndroid, Linking, Alert } from 'react-native';
+//import { check, request, openSettings, PERMISSIONS, RESULTS } from 'react-native-permissions';
+
 import {
   ScrollView,
   StatusBar,
@@ -19,6 +21,11 @@ import {
   View,
   AppState,
 } from 'react-native';
+
+const ARIANA = 1;
+const RICH = 0;
+const SPEAKER = ARIANA;
+const SPEAKER_SPEED = 1.10;
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -44,17 +51,38 @@ export async function ensureMicPermission(): Promise<boolean> {
     }
     return false;
   } else {
-    // iOS: there’s no RN core API to pre-request mic.
-    // The system prompt appears the first time you start recording.
-    // You can *optionally* guide users to Settings if they previously denied.
-    // Just return true here and ensure Info.plist is configured.
-    return true;
+ /*   // iOS: request explicitly
+    const mic = await check(PERMISSIONS.IOS.MICROPHONE);
+    if (mic === RESULTS.GRANTED) return true;
+
+    if (mic === RESULTS.BLOCKED) {
+      Alert.alert('Microphone permission required', 'Enable it in Settings.', [
+        { text: 'Open Settings', onPress: () => openSettings() },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+      return false;
+    }
+
+    const micReq = await request(PERMISSIONS.IOS.MICROPHONE);
+    if (micReq !== RESULTS.GRANTED) return false;
+
+    // Optional but usually needed for dictation/STT APIs:
+    const sr = await check(PERMISSIONS.IOS.SPEECH_RECOGNITION);
+    if (sr === RESULTS.GRANTED) return true;
+
+    const srReq = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION);
+    return srReq === RESULTS.GRANTED;*/
   }
 }
 
+// Below is a part of Speech Feature to play mp3 and WAV file within the same Audio framework.
+// You call Speech.playWav with any mp3/wav etc' file you need 
 const moonRocksSound = require('./assets/cashRegisterSound.mp3');
 const subtractMoonRocksSound = require('./assets/bellServiceDeskPressXThree.mp3');
 
+// This is how you send the speech library the tts model.
+const ttsModel = require('./assets/models/model_ex.dm');
+//const ttsModel = 'model.onnx';
 
 // If you want to use only TTS:
 import { DaVoiceTTSInstance } from 'react-native-davoice-tts';
@@ -105,6 +133,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
       'allowBluetooth',
       'allowBluetoothA2DP',
       'allowAirPlay',
+      'defaultToSpeaker',
     ],
     preferredInput: 'none',
   },
@@ -125,6 +154,20 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
 
     // 2. Built-in receiver (earpiece): force speaker so user hears responses
     builtInReceiver: {
+      category: 'playAndRecord',
+      mode: 'measurement',
+      options: [
+        'mixWithOthers',
+        'allowBluetooth',
+        'allowBluetoothA2DP',
+        'allowAirPlay',
+        'defaultToSpeaker',
+      ],
+      preferredInput: 'none',
+    },
+
+    // ✅ NEW: when we’re already on built-in speaker, keep SAME config
+    builtInSpeaker: {
       category: 'playAndRecord',
       mode: 'measurement',
       options: [
@@ -613,9 +656,11 @@ function App(): React.JSX.Element {
       const newText = lastTranscript.trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        await Speech.speak(newText, 0);
         lastProcessed = lastTranscript;
         lastTranscript = '';
+        await Speech.pauseMicrophone();
+        await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
+        await Speech.unPauseMicrophone();
       }
       //await Speech.start('en-US');
     }, silenceThresholdMs);
@@ -627,7 +672,7 @@ function App(): React.JSX.Element {
       timeoutId = null;
       console.log('Results: ', e.value?.[0]);
       const current = e.value?.[0];
-      await Speech.speak(current, 0);
+      await Speech.speak(current, SPEAKER, SPEAKER_SPEED);
       return;
     }
 
@@ -646,7 +691,9 @@ function App(): React.JSX.Element {
       const newText = lastTranscript.slice(lastProcessed.length).trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        await Speech.speak(newText, 0);
+        await Speech.pauseMicrophone();
+        await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
+        await Speech.unPauseMicrophone();
         lastProcessed = lastTranscript;
       }
     }, silenceThresholdMs);
@@ -669,7 +716,7 @@ function App(): React.JSX.Element {
 
       // 2) Stop detection (native)
       try {
-        await instance.stopKeywordDetection();
+        await instance.stopKeywordDetection(/* FR add if stop microphone or */);
       } catch {}
 
       console.log('detected keyword: ', keywordIndex);
@@ -678,22 +725,22 @@ function App(): React.JSX.Element {
 
       try {
 //        await Speech.initAll({ locale:'en-US', model: 'model2.onnx' }); // Voice of coach Rich
-        await Speech.initAll({ locale:'en-US', model: 'model.onnx' }); // Voice of coach Ariana
+        // await Speech.initAll({ locale:'en-US', model: 'model.onnx' }); // Voice of coach Ariana
+        await Speech.initAll({ locale:'en-US', model: ttsModel });
         console.log('Calling Speech.start');
-        const off = Speech.onFinishedSpeaking = () => {
-          console.log('✅ Finished speaking (last WAV done).');
+        const off = Speech.onFinishedSpeaking = async () => {
+          //await Speech.unPauseMicrophone();
+          console.log('onFinishedSpeaking(): ✅ Finished speaking (last WAV done).');
         };
       } catch (err) {
         console.error('Failed to start speech recognition:', err);
       }
 
+      await Speech.pauseMicrophone();
       // You can play WAV files without initializing the Speech frameowrk
       await Speech.playWav(moonRocksSound, true);
-      // await Speech.speak("245 . 23");
-      // await Speech.speak("45 . 223");
-      // await Speech.speak("five dot twenty three");
-      await Speech.speak("Hi! Welcome to Lunafit! My name is Rich. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
-
+      await Speech.speak("Hi! Welcome to Lunafit! My name is Rich. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
+      await Speech.unPauseMicrophone();
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
       //   Luna fitness application is using this package. \
@@ -709,10 +756,6 @@ function App(): React.JSX.Element {
       //       await Speech.playWav(moonRocksSound, true);
       //     }
       //     catch (error) {
-      //       console.log("Speech.speak RAISE ERROR", error);
-      //       console.log("Speech.speak RAISE ERROR", error);
-      //       console.log("Speech.speak RAISE ERROR", error);
-      //       console.log("Speech.speak RAISE ERROR", error);
       //       console.log("Speech.speak RAISE ERROR", error);
       //     }
       //   }, 300);
@@ -735,7 +778,7 @@ function App(): React.JSX.Element {
         // re-attach listener then start detection
         await attachListenerOnce(instance, keywordCallback);
         await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
-      }, 20000);
+      }, 300000);
     };
 
     const updateVoiceProps = async () => {
@@ -775,7 +818,7 @@ function App(): React.JSX.Element {
         await attachListenerOnce(inst, keywordCallback);
 
         const isLicensed = await inst.setKeywordDetectionLicense(
-          'MTc2NzEzMjAwMDAwMA==-05jR9f/gn4F/SyNwjbdLHIfTaCJK4VYdikxSVxAJcDk='
+          'MTc2OTg5NjgwMDAwMA==-tB+lDJbxczzL6uDqBm2939PfZDEu3jDMjF+FhD+pywI='
         );
 
         /* Below code with enableDucking/disableDucking and startKeywordDetection(xxx, false, ...) - where
