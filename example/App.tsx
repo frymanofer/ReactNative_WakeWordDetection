@@ -283,10 +283,14 @@ function App(): React.JSX.Element {
         eventListener = await set_callback(myInstance, keywordCallback);
         const isLicensed = await myInstance.setKeywordDetectionLicense(
           "MTc2OTg5NjgwMDAwMA==-tB+lDJbxczzL6uDqBm2939PfZDEu3jDMjF+FhD+pywI=");
-       await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
+
         if (!isLicensed) {
-          console.error("No License!!! - setKeywordDetectionLicense returned", isLicensed);
+          console.error('No License!!! - setKeywordDetectionLicense returned', isLicensed);
+          setMessage('Lincese not valid: Please contact info@davoice.io for a new license');
+          return;
         }
+
+          await myInstance.startKeywordDetection(instanceConfigs[0].threshold);
         /* Using use_model.tsx:
         await setKeywordDetectionLicense(
           "MTczNDIxMzYwMDAwMA==-tNV5HJ3NTRQCs5IpOe0imza+2PgPCJLRdzBJmMoJvok=");
