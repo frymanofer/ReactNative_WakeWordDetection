@@ -1406,49 +1406,16 @@ function App(): React.JSX.Element {
         console.error('Failed to start speech recognition:', err);
       }
 
-      await Speech.playWav(wavFilePath, false);
-      await sleep(1500);
-      await Speech.playWav(wavFilePath, false);
-      await sleep(1500);
-/*
-      console.log('Speech action 1');
+      /**** You can play what activated the wake word ****/
+      // await Speech.playWav(wavFilePath, false);
+      // await sleep(1500);
+
       await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 2');
       await Speech.pauseSpeechRecognition();
-      console.log('Speech action 3');
-      // You can play WAV files without initializing the Speech frameowrk
       await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 4');
       await Speech.speak("Hi! Welcome to Lunafit! My name is Rich. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
-      console.log('Speech action 5');
-      await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 6');
       await Speech.unPauseSpeechRecognition(-1);
-      console.log('Speech action 7');
-      await Speech.pauseSpeechRecognition();
-      console.log('Speech action 8');
-      // You can play WAV files without initializing the Speech frameowrk
-      await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 9');
-      await Speech.speak("Hi! Welcome to Lunafit!", SPEAKER, SPEAKER_SPEED);
-      console.log('Speech action 10');
-      await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 11');
-      await Speech.unPauseSpeechRecognition(-1);
-      console.log('Speech action 12');
-      await Speech.pauseSpeechRecognition();
-      console.log('Speech action 13');
-      // You can play WAV files without initializing the Speech frameowrk
-      await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 14');
-      await Speech.speak("Hi! Welcome to Lunafit!", SPEAKER, SPEAKER_SPEED);
-      console.log('Speech action 15');
-      await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 16');
-      await Speech.unPauseSpeechRecognition(-1);
-      console.log('Speech action 17');
-      await Speech.playWav(moonRocksSound, false);
-      console.log('Speech action 18');
+
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
       //   Luna fitness application is using this package. \
