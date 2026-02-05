@@ -16,6 +16,9 @@ const config = {
       'dm',
       'onnx',
       'json',
+      'onnx', 
+      'wav', 
+      'mp3'
     ],
   },
 };

@@ -106,16 +106,666 @@ const Colors = {
 
 import LinearGradient from 'react-native-linear-gradient';
 
-// import KeyWordRNBridge from 'react-native-wakeword';
-import { KeyWordRNBridgeInstance } from 'react-native-wakeword';
-import { createKeyWordRNBridgeInstance } from 'react-native-wakeword';
-//import { createSpeakerIdInstance } from 'react-native-wakeword/speakerid';
+// import KeyWordRNBridge from 'react-native-wakeword-sid';
+import { KeyWordRNBridgeInstance } from 'react-native-wakeword-sid';
+import { createKeyWordRNBridgeInstance } from 'react-native-wakeword-sid';
 // If you created audioRoutingConfig.ts in the lib:
-import { setWakewordAudioRoutingConfig } from 'react-native-wakeword';
-import type { AudioRoutingConfig } from 'react-native-wakeword';
+import { setWakewordAudioRoutingConfig } from 'react-native-wakeword-sid';
+import type { AudioRoutingConfig } from 'react-native-wakeword-sid';
+import {
+  createSpeakerVerificationInstance,
+  createSpeakerVerificationMicController,
+  onSpeakerVerificationOnboardingProgress,
+  onSpeakerVerificationOnboardingDone,
+  onSpeakerVerificationVerifyResult,
+  onSpeakerVerificationError,
+} from 'react-native-wakeword-sid';
 
+async function writeEnrollmentJsonToFile(enrollmentJson: string, filename = 'sv_enrollment.json') {
+  const path = `${RNFS.DocumentDirectoryPath}/${filename}`;
+  await RNFS.writeFile(path, enrollmentJson, 'utf8');
+  console.log('[SVJS] wrote enrollment json to', path, 'len=', enrollmentJson.length);
+  return path;
+}
+
+// ✅ NEW: endless/continuous mic verification (returns stop() to cleanup)
+async function startEndlessVerificationWithEnrollment(
+  enrollmentJson,
+  setUiMessage,
+  opts
+) {
+  if (!enrollmentJson || typeof enrollmentJson !== 'string') {
+    throw new Error('[SVJS] startEndlessVerificationWithEnrollment: enrollmentJson is missing');
+  }
+
+  const hopSeconds = Number(opts?.hopSeconds ?? 0.25);
+  const stopOnMatch = !!opts?.stopOnMatch;
+  const waitFirstResult = !!opts?.waitFirstResult;
+  const firstResultTimeoutMs = Number(opts?.firstResultTimeoutMs ?? 3000);
+
+  const micConfig = {
+    modelPath: 'speaker_model.dm',
+    options: {
+      decisionThreshold: 0.35,
+//      tailSeconds: 2.0,
+      tailSeconds: 0.8,
+      frameSize: 1280,
+      maxTailSeconds: 3.0,
+      cmn: true,
+      expectedLayoutBDT: false,
+    },
+  };
+
+  const controllerId = `svVerifyMic_${Date.now()}`;
+  const ctrl = await createSpeakerVerificationMicController(controllerId);
+  await ctrl.create(JSON.stringify(micConfig));
+  await ctrl.setEnrollmentJson(enrollmentJson);
+
+  // Start continuous verify (native hop gate)
+  // Start continuous verify (JS loop)
+  let inFlight = false;
+  let first = true;
+
+    // ✅ NEW: first-result gate
+  let firstDone = false;
+  let firstResolve: any = null;
+  let firstReject: any = null;
+  const firstResultPromise = new Promise((resolve, reject) => {
+    firstResolve = resolve;
+    firstReject = reject;
+  });
+  const firstTimeoutPromise = new Promise((resolve) =>
+    setTimeout(() => resolve({ timeout: true }), firstResultTimeoutMs)
+  );
+
+  let stoppedResolve: any = null;
+  const stoppedPromise = new Promise<void>((resolve) => {
+    stoppedResolve = resolve;
+  });
+
+  let stopped = false;
+  const stop = async () => {
+    if (stopped) return;
+    stopped = true;
+    try { offR?.(); } catch {}
+    try { offE?.(); } catch {}
+    try { await ctrl.stop?.(); } catch {}
+    try { await ctrl.destroy?.(); } catch {}
+        // ✅ NEW: if we’re stopping before first result, unblock awaiters
+    if (!firstDone) {
+      firstDone = true;
+      try { firstResolve({ stopped: true }); } catch {}
+    }
+    // ✅ NEW: unblock the "wait forever"
+    try { stoppedResolve?.(); } catch {}
+  };
+
+  const offE = onSpeakerVerificationError((e) => {
+    if (e?.controllerId && e.controllerId !== controllerId) return;
+    console.log('[SVJS] SV ERROR event:', e);
+    setUiMessage?.(`⚠️ SV error: ${e?.error ?? JSON.stringify(e)}`);
+
+    // ✅ NEW: unblock first-waiters
+    if (!firstDone) {
+      firstDone = true;
+      try { firstReject(new Error(e?.error ?? 'SV_ERROR')); } catch {}
+    }
+
+    stop(); // stop on error
+  });
+
+  const offR = onSpeakerVerificationVerifyResult((e) => {
+    if (e?.controllerId && e.controllerId !== controllerId) return;
+
+    const best = Number(e?.scoreBest ?? e?.bestScore ?? e?.score ?? NaN);
+    const ok = !!e?.isMatch;
+    console.log('[SVJS] SV VERIFY:', e);
+    setUiMessage?.(`🔐 SV best=${Number.isFinite(best) ? best.toFixed(3) : 'n/a'} match=${ok ? '✅' : '❌'}`);
+
+    // ✅ NEW: first result arrived → unblock awaiters
+    if (!firstDone) {
+      firstDone = true;
+      try { firstResolve(e); } catch {}
+    }
+
+    // allow next cycle
+    inFlight = false;
+
+    if (stopOnMatch && ok) {
+      stop();
+      return;
+    }
+
+    // hop delay then start next verify
+    setTimeout(() => {
+      kick().catch((err) => {
+        console.log('[SVJS] kick failed:', err);
+        stop();
+      });
+    }, Math.max(0.05, hopSeconds) * 1000);
+  });
+
+  const kick = async () => {
+    if (stopped) return;
+    if (inFlight) return;
+    inFlight = true;
+    try {
+      await ctrl.startVerifyFromMic(true);// first); // resetState on first run
+      first = false;
+    } catch (e) {
+      inFlight = false;
+            // ✅ NEW: unblock first-waiters on failure
+      if (!firstDone) {
+        firstDone = true;
+        try { firstReject(e); } catch {}
+      } 
+      throw e;
+    }
+  };
+
+  setUiMessage?.(`🎙️ SV continuous verify started (hop=${hopSeconds}s)`);
+  await kick();
+  // ✅ NEW: optionally wait before returning
+  if (waitFirstResult) {
+    try {
+      await Promise.race([firstResultPromise, firstTimeoutPromise]);
+    } catch {
+      // ignore here; error handler already stopped
+    }
+    await stoppedPromise;     // blocks forever until stop() runs
+  }
+
+  return stop;
+}
+
+// ✅ NEW: mic-verify helper (THIS is what your code was calling)
+async function verifyFromMicWithEnrollment(
+  enrollmentJson: string,
+  setUiMessage?: (s: string) => void
+) {
+  if (!enrollmentJson || typeof enrollmentJson !== 'string') {
+    throw new Error('[SVJS] verifyFromMicWithEnrollment: enrollmentJson is missing');
+  }
+
+  const micConfig = {
+    modelPath: 'speaker_model.dm',
+    options: {
+      decisionThreshold: 0.35,
+      // tailSeconds: 2.0,
+      tailSeconds: 0.8,
+      frameSize: 1280,
+      maxTailSeconds: 3.0,
+      cmn: true,
+      expectedLayoutBDT: false,
+    },
+  };
+
+  const controllerId = 'svVerifyMic1';
+  const ctrl = await createSpeakerVerificationMicController(controllerId);
+  await ctrl.create(JSON.stringify(micConfig));
+  await ctrl.setEnrollmentJson(enrollmentJson);
+
+  const TIMEOUT_MS = 60_000;
+
+  try {
+    const res = await new Promise<any>((resolve, reject) => {
+      const t = setTimeout(() => {
+        offR?.(); offE?.();
+        reject(new Error('NO_SPEECH_TIMEOUT'));
+      }, TIMEOUT_MS);
+
+      const cleanup = () => {
+        clearTimeout(t);
+        offR?.(); offE?.();
+      };
+
+      const offE = onSpeakerVerificationError((e) => {
+        if (e?.controllerId && e.controllerId !== controllerId) return;
+        cleanup();
+        reject(new Error(`[SVJS] SV ERROR event: ${JSON.stringify(e)}`));
+      });
+
+      const offR = onSpeakerVerificationVerifyResult((e) => {
+        if (e?.controllerId && e.controllerId !== controllerId) return;
+        cleanup();
+        resolve(e);
+      });
+
+      ctrl.startVerifyFromMic(true).catch((err) => {
+        cleanup();
+        reject(err);
+      });
+    });
+
+    return res;
+  } finally {
+    try { await ctrl.stop?.(); } catch {}
+    try { await ctrl.destroy?.(); } catch {}
+  }
+}
+
+async function runVerificationWithEnrollment(
+  enrollmentJson: string,
+  setUiMessage?: (s: string) => void
+) {
+  if (!enrollmentJson || typeof enrollmentJson !== 'string') {
+    throw new Error('[SVJS] runVerificationWithEnrollment: enrollmentJson is missing');
+  }
+
+  const micConfig = {
+    modelPath: 'speaker_model.dm',
+    options: {
+      decisionThreshold: 0.35,
+      tailSeconds: 0.8,
+      frameSize: 1280,
+      maxTailSeconds: 3.0,
+      cmn: true,
+      expectedLayoutBDT: false,
+    },
+  };
+
+  // 1) Persist enrollmentJson so native can load it like a normal file
+  const enrollmentPath = await writeEnrollmentJsonToFile(enrollmentJson, 'yaroslav_enrollment_runtime.json');
+
+  // 2) Create a SpeakerVerification engine instance (NOT the mic controller)
+  const sv = await createSpeakerVerificationInstance('svVerify1');
+  await sv.create(
+    micConfig.modelPath,
+    enrollmentPath,               // <-- IMPORTANT: use the file path we just wrote
+    micConfig.options
+  );
+
+  // ---------- (A) Verify WAV files ----------
+  const wavs = [
+    'ekaterina_sample_1760703001874.wav',
+    'james_sample_1760701252720.wav',
+    'y1.wav',
+    'y2.wav',
+    'y3.wav',
+  ];
+
+  setUiMessage?.('🔐 Verifying WAV files...');
+  for (const wav of wavs) {
+    try {
+      const out = await sv.verifyWavStreaming(wav, true); // resetState=true
+      console.log('[SVJS] verifyWav:', wav, out);
+      setUiMessage?.(`🔐 WAV: ${wav} → score=${out?.bestScore ?? out?.score ?? 'n/a'}`);
+    } catch (e) {
+      console.log('[SVJS] verifyWav FAILED:', wav, e);
+      setUiMessage?.(`⚠️ WAV verify failed: ${wav}`);
+    }
+  }
+
+  // ---------- (B) 3 mic trials, wait up to 60s each ----------
+  const lines: string[] = [];
+  let lastScore: any = null;
+  const extractScore = (res: any) => {
+    // your log shows: scoreBest / scoreMean / scoreWorst
+    return res?.scoreBest ?? res?.bestScore ?? res?.score ?? null;
+  };
+  const fmt = (v: any) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n.toFixed(3) : 'n/a';
+  };
+  const render = (trial: number) => {
+    const header = `🎙️ Mic verify trial ${trial}/3 — speak now (up to 60s)...`;
+    const last = `last score: ${fmt(lastScore)}`;
+    return [header, ...lines, last].join('\n');
+  };
+
+  for (let t = 1; t <= 3; t++) {
+    // Always show what we have so far (previous score if exists)
+    // Always show previous scores + last score BEFORE starting the mic trial
+    setUiMessage?.(render(t));
+    try {
+      const res = await verifyFromMicWithEnrollment(enrollmentJson, setUiMessage);
+      console.log('[SVJS] mic verify result:', res);
+      const score = extractScore(res);
+      lastScore = score;
+      lines.push(`verification #${t} score: ${fmt(score)}`);
+      // Keep showing history (and last score)
+      setUiMessage?.(render(Math.min(t + 1, 3)));
+    } catch (e: any) {
+      if (String(e?.message || e).includes('NO_SPEECH_TIMEOUT')) {
+        lines.push(`verification #${t} score: n/a`);
+        setUiMessage?.(render(Math.min(t + 1, 3)));
+        continue;
+      }
+      lines.push(`verification #${t} score: n/a`);
+      setUiMessage?.(render(Math.min(t + 1, 3)));
+      console.log('[SVJS] mic verify ERROR:', e);
+    }
+  }
+  // Final summary (exact format you asked)
+  setUiMessage?.(lines.join('\n'));
+  await sv.destroy();
+}
+
+async function runSpeakerVerifyDemo(setUiMessage?: (s: string) => void): Promise<string> {
+
+  const micConfig = {
+    modelPath: 'speaker_model.dm',
+    options: {
+      decisionThreshold: 0.35,
+      tailSeconds: 0.8,
+      frameSize: 1280,
+      maxTailSeconds: 3.0,
+      cmn: true,
+      expectedLayoutBDT: false,
+    },
+  };
+
+  const ctrl = await createSpeakerVerificationMicController('svMic1');
+  setUiMessage?.('🎙️ Speaker onboarding: preparing mic…');
+
+  console.log('[SVJS] create mic controller...');
+  await ctrl.create(JSON.stringify(micConfig));
+
+  let collected = 0;
+  let target = 3;
+  let enrollmentJson: string | null = null;
+
+  const waitForNextSVStep = (controllerId: string, beforeCollected: number, timeoutMs = 25000) => {
+    return new Promise<{ type: 'progress' | 'done'; ev: any }>((resolve, reject) => {
+      const t = setTimeout(() => {
+        offP?.();
+        offD?.();
+        offE?.();
+        reject(new Error(`[SVJS] timeout waiting for progress/done (before=${beforeCollected})`));
+      }, timeoutMs);
+
+      const cleanup = () => {
+        clearTimeout(t);
+        offP?.();
+        offD?.();
+        offE?.();
+      };
+
+      const offE = onSpeakerVerificationError((e) => {
+        if (e?.controllerId !== controllerId) return;
+        cleanup();
+        reject(new Error(`[SVJS] SV ERROR event: ${JSON.stringify(e)}`));
+      });
+
+      const offP = onSpeakerVerificationOnboardingProgress((e) => {
+        if (e?.controllerId !== controllerId) return;
+        const c = Number(e?.collected ?? 0);
+        if (c > beforeCollected) {
+          cleanup();
+          resolve({ type: 'progress', ev: e });
+        }
+      });
+
+      const offD = onSpeakerVerificationOnboardingDone((e) => {
+        if (e?.controllerId !== controllerId) return;
+        cleanup();
+        resolve({ type: 'done', ev: e });
+      });
+    });
+  };
+
+  const offErr = onSpeakerVerificationError((e) => {
+    console.log('[SVJS] ERROR event:', e);
+  });
+
+  const offProg = onSpeakerVerificationOnboardingProgress((e) => {
+    if (e?.controllerId !== 'svMic1') return;
+    console.log('[SVJS] PROGRESS event:', e);
+    collected = Number(e?.collected ?? collected);
+    target = Number(e?.target ?? target);
+  });
+
+  const donePromise = new Promise<void>((resolve, reject) => {
+    let finished = false;
+    const offDone = onSpeakerVerificationOnboardingDone((e) => {
+      if (e?.controllerId !== 'svMic1') return;
+      if (finished) return;
+      finished = true;
+      console.log('[SVJS] DONE event:', e);
+      enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? null;
+      offDone?.();
+      resolve();
+    });
+    setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      offDone?.();
+      reject(new Error('[SVJS] timeout waiting for onboarding done'));
+    }, 60000);
+  });
+
+  setUiMessage?.('🎙️ Speaker onboarding: start. Please speak clearly when asked…');
+  await ctrl.beginOnboarding?.('yaroslav', 3, true);
+
+  for (let i = 1; i <= 3; i++) {
+    console.log('[SVJS] requesting embedding', i, '/', 3);
+    setUiMessage?.(`🎙️ Please speak now… collecting sample ${i}/3 (about 2s)`);
+
+    const before = collected;
+    const stepPromise = waitForNextSVStep('svMic1', before, 30000);
+    await ctrl.getNextEmbeddingFromMic();
+    const step = await stepPromise;
+
+    if (step.type === 'done') {
+      const e = step.ev;
+      enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? enrollmentJson;
+      setUiMessage?.('✅ Speaker onboarding completed.');
+      break;
+    }
+
+    setUiMessage?.(`✅ Collected ${Math.min(collected, 3)}/3 samples`);
+  }
+
+  setUiMessage?.('✅ Finalizing speaker profile…');
+  await donePromise;
+
+  if (!enrollmentJson || typeof enrollmentJson !== 'string' || enrollmentJson.length < 10) {
+    offProg?.();
+    offErr?.();
+    try { await ctrl.destroy?.(); } catch {}
+    throw new Error('[SVJS] onboarding done but enrollmentJson is empty/invalid');
+  }
+
+  console.log('[SVJS] enrollmentJson len=', enrollmentJson.length);
+  await ctrl.setEnrollmentJson(enrollmentJson);
+  setUiMessage?.('✅ Speaker profile saved. Continuing…');
+
+  offProg?.();
+  offErr?.();
+
+  // recommended: close mic-controller to avoid fighting resources during verification
+  try { await ctrl.destroy?.(); } catch {}
+
+  return enrollmentJson;
+}
+
+async function runSpeakerVerifyDemo_old(setUiMessage?: (s: string) => void) {
+
+  // IMPORTANT: configJson MUST include modelPath (and your ObjC now resolves it)
+  const micConfig = {
+    modelPath: 'speaker_model.dm',
+    options: {
+      decisionThreshold: 0.35,
+      tailSeconds: 0.8,
+      frameSize: 1280,
+      maxTailSeconds: 3.0,
+      cmn: true,
+      expectedLayoutBDT: false,
+    },
+  };
+
+  const ctrl = await createSpeakerVerificationMicController('svMic1');
+  setUiMessage?.('🎙️ Speaker onboarding: preparing mic…');
+
+  console.log('[SVJS] create mic controller...');
+  await ctrl.create(JSON.stringify(micConfig));
+
+  // Subscribe (and keep latest state)
+  let collected = 0;
+  let target = 3;
+  let enrollmentJson = null;
+  setUiMessage?.('🎙️ Speaker onboarding: ready. Press / wait for embedding #1…');
+
+  // --- helper: wait for next PROGRESS (collected increases) OR DONE OR ERROR ---
+  const waitForNextSVStep = (controllerId: string, beforeCollected: number, timeoutMs = 25000) => {
+    return new Promise<{ type: 'progress' | 'done'; ev: any }>((resolve, reject) => {
+      const t = setTimeout(() => {
+        offP?.();
+        offD?.();
+        offE?.();
+        reject(new Error(`[SVJS] timeout waiting for progress/done (before=${beforeCollected})`));
+      }, timeoutMs);
+
+      const cleanup = () => {
+        clearTimeout(t);
+        offP?.();
+        offD?.();
+        offE?.();
+      };
+
+      const offE = onSpeakerVerificationError((e) => {
+        if (e?.controllerId !== controllerId) return;
+        cleanup();
+        reject(new Error(`[SVJS] SV ERROR event: ${JSON.stringify(e)}`));
+      });
+
+      const offP = onSpeakerVerificationOnboardingProgress((e) => {
+        if (e?.controllerId !== controllerId) return;
+        const c = Number(e?.collected ?? 0);
+        if (c > beforeCollected) {
+          cleanup();
+          resolve({ type: 'progress', ev: e });
+        }
+      });
+
+      const offD = onSpeakerVerificationOnboardingDone((e) => {
+        if (e?.controllerId !== controllerId) return;
+        cleanup();
+        resolve({ type: 'done', ev: e });
+      });
+    });
+  };
+
+
+  const offErr = onSpeakerVerificationError((e) => {
+    console.log('[SVJS] ERROR event:', e);
+  });
+
+  const offProg = onSpeakerVerificationOnboardingProgress((e) => {
+    if (e?.controllerId !== 'svMic1') return;
+    console.log('[SVJS] PROGRESS event:', e);
+    collected = Number(e?.collected ?? collected);
+    target = Number(e?.target ?? target);
+  });
+
+  const donePromise = new Promise((resolve, reject) => {
+    let finished = false;
+    const offDone = onSpeakerVerificationOnboardingDone((e) => {
+      if (e?.controllerId !== 'svMic1') return;
+      if (finished) return;
+      finished = true;
+      console.log('[SVJS] DONE event:', e);
+      enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? null;
+      offDone?.();
+      resolve(e);
+    });
+    const t = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      offDone?.();
+      reject(new Error('[SVJS] timeout waiting for onboarding done'));
+    }, 60000);
+    // (timeout auto-clears by finished guard)
+  });
+
+  // Begin onboarding
+  setUiMessage?.('🎙️ Speaker onboarding: start. Please speak clearly when asked…');
+
+  await ctrl.beginOnboarding('yaroslav', 3, true);
+
+  // Request embeddings ONE BY ONE, and WAIT for progress to advance
+  for (let i = 1; i <= 3; i++) {
+    console.log('[SVJS] requesting embedding', i, '/', 3);
+    setUiMessage?.(`🎙️ Please speak now… collecting sample ${i}/3 (about 2s)`);
+    const before = collected;
+
+    // IMPORTANT: attach listeners BEFORE triggering native to avoid missing fast events
+    const stepPromise = waitForNextSVStep('svMic1', before, 30000);
+    await ctrl.getNextEmbeddingFromMic();
+    const step = await stepPromise;
+
+    if (step.type === 'done') {
+      // native completed early (should be after 3/3)
+      // enrollmentJson is captured by donePromise subscription too, but capture here as well
+      const e = step.ev;
+      enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? enrollmentJson;
+      setUiMessage?.('✅ Speaker onboarding completed.');
+
+      break;
+    }
+
+    // progress happened
+    setUiMessage?.(`✅ Collected ${Math.min(collected, 3)}/3 samples`);
+
+  }
+
+  // Wait for DONE event (contains enrollment JSON)
+  setUiMessage?.('✅ Finalizing speaker profile…');
+  await donePromise;
+
+  console.log('[SVJS] enrollmentJson len=', enrollmentJson?.length ?? 0);
+  await ctrl.setEnrollmentJson(enrollmentJson);
+  setUiMessage?.('✅ Speaker profile saved. Continuing…');
+
+  // cleanup listeners
+  offProg?.();
+  offErr?.();
+
+  // optionally keep controller for verify-from-mic; or destroy
+  // await ctrl.destroy();
+}
+
+/* New Speaker verification  
+async function runSpeakerVerifyDemo() {
+  // 1) Create instance
+  const sv = await createSpeakerVerificationInstance('sv1');
+
+  // 2) Create native engine (bundle resource names)
+  const createRes = await sv.create(
+    'speaker_model.dm',
+    'yaroslav_enrollment.json',
+    {
+      decisionThreshold: 0.35,
+      tailSeconds: 2.0,
+      frameSize: 1280,
+      maxTailSeconds: 3.0,
+      cmn: true,
+      expectedLayoutBDT: false,
+      // logLevel: 5, // trace
+    }
+  );
+  console.log('SV createRes:', createRes);
+
+  // 3) Verify multiple wavs (bundle resource names)
+  const wavs = [
+    'ekaterina_sample_1760703001874.wav',
+    'james_sample_1760701252720.wav',
+    'y1.wav',
+    'y2.wav',
+    'y3.wav',
+  ];
+
+  for (const wav of wavs) {
+    const out = await sv.verifyWavStreaming(wav, true); // true == resetState
+    console.log('SV verify:', wav, out);
+  }
+
+  // 4) Cleanup
+  await sv.destroy();
+}
+*/
 // Ducking / Unducking
-import {disableDucking, enableDucking} from 'react-native-wakeword';
+import {disableDucking, enableDucking} from 'react-native-wakeword-sid';
 
 // 
 // 
@@ -385,7 +1035,8 @@ function App(): React.JSX.Element {
   // --- FIX: persist across renders ---
   const myInstanceRef = useRef<KeyWordRNBridgeInstance | null>(null);
   const listenerRef = useRef<any>(null);
-  
+  const svStopRef = useRef<null | (() => Promise<void>)>(null);
+
   const sidRef = useRef<any>(null);
   const [didInitSID, setDidInitSID] = useState(false);
 
@@ -423,60 +1074,60 @@ function App(): React.JSX.Element {
     return sub;
   };
 
-  // --- Speaker-ID flows (kept) ---
-  const initSpeakerIdWWD = async () => {
-    try {
-      const sidIdWWD = 'sidWWD';
-      const sid = await createSpeakerIdInstance(sidIdWWD);
-      await sid.createInstanceWWD();
-      sidRef.current = sid;
+  // // --- Speaker-ID flows (kept) ---
+  // const initSpeakerIdWWD = async () => {
+  //   try {
+  //     const sidIdWWD = 'sidWWD';
+  //     const sid = await createSpeakerIdInstance(sidIdWWD);
+  //     await sid.createInstanceWWD();
+  //     sidRef.current = sid;
 
-      const hasDefault = await sid.initVerificationUsingCurrentConfig();
-      if (!hasDefault) {
-        setMessage('🎙️ Speaker setup: Please speak for ~3–5 seconds…');
-        const ob = await sid.onboardFromMicrophoneWWD(3, 12000);
-        setMessage(`✅ Enrolled (${ob.clusterSize} slices). Verifying…`);
-        if (Platform.OS === 'android') await sleep(200);
-      } else {
-        setMessage('🔐 Found existing speaker profile. Verifying…');
-      }
+  //     const hasDefault = await sid.initVerificationUsingCurrentConfig();
+  //     if (!hasDefault) {
+  //       setMessage('🎙️ Speaker setup: Please speak for ~3–5 seconds…');
+  //       const ob = await sid.onboardFromMicrophoneWWD(3, 12000);
+  //       setMessage(`✅ Enrolled (${ob.clusterSize} slices). Verifying…`);
+  //       if (Platform.OS === 'android') await sleep(200);
+  //     } else {
+  //       setMessage('🔐 Found existing speaker profile. Verifying…');
+  //     }
 
-      const res = await sid.verifyFromMicrophoneWWD(6000);
-      const ok = (res?.bestScore ?? 0) >= sidScoreAccept;
-      console.log(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
-      setMessage(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
-    } catch (err) {
-      console.error('[SpeakerId] init failed:', err);
-      setMessage('⚠️ Speaker verification failed (see logs).');
-    }
-  };
+  //     const res = await sid.verifyFromMicrophoneWWD(6000);
+  //     const ok = (res?.bestScore ?? 0) >= sidScoreAccept;
+  //     console.log(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
+  //     setMessage(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
+  //   } catch (err) {
+  //     console.error('[SpeakerId] init failed:', err);
+  //     setMessage('⚠️ Speaker verification failed (see logs).');
+  //   }
+  // };
 
-  const initSpeakerId = async () => {
-    try {
-      const sid = await createSpeakerIdInstance(sidId);
-      await sid.createInstance();
-      sidRef.current = sid;
+  // const initSpeakerId = async () => {
+  //   try {
+  //     const sid = await createSpeakerIdInstance(sidId);
+  //     await sid.createInstance();
+  //     sidRef.current = sid;
 
-      const hasDefault = await sid.initVerificationUsingDefaults();
+  //     const hasDefault = await sid.initVerificationUsingDefaults();
 
-      if (!hasDefault) {
-        setMessage('🎙️ Speaker setup: Please speak for ~3–5 seconds…');
-        const ob = await sid.onboardFromMicrophone(12000);
-        setMessage(`✅ Enrolled (${ob.clusterSize} slices). Verifying…`);
-        if (Platform.OS === 'android') await sleep(200);
-      } else {
-        setMessage('🔐 Found existing speaker profile. Verifying…');
-      }
+  //     if (!hasDefault) {
+  //       setMessage('🎙️ Speaker setup: Please speak for ~3–5 seconds…');
+  //       const ob = await sid.onboardFromMicrophone(12000);
+  //       setMessage(`✅ Enrolled (${ob.clusterSize} slices). Verifying…`);
+  //       if (Platform.OS === 'android') await sleep(200);
+  //     } else {
+  //       setMessage('🔐 Found existing speaker profile. Verifying…');
+  //     }
 
-      const res = await sid.verifyFromMicrophone(8000);
-      const ok = (res?.bestScore ?? 0) >= sidScoreAccept;
-      console.log(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
-      setMessage(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
-    } catch (err) {
-      console.error('[SpeakerId] init failed:', err);
-      setMessage('⚠️ Speaker verification failed (see logs).');
-    }
-  };
+  //     const res = await sid.verifyFromMicrophone(8000);
+  //     const ok = (res?.bestScore ?? 0) >= sidScoreAccept;
+  //     console.log(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
+  //     setMessage(`${ok ? '✅' : '❓'} Speaker score: ${res?.bestScore?.toFixed?.(3) ?? 'n/a'} (${res?.bestTargetLabel ?? 'n/a'})`);
+  //   } catch (err) {
+  //     console.error('[SpeakerId] init failed:', err);
+  //     setMessage('⚠️ Speaker verification failed (see logs).');
+  //   }
+  // };
 
   // permissions + appstate
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
@@ -658,9 +1309,9 @@ function App(): React.JSX.Element {
         console.log('🗣️ Speaking:', newText);
         lastProcessed = lastTranscript;
         lastTranscript = '';
-        await Speech.pauseMicrophone();
+        await Speech.pauseSpeechRecognition();
         await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
-        await Speech.unPauseMicrophone();
+        await Speech.unPauseSpeechRecognition(1);
       }
       //await Speech.start('en-US');
     }, silenceThresholdMs);
@@ -691,9 +1342,9 @@ function App(): React.JSX.Element {
       const newText = lastTranscript.slice(lastProcessed.length).trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        await Speech.pauseMicrophone();
+        await Speech.pauseSpeechRecognition();
         await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
-        await Speech.unPauseMicrophone();
+        await Speech.unPauseSpeechRecognition(1);
         lastProcessed = lastTranscript;
       }
     }, silenceThresholdMs);
@@ -714,46 +1365,103 @@ function App(): React.JSX.Element {
       // 1) Remove listener first (prevents late events)
       await detachListener();
 
+      let wavFilePath = '';
       // 2) Stop detection (native)
       try {
         await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+        wavFilePath = await instance.getRecordingWav();
+        console.log("wavFilePath == ", wavFilePath);
       } catch {}
+      await sleep(1500);
 
       console.log('detected keyword: ', keywordIndex);
       setMessage(`WakeWord '${keywordIndex}' DETECTED`);
       setIsFlashing(true);
 
       try {
-//        await Speech.initAll({ locale:'en-US', model: 'model2.onnx' }); // Voice of coach Rich
-        // await Speech.initAll({ locale:'en-US', model: 'model.onnx' }); // Voice of coach Ariana
+        const enrollmentJson = await runSpeakerVerifyDemo(setMessage);
+        // await runVerificationWithEnrollment(enrollmentJson, setMessage);
+//        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
+        svStopRef.current = await startEndlessVerificationWithEnrollment(
+          enrollmentJson,
+          setMessage,
+          { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000 }
+        );
+        console.log('Calling Speech.initAll');
         await Speech.initAll({ locale:'en-US', model: ttsModel });
-        console.log('Calling Speech.start');
+        
+        //await Speech.initAll({ locale:'en-US', model: ttsModel });
+        // Spanish:
+        // Spain: es-ES
+        // Mexico: es-MX
+        // US Spanish: es-US
+        // Argentina: es-AR
+        // Colombia: es-CO
+
         const off = Speech.onFinishedSpeaking = async () => {
-          //await Speech.unPauseMicrophone();
+          //await Speech.unPauseSpeechRecognition(1);
           console.log('onFinishedSpeaking(): ✅ Finished speaking (last WAV done).');
         };
       } catch (err) {
         console.error('Failed to start speech recognition:', err);
       }
 
-      await Speech.pauseMicrophone();
+      await Speech.playWav(wavFilePath, false);
+      await sleep(1500);
+      await Speech.playWav(wavFilePath, false);
+      await sleep(1500);
+/*
+      console.log('Speech action 1');
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 2');
+      await Speech.pauseSpeechRecognition();
+      console.log('Speech action 3');
       // You can play WAV files without initializing the Speech frameowrk
-      await Speech.playWav(moonRocksSound, true);
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 4');
       await Speech.speak("Hi! Welcome to Lunafit! My name is Rich. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
-      await Speech.unPauseMicrophone();
+      console.log('Speech action 5');
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 6');
+      await Speech.unPauseSpeechRecognition(-1);
+      console.log('Speech action 7');
+      await Speech.pauseSpeechRecognition();
+      console.log('Speech action 8');
+      // You can play WAV files without initializing the Speech frameowrk
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 9');
+      await Speech.speak("Hi! Welcome to Lunafit!", SPEAKER, SPEAKER_SPEED);
+      console.log('Speech action 10');
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 11');
+      await Speech.unPauseSpeechRecognition(-1);
+      console.log('Speech action 12');
+      await Speech.pauseSpeechRecognition();
+      console.log('Speech action 13');
+      // You can play WAV files without initializing the Speech frameowrk
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 14');
+      await Speech.speak("Hi! Welcome to Lunafit!", SPEAKER, SPEAKER_SPEED);
+      console.log('Speech action 15');
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 16');
+      await Speech.unPauseSpeechRecognition(-1);
+      console.log('Speech action 17');
+      await Speech.playWav(moonRocksSound, false);
+      console.log('Speech action 18');
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
       //   Luna fitness application is using this package. \
       //   Inside Luna Fitness application you will here things like: \
       //   Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
-
+*/
       // setTimeout(async () => {
-      //   await Speech.pauseMicrophone();
+      //   await Speech.pauseSpeechRecognition();
       //   setTimeout(async () => {
       //     try {
       //       await tts.initTTS({model: 'model2.onnx'});
       //       await tts.speak("five dot twenty three");
-      //       await Speech.playWav(moonRocksSound, true);
+      //       await Speech.playWav(moonRocksSound, false);
       //     }
       //     catch (error) {
       //       console.log("Speech.speak RAISE ERROR", error);
@@ -761,7 +1469,7 @@ function App(): React.JSX.Element {
       //   }, 300);
       // }, 30000);
       // setTimeout(async () => {
-      //   await Speech.unPauseMicrophone();
+      //   await Speech.unPauseSpeechRecognition(1);
       // }, 100000);
       //  Restart detection after timeout
       setTimeout(async () => {
@@ -778,7 +1486,8 @@ function App(): React.JSX.Element {
         // re-attach listener then start detection
         await attachListenerOnce(instance, keywordCallback);
         await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
-      }, 300000);
+      }, 10000);
+//      }, 300000);
     };
 
     const updateVoiceProps = async () => {
@@ -818,8 +1527,13 @@ function App(): React.JSX.Element {
         await attachListenerOnce(inst, keywordCallback);
 
         const isLicensed = await inst.setKeywordDetectionLicense(
-          'MTc2OTg5NjgwMDAwMA==-tB+lDJbxczzL6uDqBm2939PfZDEu3jDMjF+FhD+pywI='
+          'MTc3NDkwNDQwMDAwMA==-z/W+fYYTMV1BNZqFL2eKFcETpOideVer8igwlAA4OWI='
         );
+        if (!isLicensed) {
+          console.error('No License!!! - setKeywordDetectionLicense returned', isLicensed);
+          setMessage('Lincese not valid: Please contact info@davoice.io for a new license');
+          return;
+        }
 
         /* Below code with enableDucking/disableDucking and startKeywordDetection(xxx, false, ...) - where
         false is the second argument is used to initialze other audio sessions before wake word to duck others etc'
@@ -830,10 +1544,6 @@ function App(): React.JSX.Element {
         */
         await inst.startKeywordDetection(instanceConfigs[0].threshold, true);
         //await disableDucking();
-
-        if (!isLicensed) {
-          console.error('No License!!! - setKeywordDetectionLicense returned', isLicensed);
-        }
 
         let ms = 5000;
         while (ms <= 10000) {
