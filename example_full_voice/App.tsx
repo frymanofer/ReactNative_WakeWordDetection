@@ -1365,6 +1365,10 @@ function App(): React.JSX.Element {
       // 1) Remove listener first (prevents late events)
       await detachListener();
 
+      // TODO:
+      // 1. Speech and wakeword running in parallel.
+      // 2. Smooth pause keyword detection and speech.
+      // 3. We need the wake word to stop the speaker
       let wavFilePath = '';
       // 2) Stop detection (native)
       try {
@@ -1409,6 +1413,7 @@ function App(): React.JSX.Element {
       /**** You can play what activated the wake word ****/
       // await Speech.playWav(wavFilePath, false);
       // await sleep(1500);
+      /**** END: You can play what activated the wake word ****/
 
       await Speech.playWav(moonRocksSound, false);
       await Speech.pauseSpeechRecognition();
@@ -1421,7 +1426,7 @@ function App(): React.JSX.Element {
       //   Luna fitness application is using this package. \
       //   Inside Luna Fitness application you will here things like: \
       //   Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
-*/
+
       // setTimeout(async () => {
       //   await Speech.pauseSpeechRecognition();
       //   setTimeout(async () => {
