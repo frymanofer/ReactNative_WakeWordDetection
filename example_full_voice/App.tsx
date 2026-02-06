@@ -106,12 +106,12 @@ const Colors = {
 
 import LinearGradient from 'react-native-linear-gradient';
 
-// import KeyWordRNBridge from 'react-native-wakeword-sid';
-import { KeyWordRNBridgeInstance } from 'react-native-wakeword-sid';
-import { createKeyWordRNBridgeInstance } from 'react-native-wakeword-sid';
+// import KeyWordRNBridge from 'react-native-wakeword';
+import { KeyWordRNBridgeInstance } from 'react-native-wakeword';
+import { createKeyWordRNBridgeInstance } from 'react-native-wakeword';
 // If you created audioRoutingConfig.ts in the lib:
-import { setWakewordAudioRoutingConfig } from 'react-native-wakeword-sid';
-import type { AudioRoutingConfig } from 'react-native-wakeword-sid';
+import { setWakewordAudioRoutingConfig } from 'react-native-wakeword';
+import type { AudioRoutingConfig } from 'react-native-wakeword';
 import {
   createSpeakerVerificationInstance,
   createSpeakerVerificationMicController,
@@ -119,7 +119,7 @@ import {
   onSpeakerVerificationOnboardingDone,
   onSpeakerVerificationVerifyResult,
   onSpeakerVerificationError,
-} from 'react-native-wakeword-sid';
+} from 'react-native-wakeword';
 
 async function writeEnrollmentJsonToFile(enrollmentJson: string, filename = 'sv_enrollment.json') {
   const path = `${RNFS.DocumentDirectoryPath}/${filename}`;
@@ -765,7 +765,7 @@ async function runSpeakerVerifyDemo() {
 }
 */
 // Ducking / Unducking
-import {disableDucking, enableDucking} from 'react-native-wakeword-sid';
+import {disableDucking, enableDucking} from 'react-native-wakeword';
 
 // 
 // 
