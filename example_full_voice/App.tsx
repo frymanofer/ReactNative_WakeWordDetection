@@ -26,7 +26,7 @@ import {
 const ARIANA = 1;
 const RICH = 0;
 const SPEAKER = ARIANA;
-const SPEAKER_SPEED = 1.10;
+const SPEAKER_SPEED = 0.90;
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -144,6 +144,7 @@ async function startEndlessVerificationWithEnrollment(
   const waitFirstResult = !!opts?.waitFirstResult;
   const firstResultTimeoutMs = Number(opts?.firstResultTimeoutMs ?? 3000);
   const onStopReady = opts?.onStopReady;
+  const onScore = opts?.onScore;
 
   const micConfig = {
     modelPath: 'speaker_model.dm',
@@ -152,7 +153,7 @@ async function startEndlessVerificationWithEnrollment(
 //      tailSeconds: 2.0,
       tailSeconds: 0.8,
       frameSize: 1280,
-      maxTailSeconds: 3.0,
+      maxTailSeconds: 1.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -223,6 +224,7 @@ async function startEndlessVerificationWithEnrollment(
     const ok = !!e?.isMatch;
     console.log('[SVJS] SV VERIFY:', e);
     setUiMessage?.(`🔐 SV best=${Number.isFinite(best) ? best.toFixed(3) : 'n/a'} match=${ok ? '✅' : '❌'}`);
+    onScore?.(best, ok);
 
     // ✅ NEW: first result arrived → unblock awaiters
     if (!firstDone) {
@@ -300,7 +302,7 @@ async function verifyFromMicWithEnrollment(
       // tailSeconds: 2.0,
       tailSeconds: 0.8,
       frameSize: 1280,
-      maxTailSeconds: 3.0,
+      maxTailSeconds: 1.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -364,7 +366,7 @@ async function runVerificationWithEnrollment(
       decisionThreshold: 0.35,
       tailSeconds: 0.8,
       frameSize: 1280,
-      maxTailSeconds: 3.0,
+      maxTailSeconds: 1.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -455,7 +457,7 @@ async function runSpeakerVerifyDemo(setUiMessage?: (s: string) => void): Promise
       decisionThreshold: 0.35,
       tailSeconds: 0.8,
       frameSize: 1280,
-      maxTailSeconds: 3.0,
+      maxTailSeconds: 1.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -594,7 +596,7 @@ async function runSpeakerVerifyDemo_old(setUiMessage?: (s: string) => void) {
       decisionThreshold: 0.35,
       tailSeconds: 0.8,
       frameSize: 1280,
-      maxTailSeconds: 3.0,
+      maxTailSeconds: 1.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -744,7 +746,7 @@ async function runSpeakerVerifyDemo() {
       decisionThreshold: 0.35,
       tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 3.0,
+      maxTailSeconds: 1.0,
       cmn: true,
       expectedLayoutBDT: false,
       // logLevel: 5, // trace
@@ -1045,6 +1047,10 @@ function App(): React.JSX.Element {
   const [showSVPrompt, setShowSVPrompt] = useState(false);
   const [svRunning, setSvRunning] = useState(false);
   const svChoiceResolverRef = useRef<null | ((choice: boolean) => void)>(null);
+  const [lastSVScore, setLastSVScore] = useState<{ score: number; isMatch: boolean } | null>(null);
+  const lastSVScoreTimeRef = useRef<number | null>(null);
+  const [svElapsed, setSvElapsed] = useState<string>('N/A');
+  const svElapsedIntervalRef = useRef<any>(null);
 
   const sidRef = useRef<any>(null);
   const [didInitSID, setDidInitSID] = useState(false);
@@ -1414,6 +1420,20 @@ function App(): React.JSX.Element {
 
         if (testSV) {
           const enrollmentJson = await runSpeakerVerifyDemo(setMessage);
+          // Reset score tracking and start elapsed timer
+          setLastSVScore(null);
+          lastSVScoreTimeRef.current = null;
+          setSvElapsed('N/A');
+          svElapsedIntervalRef.current = setInterval(() => {
+            const t = lastSVScoreTimeRef.current;
+            if (t === null) {
+              setSvElapsed('N/A');
+            } else {
+              const sec = (Date.now() - t) / 1000;
+              setSvElapsed(sec < 60 ? `${sec.toFixed(1)}s` : `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`);
+            }
+          }, 100);
+
           setSvRunning(true);
           // await runVerificationWithEnrollment(enrollmentJson, setMessage);
   //        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
@@ -1421,8 +1441,17 @@ function App(): React.JSX.Element {
             enrollmentJson,
             setMessage,
             { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000,
-              onStopReady: (stopFn: () => Promise<void>) => { svStopRef.current = stopFn; } }
+              onStopReady: (stopFn: () => Promise<void>) => { svStopRef.current = stopFn; },
+              onScore: (score: number, isMatch: boolean) => {
+                setLastSVScore({ score, isMatch });
+                lastSVScoreTimeRef.current = Date.now();
+              } }
           );
+          // Cleanup timer when verification ends
+          if (svElapsedIntervalRef.current) {
+            clearInterval(svElapsedIntervalRef.current);
+            svElapsedIntervalRef.current = null;
+          }
           setSvRunning(false);
           console.log('Calling Speech.initAll');
         }
@@ -1459,7 +1488,7 @@ function App(): React.JSX.Element {
       await Speech.playWav(moonRocksSound, false);
       await Speech.pauseSpeechRecognition();
       await Speech.playWav(moonRocksSound, false);
-      await Speech.speak("Hi! Welcome to Lunafit! My name is Rich. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("Hi! Welcome to Lunafit! My name is " + ((SPEAKER == RICH) ? "Rich" : "Ariana") + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
       await Speech.unPauseSpeechRecognition(-1);
 
       // await Speech.speak("This is the first, \
@@ -1622,20 +1651,45 @@ function App(): React.JSX.Element {
           </View>
         )}
 
-        {/* Stop Verification button */}
+        {/* SV score tracking + Stop button */}
         {svRunning && (
-          <TouchableOpacity
-            style={styles.svStopButton}
-            activeOpacity={0.7}
-            onPress={async () => {
-              if (svStopRef.current) {
-                await svStopRef.current();
-                svStopRef.current = null;
-              }
-              setSvRunning(false);
-            }}>
+          <View style={styles.svScoreContainer}>
+            <Text style={styles.svScoreLabel}>Speaker Verification</Text>
+            <View style={styles.svScoreRow}>
+              <View style={styles.svScoreItem}>
+                <Text style={styles.svScoreItemLabel}>Last Score</Text>
+                <Text style={styles.svScoreValue}>
+                  {lastSVScore ? lastSVScore.score.toFixed(3) : 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.svScoreItem}>
+                <Text style={styles.svScoreItemLabel}>Match</Text>
+                <Text style={styles.svScoreValue}>
+                  {lastSVScore ? (lastSVScore.isMatch ? 'YES' : 'NO') : 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.svScoreItem}>
+                <Text style={styles.svScoreItemLabel}>Since Last</Text>
+                <Text style={styles.svScoreValue}>{svElapsed}</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.svStopButton}
+              activeOpacity={0.7}
+              onPress={async () => {
+                if (svElapsedIntervalRef.current) {
+                  clearInterval(svElapsedIntervalRef.current);
+                  svElapsedIntervalRef.current = null;
+                }
+                if (svStopRef.current) {
+                  await svStopRef.current();
+                  svStopRef.current = null;
+                }
+                setSvRunning(false);
+              }}>
             <Text style={styles.svStopButtonText}>Stop Verification</Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
     </LinearGradient>
@@ -1731,11 +1785,51 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  svStopButton: {
+  svScoreContainer: {
     marginTop: 28,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    width: '100%',
+  },
+  svScoreLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.6)',
+    letterSpacing: 2,
+    marginBottom: 14,
+    textTransform: 'uppercase',
+  },
+  svScoreRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 18,
+  },
+  svScoreItem: {
+    alignItems: 'center',
+  },
+  svScoreItemLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  svScoreValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  svStopButton: {
     backgroundColor: '#FF3B30',
-    paddingVertical: 16,
-    paddingHorizontal: 40,
+    paddingVertical: 14,
+    paddingHorizontal: 36,
     borderRadius: 14,
     shadowColor: '#FF3B30',
     shadowOffset: { width: 0, height: 4 },
