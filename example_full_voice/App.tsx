@@ -17,6 +17,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
   AppState,
@@ -142,6 +143,7 @@ async function startEndlessVerificationWithEnrollment(
   const stopOnMatch = !!opts?.stopOnMatch;
   const waitFirstResult = !!opts?.waitFirstResult;
   const firstResultTimeoutMs = Number(opts?.firstResultTimeoutMs ?? 3000);
+  const onStopReady = opts?.onStopReady;
 
   const micConfig = {
     modelPath: 'speaker_model.dm',
@@ -265,6 +267,10 @@ async function startEndlessVerificationWithEnrollment(
 
   setUiMessage?.(`🎙️ SV continuous verify started (hop=${hopSeconds}s)`);
   await kick();
+
+  // Pass stop function out before blocking, so caller can stop from UI
+  onStopReady?.(stop);
+
   // ✅ NEW: optionally wait before returning
   if (waitFirstResult) {
     try {
@@ -1036,6 +1042,9 @@ function App(): React.JSX.Element {
   const myInstanceRef = useRef<KeyWordRNBridgeInstance | null>(null);
   const listenerRef = useRef<any>(null);
   const svStopRef = useRef<null | (() => Promise<void>)>(null);
+  const [showSVPrompt, setShowSVPrompt] = useState(false);
+  const [svRunning, setSvRunning] = useState(false);
+  const svChoiceResolverRef = useRef<null | ((choice: boolean) => void)>(null);
 
   const sidRef = useRef<any>(null);
   const [didInitSID, setDidInitSID] = useState(false);
@@ -1161,7 +1170,7 @@ function App(): React.JSX.Element {
   }, [isPermissionGranted]);
 
   // UI message + Speech state (kept)
-  const [message, setMessage] = useState(`Listening to WakeWords '${wakeWords}'...`);
+  const [message, setMessage] = useState(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
   let lastPartialTime = 0;
   let timeoutId: any = null;
   let vadCBintervalID: any = null;
@@ -1351,8 +1360,14 @@ function App(): React.JSX.Element {
 
   };
 
+  let callbackTimes = 0;
   useEffect(() => {
     
+    
+    const keywordCallbackDuringSpeech = async (keywordIndex: any) => {
+      console.log("keywordCallbackDuringSpeech: #callbacks == ", callbackTimes);
+      callbackTimes +=1;
+    }
     // --> WAKE WORD CALLED ENTRY !!!!
     // *** === keyword callback === ***
     //
@@ -1361,18 +1376,25 @@ function App(): React.JSX.Element {
     const keywordCallback = async (keywordIndex: any) => {
       const instance = myInstanceRef.current;
       if (!instance) return;
-
+      const stopWakeWord = true;
+      callbackTimes = 1;
       // 1) Remove listener first (prevents late events)
-      await detachListener();
+      /** *** NEW *** do not detachListener when not stopping wake word **/ 
+      if (stopWakeWord)
+        await detachListener();
 
       // TODO:
       // 1. Speech and wakeword running in parallel.
       // 2. Smooth pause keyword detection and speech.
-      // 3. We need the wake word to stop the speaker
+      // 3. We need the wake word to stop the speaker.
       let wavFilePath = '';
       // 2) Stop detection (native)
       try {
-        await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+        if (stopWakeWord)
+          await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+        /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
+        // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
+        
         wavFilePath = await instance.getRecordingWav();
         console.log("wavFilePath == ", wavFilePath);
       } catch {}
@@ -1383,15 +1405,27 @@ function App(): React.JSX.Element {
       setIsFlashing(true);
 
       try {
-        const enrollmentJson = await runSpeakerVerifyDemo(setMessage);
-        // await runVerificationWithEnrollment(enrollmentJson, setMessage);
-//        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
-        svStopRef.current = await startEndlessVerificationWithEnrollment(
-          enrollmentJson,
-          setMessage,
-          { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000 }
-        );
-        console.log('Calling Speech.initAll');
+        // Show SV prompt and wait for user choice
+        setShowSVPrompt(true);
+        const testSV = await new Promise<boolean>((resolve) => {
+          svChoiceResolverRef.current = resolve;
+        });
+        setShowSVPrompt(false);
+
+        if (testSV) {
+          const enrollmentJson = await runSpeakerVerifyDemo(setMessage);
+          setSvRunning(true);
+          // await runVerificationWithEnrollment(enrollmentJson, setMessage);
+  //        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
+          svStopRef.current = await startEndlessVerificationWithEnrollment(
+            enrollmentJson,
+            setMessage,
+            { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000,
+              onStopReady: (stopFn: () => Promise<void>) => { svStopRef.current = stopFn; } }
+          );
+          setSvRunning(false);
+          console.log('Calling Speech.initAll');
+        }
         await Speech.initAll({ locale:'en-US', model: ttsModel });
         
         //await Speech.initAll({ locale:'en-US', model: ttsModel });
@@ -1408,6 +1442,13 @@ function App(): React.JSX.Element {
         };
       } catch (err) {
         console.error('Failed to start speech recognition:', err);
+      }
+
+      const runWakeWordWithSpeech = true;
+      if (runWakeWordWithSpeech) {
+              // re-attach listener then start detection
+        await attachListenerOnce(instance, keywordCallbackDuringSpeech);
+        await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
       }
 
       /**** You can play what activated the wake word ****/
@@ -1446,7 +1487,7 @@ function App(): React.JSX.Element {
       //  Restart detection after timeout
       setTimeout(async () => {
         console.log('Restarting wake word');
-        setMessage(`Listening to WakeWords '${wakeWords}'...`);
+        setMessage(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
         setIsFlashing(false);
 
         await Speech.destroyAll();
@@ -1458,7 +1499,7 @@ function App(): React.JSX.Element {
         // re-attach listener then start detection
         await attachListenerOnce(instance, keywordCallback);
         await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
-      }, 10000);
+      }, 3000000);
 //      }, 300000);
     };
 
@@ -1542,53 +1583,171 @@ function App(): React.JSX.Element {
 
   return (
     <LinearGradient
-      colors={isDarkMode ? ['#232526', '#414345'] : ['#e0eafc', '#cfdef3']}
+      colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
       style={styles.linearGradient}>
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
       />
-      <ScrollView contentInsetAdjustmentBehavior="automatic" style={backgroundStyle}>
+      <View style={styles.container}>
+        {/* Main message card */}
         <View
           style={[
-            styles.container,
-            {
-              backgroundColor: isFlashing ? (isDarkMode ? '#ff4d4d' : '#ffcccc') : isDarkMode ? Colors.black : Colors.white,
-            },
+            styles.messageCard,
+            isFlashing && styles.messageCardFlashing,
           ]}>
+          <Text style={styles.appLabel}>VOICE DEMO</Text>
           <Text style={styles.title}>{message}</Text>
         </View>
-      </ScrollView>
+
+        {/* Speaker Verification prompt */}
+        {showSVPrompt && (
+          <View style={styles.svPromptContainer}>
+            <Text style={styles.svPromptText}>Test Speaker Verification?</Text>
+            <View style={styles.svButtonRow}>
+              <TouchableOpacity
+                style={[styles.svButton, styles.svButtonYes]}
+                activeOpacity={0.7}
+                onPress={() => svChoiceResolverRef.current?.(true)}>
+                <Text style={styles.svButtonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.svButton, styles.svButtonNo]}
+                activeOpacity={0.7}
+                onPress={() => svChoiceResolverRef.current?.(false)}>
+                <Text style={styles.svButtonText}>Skip</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Stop Verification button */}
+        {svRunning && (
+          <TouchableOpacity
+            style={styles.svStopButton}
+            activeOpacity={0.7}
+            onPress={async () => {
+              if (svStopRef.current) {
+                await svStopRef.current();
+                svStopRef.current = null;
+              }
+              setSvRunning(false);
+            }}>
+            <Text style={styles.svStopButtonText}>Stop Verification</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  linearGradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    marginTop: 32,
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
-  linearGradient: {
-    flex: 1,
+  messageCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 24,
+    paddingVertical: 32,
+    paddingHorizontal: 28,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+    alignItems: 'center',
+  },
+  messageCardFlashing: {
+    backgroundColor: 'rgba(255, 77, 77, 0.35)',
+    borderColor: 'rgba(255, 100, 100, 0.5)',
+  },
+  appLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.6)',
+    letterSpacing: 3,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4a4a4a',
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#ffffff',
     textAlign: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#ffffff99',
-    borderRadius: 12,
-    paddingVertical: 20,
-    marginHorizontal: 10,
-    elevation: 4,
+    lineHeight: 32,
+  },
+  svPromptContainer: {
+    marginTop: 28,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  svPromptText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginBottom: 18,
+  },
+  svButtonRow: {
+    flexDirection: 'row',
+    gap: 14,
+  },
+  svButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 36,
+    borderRadius: 14,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  svButtonYes: {
+    backgroundColor: '#34C759',
+  },
+  svButtonNo: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  svButtonText: {
+    color: '#ffffff',
+    fontSize: 17,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  svStopButton: {
+    marginTop: 28,
+    backgroundColor: '#FF3B30',
+    paddingVertical: 16,
+    paddingHorizontal: 40,
+    borderRadius: 14,
+    shadowColor: '#FF3B30',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  svStopButtonText: {
+    color: '#ffffff',
+    fontSize: 17,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });
 
