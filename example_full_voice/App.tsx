@@ -129,14 +129,14 @@ async function writeEnrollmentJsonToFile(enrollmentJson: string, filename = 'sv_
   return path;
 }
 
-// ✅ NEW: endless/continuous mic verification (returns stop() to cleanup)
-async function startEndlessVerificationWithEnrollment(
+// ✅ NEW: endless/continuous mic verification (FIXED: uses native endless mode)
+async function startEndlessVerificationWithEnrollmentFix(
   enrollmentJson,
   setUiMessage,
   opts
 ) {
   if (!enrollmentJson || typeof enrollmentJson !== 'string') {
-    throw new Error('[SVJS] startEndlessVerificationWithEnrollment: enrollmentJson is missing');
+    throw new Error('[SVJS] startEndlessVerificationWithEnrollmentFix: enrollmentJson is missing');
   }
 
   const hopSeconds = Number(opts?.hopSeconds ?? 0.25);
@@ -150,26 +150,20 @@ async function startEndlessVerificationWithEnrollment(
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-//      tailSeconds: 2.0,
-      tailSeconds: 0.8,
+      tailSeconds: 0.5,
       frameSize: 1280,
-      maxTailSeconds: 1.0,
+      maxTailSeconds: 0.8,
       cmn: true,
       expectedLayoutBDT: false,
     },
   };
 
-  const controllerId = `svVerifyMic_${Date.now()}`;
+  const controllerId = `svVerifyMicFix_${Date.now()}`;
   const ctrl = await createSpeakerVerificationMicController(controllerId);
   await ctrl.create(JSON.stringify(micConfig));
   await ctrl.setEnrollmentJson(enrollmentJson);
 
-  // Start continuous verify (native hop gate)
-  // Start continuous verify (JS loop)
-  let inFlight = false;
-  let first = true;
-
-    // ✅ NEW: first-result gate
+  // First-result gate
   let firstDone = false;
   let firstResolve: any = null;
   let firstReject: any = null;
@@ -194,12 +188,126 @@ async function startEndlessVerificationWithEnrollment(
     try { offE?.(); } catch {}
     try { await ctrl.stop?.(); } catch {}
     try { await ctrl.destroy?.(); } catch {}
-        // ✅ NEW: if we’re stopping before first result, unblock awaiters
     if (!firstDone) {
       firstDone = true;
       try { firstResolve({ stopped: true }); } catch {}
     }
-    // ✅ NEW: unblock the "wait forever"
+    try { stoppedResolve?.(); } catch {}
+  };
+
+  const offE = onSpeakerVerificationError((e) => {
+    if (e?.controllerId && e.controllerId !== controllerId) return;
+    console.log('[SVJS-FIX] SV ERROR event:', e);
+    setUiMessage?.(`⚠️ SV error: ${e?.error ?? JSON.stringify(e)}`);
+
+    if (!firstDone) {
+      firstDone = true;
+      try { firstReject(new Error(e?.error ?? 'SV_ERROR')); } catch {}
+    }
+    stop(); // stop on error
+  });
+
+  const offR = onSpeakerVerificationVerifyResult((e) => {
+    if (e?.controllerId && e.controllerId !== controllerId) return;
+
+    const best = Number(e?.scoreBest ?? e?.bestScore ?? e?.score ?? NaN);
+    const ok = !!e?.isMatch;
+    console.log('[SVJS-FIX] SV VERIFY:', e);
+    setUiMessage?.(`🔐 SV(best=${Number.isFinite(best) ? best.toFixed(3) : 'n/a'}) match=${ok ? '✅' : '❌'}`);
+    onScore?.(best, ok);
+
+    if (!firstDone) {
+      firstDone = true;
+      try { firstResolve(e); } catch {}
+    }
+
+    // Native endless mode keeps emitting; only stop here if requested.
+    if (stopOnMatch && ok) stop();
+  });
+
+  setUiMessage?.(`🎙️ SV continuous verify FIX started (hop=${hopSeconds}s)`);
+
+  // ✅ KEY FIX: use native endless mode (mic stays open, emits every hopSeconds)
+  await ctrl.startEndlessVerifyFromMic(hopSeconds, stopOnMatch, true);
+
+  // Pass stop function out so caller can stop from UI
+  onStopReady?.(stop);
+
+  if (waitFirstResult) {
+    try {
+      await Promise.race([firstResultPromise, firstTimeoutPromise]);
+    } catch {
+      // ignore here; error handler already stopped
+    }
+    await stoppedPromise; // blocks until stop()
+  }
+
+  return stop;
+}
+
+// ✅ NEW: endless/continuous mic verification (returns stop() to cleanup)
+async function startEndlessVerificationWithEnrollment(
+  enrollmentJson,
+  setUiMessage,
+  opts
+) {
+  if (!enrollmentJson || typeof enrollmentJson !== 'string') {
+    throw new Error('[SVJS] startEndlessVerificationWithEnrollment: enrollmentJson is missing');
+  }
+
+  const hopSeconds = Number(opts?.hopSeconds ?? 0.25);
+  const stopOnMatch = !!opts?.stopOnMatch;
+  const waitFirstResult = !!opts?.waitFirstResult;
+  const firstResultTimeoutMs = Number(opts?.firstResultTimeoutMs ?? 3000);
+  const onStopReady = opts?.onStopReady;
+  const onScore = opts?.onScore;
+
+  const micConfig = {
+    modelPath: 'speaker_model.dm',
+    options: {
+      decisionThreshold: 0.35,
+      tailSeconds: 0.5,
+      frameSize: 1280,
+      maxTailSeconds: 0.8,
+      cmn: true,
+      expectedLayoutBDT: false,
+    },
+  };
+
+  const controllerId = `svVerifyMic_${Date.now()}`;
+  const ctrl = await createSpeakerVerificationMicController(controllerId);
+  await ctrl.create(JSON.stringify(micConfig));
+  await ctrl.setEnrollmentJson(enrollmentJson);
+
+  // First-result gate
+  let firstDone = false;
+  let firstResolve: any = null;
+  let firstReject: any = null;
+  const firstResultPromise = new Promise((resolve, reject) => {
+    firstResolve = resolve;
+    firstReject = reject;
+  });
+  const firstTimeoutPromise = new Promise((resolve) =>
+    setTimeout(() => resolve({ timeout: true }), firstResultTimeoutMs)
+  );
+
+  let stoppedResolve: any = null;
+  const stoppedPromise = new Promise<void>((resolve) => {
+    stoppedResolve = resolve;
+  });
+
+  let stopped = false;
+  const stop = async () => {
+    if (stopped) return;
+    stopped = true;
+    try { offR?.(); } catch {}
+    try { offE?.(); } catch {}
+    try { await ctrl.stop?.(); } catch {}
+    try { await ctrl.destroy?.(); } catch {}
+    if (!firstDone) {
+      firstDone = true;
+      try { firstResolve({ stopped: true }); } catch {}
+    }
     try { stoppedResolve?.(); } catch {}
   };
 
@@ -208,7 +316,6 @@ async function startEndlessVerificationWithEnrollment(
     console.log('[SVJS] SV ERROR event:', e);
     setUiMessage?.(`⚠️ SV error: ${e?.error ?? JSON.stringify(e)}`);
 
-    // ✅ NEW: unblock first-waiters
     if (!firstDone) {
       firstDone = true;
       try { firstReject(new Error(e?.error ?? 'SV_ERROR')); } catch {}
@@ -226,7 +333,6 @@ async function startEndlessVerificationWithEnrollment(
     setUiMessage?.(`🔐 SV best=${Number.isFinite(best) ? best.toFixed(3) : 'n/a'} match=${ok ? '✅' : '❌'}`);
     onScore?.(best, ok);
 
-    // ✅ NEW: first result arrived → unblock awaiters
     if (!firstDone) {
       firstDone = true;
       try { firstResolve(e); } catch {}
@@ -240,40 +346,39 @@ async function startEndlessVerificationWithEnrollment(
       return;
     }
 
-    // hop delay then start next verify
+    // hop delay then start next verify (resetState=true for fresh audio each cycle)
     setTimeout(() => {
-      kick().catch((err) => {
+      kick(true).catch((err) => {
         console.log('[SVJS] kick failed:', err);
         stop();
       });
     }, Math.max(0.05, hopSeconds) * 1000);
   });
 
-  const kick = async () => {
+  let inFlight = false;
+  const kick = async (resetState: boolean) => {
     if (stopped) return;
     if (inFlight) return;
     inFlight = true;
     try {
-      await ctrl.startVerifyFromMic(true);// first); // resetState on first run
-      first = false;
+      await ctrl.startVerifyFromMic(resetState);
     } catch (e) {
       inFlight = false;
-            // ✅ NEW: unblock first-waiters on failure
       if (!firstDone) {
         firstDone = true;
         try { firstReject(e); } catch {}
-      } 
+      }
       throw e;
     }
   };
 
   setUiMessage?.(`🎙️ SV continuous verify started (hop=${hopSeconds}s)`);
-  await kick();
+  await kick(true); // first call resets state; subsequent calls keep buffer
 
   // Pass stop function out before blocking, so caller can stop from UI
   onStopReady?.(stop);
 
-  // ✅ NEW: optionally wait before returning
+  // Optionally wait before returning
   if (waitFirstResult) {
     try {
       await Promise.race([firstResultPromise, firstTimeoutPromise]);
@@ -300,9 +405,9 @@ async function verifyFromMicWithEnrollment(
     options: {
       decisionThreshold: 0.35,
       // tailSeconds: 2.0,
-      tailSeconds: 0.8,
+      tailSeconds: 0.5,
       frameSize: 1280,
-      maxTailSeconds: 1.0,
+      maxTailSeconds: 0.8,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -364,9 +469,9 @@ async function runVerificationWithEnrollment(
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.8,
+      tailSeconds: 0.5,
       frameSize: 1280,
-      maxTailSeconds: 1.0,
+      maxTailSeconds: 0.8,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -455,9 +560,9 @@ async function runSpeakerVerifyDemo(setUiMessage?: (s: string) => void): Promise
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.8,
+      tailSeconds: 0.5,
       frameSize: 1280,
-      maxTailSeconds: 1.0,
+      maxTailSeconds: 0.8,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -594,9 +699,9 @@ async function runSpeakerVerifyDemo_old(setUiMessage?: (s: string) => void) {
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.8,
+      tailSeconds: 0.5,
       frameSize: 1280,
-      maxTailSeconds: 1.0,
+      maxTailSeconds: 0.8,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -746,7 +851,7 @@ async function runSpeakerVerifyDemo() {
       decisionThreshold: 0.35,
       tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 1.0,
+      maxTailSeconds: 0.8,
       cmn: true,
       expectedLayoutBDT: false,
       // logLevel: 5, // trace
@@ -1177,16 +1282,18 @@ function App(): React.JSX.Element {
 
   // UI message + Speech state (kept)
   const [message, setMessage] = useState(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
-  let lastPartialTime = 0;
-  let timeoutId: any = null;
+  const [isSpeechSessionActive, setIsSpeechSessionActive] = useState(false);
+  const [currentSpeechSentence, setCurrentSpeechSentence] = useState('');
+  const lastPartialTimeRef = useRef(0);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   let vadCBintervalID: any = null;
-  let silenceThresholdMs = 2000;
-  let lastTranscript = '';
-  let lastProcessed = '';
+  const silenceThresholdMsRef = useRef(2000);
+  const lastTranscriptRef = useRef('');
+  const lastProcessedRef = useRef('');
 
   const SILENCE_TIMEOUT = 2000;
   function resetTranscript() {
-    lastTranscript = '';
+    lastTranscriptRef.current = '';
   }
 
   // Speech handlers (kept)
@@ -1279,26 +1386,29 @@ function App(): React.JSX.Element {
 
   Speech.onSpeechStart = async () => {
     console.log('Speech started');
+    setIsSpeechSessionActive(true);
   };
 
   Speech.onSpeechEnd = async () => {
-    console.log('***Sentence ended***:', lastTranscript);
-    if (lastTranscript == '') {
+    console.log('***Sentence ended***:', lastTranscriptRef.current);
+    if (lastTranscriptRef.current == '') {
       return;
     }
-    //Speech.speak(lastTranscript, 0);
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = null;
-    lastTranscript = '';
+    //Speech.speak(lastTranscriptRef.current, 0);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
+    lastTranscriptRef.current = '';
+    setCurrentSpeechSentence('');
     //await Speech.start('en-US');
   };
 
   Speech.onSpeechPartialResults = (e) => {
     const curr = e.value?.[0];
     if (Platform.OS === 'ios') {
-      if (curr && curr !== lastTranscript) {
-        lastTranscript = curr;
-        lastPartialTime = Date.now();
+      if (curr && curr !== lastTranscriptRef.current) {
+        lastTranscriptRef.current = curr;
+        lastPartialTimeRef.current = Date.now();
+        setCurrentSpeechSentence(curr);
         console.log('Partial:', curr);
       }
       return;
@@ -1310,59 +1420,64 @@ function App(): React.JSX.Element {
       return;
     }
         // Android path
-    const merged = mergeSmartKeepPunct(lastTranscript, curr, 2);
-    if (merged === lastTranscript) return; // no new info
+    const merged = mergeSmartKeepPunct(lastTranscriptRef.current, curr, 2);
+    if (merged === lastTranscriptRef.current) return; // no new info
 
-    lastTranscript = merged;
+    lastTranscriptRef.current = merged;
+    setCurrentSpeechSentence(merged);
     console.log('Partial:', merged);
 
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(async () => {
-      console.log('⏳ Silence timeout reached, speaking:', lastTranscript);
-      const newText = lastTranscript.trim();
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(async () => {
+      console.log('⏳ Silence timeout reached, speaking:', lastTranscriptRef.current);
+      const newText = lastTranscriptRef.current.trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        lastProcessed = lastTranscript;
-        lastTranscript = '';
+        setCurrentSpeechSentence(newText);
+        lastProcessedRef.current = lastTranscriptRef.current;
+        lastTranscriptRef.current = '';
         await Speech.pauseSpeechRecognition();
         await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
         await Speech.unPauseSpeechRecognition(1);
       }
       //await Speech.start('en-US');
-    }, silenceThresholdMs);
+    }, silenceThresholdMsRef.current);
   };
 
   Speech.onSpeechResults = async (e) => {
     if (Platform.OS === 'android') {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = null;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
       console.log('Results: ', e.value?.[0]);
       const current = e.value?.[0];
+      if (current) setCurrentSpeechSentence(current);
       await Speech.speak(current, SPEAKER, SPEAKER_SPEED);
       return;
     }
 
     console.log('Results: ', e.value?.[0]);
     const current = e.value?.[0];
-    if (!current || current === lastTranscript) return;
+    if (!current || current === lastTranscriptRef.current) return;
+    setCurrentSpeechSentence(current);
 
-    const newWords = current.replace(lastTranscript, '').trim();
+    const newWords = current.replace(lastTranscriptRef.current, '').trim();
     console.log('Heard new words:', newWords);
 
-    lastTranscript = current;
+    lastTranscriptRef.current = current;
 
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(async () => {
-      console.log('⏳ Silence timeout reached, speaking:', lastTranscript);
-      const newText = lastTranscript.slice(lastProcessed.length).trim();
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(async () => {
+      console.log('⏳ Silence timeout reached, speaking:', lastTranscriptRef.current);
+      const newText = lastTranscriptRef.current.slice(lastProcessedRef.current.length).trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
+        setCurrentSpeechSentence(newText);
         await Speech.pauseSpeechRecognition();
         await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
         await Speech.unPauseSpeechRecognition(1);
-        lastProcessed = lastTranscript;
+        lastProcessedRef.current = lastTranscriptRef.current;
       }
-    }, silenceThresholdMs);
+    }, silenceThresholdMsRef.current);
 
   };
 
@@ -1437,7 +1552,7 @@ function App(): React.JSX.Element {
           setSvRunning(true);
           // await runVerificationWithEnrollment(enrollmentJson, setMessage);
   //        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
-          svStopRef.current = await startEndlessVerificationWithEnrollment(
+          svStopRef.current = await startEndlessVerificationWithEnrollmentFix(
             enrollmentJson,
             setMessage,
             { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000,
@@ -1455,6 +1570,8 @@ function App(): React.JSX.Element {
           setSvRunning(false);
           console.log('Calling Speech.initAll');
         }
+        setIsSpeechSessionActive(true);
+        setCurrentSpeechSentence('');
         await Speech.initAll({ locale:'en-US', model: ttsModel });
         
         //await Speech.initAll({ locale:'en-US', model: ttsModel });
@@ -1485,11 +1602,11 @@ function App(): React.JSX.Element {
       // await sleep(1500);
       /**** END: You can play what activated the wake word ****/
 
-      await Speech.playWav(moonRocksSound, false);
-      await Speech.pauseSpeechRecognition();
-      await Speech.playWav(moonRocksSound, false);
-      await Speech.speak("Hi! Welcome to Lunafit! My name is " + ((SPEAKER == RICH) ? "Rich" : "Ariana") + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
-      await Speech.unPauseSpeechRecognition(-1);
+      // await Speech.playWav(moonRocksSound, false);
+      // await Speech.pauseSpeechRecognition();
+      // await Speech.playWav(moonRocksSound, false);
+      // await Speech.speak("Hi! Welcome to Lunafit! My name is " + ((SPEAKER == RICH) ? "Rich" : "Ariana") + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
+      // await Speech.unPauseSpeechRecognition(-1);
 
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
@@ -1518,6 +1635,8 @@ function App(): React.JSX.Element {
         console.log('Restarting wake word');
         setMessage(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
         setIsFlashing(false);
+        setIsSpeechSessionActive(false);
+        setCurrentSpeechSentence('');
 
         await Speech.destroyAll();
 
@@ -1629,6 +1748,15 @@ function App(): React.JSX.Element {
           <Text style={styles.appLabel}>VOICE DEMO</Text>
           <Text style={styles.title}>{message}</Text>
         </View>
+
+        {isSpeechSessionActive && (
+          <View style={styles.speechSentenceCard}>
+            <Text style={styles.speechSentenceLabel}>Current Sentence</Text>
+            <Text style={styles.speechSentenceText}>
+              {currentSpeechSentence || 'Listening...'}
+            </Text>
+          </View>
+        )}
 
         {/* Speaker Verification prompt */}
         {showSVPrompt && (
@@ -1750,6 +1878,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  speechSentenceCard: {
+    marginTop: 18,
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  speechSentenceLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    color: 'rgba(255, 255, 255, 0.65)',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  speechSentenceText: {
+    fontSize: 17,
+    lineHeight: 24,
+    color: '#ffffff',
+    fontWeight: '500',
   },
   svPromptText: {
     fontSize: 18,
