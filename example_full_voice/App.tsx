@@ -555,8 +555,7 @@ async function runVerificationWithEnrollment(
   await sv.destroy();
 }
 
-async function runSpeakerVerifyDemo(setUiMessage?: (s: string) => void): Promise<string> {
-
+async function runSpeakerVerifyEnrollment(setUiMessage?: (s: string) => void): Promise<string> {
   const micConfig = {
     modelPath: 'speaker_model.dm',
     options: {
@@ -694,7 +693,7 @@ async function runSpeakerVerifyDemo(setUiMessage?: (s: string) => void): Promise
   return enrollmentJson;
 }
 
-async function runSpeakerVerifyDemo_old(setUiMessage?: (s: string) => void) {
+async function runSpeakerVerifyEnrollment_old(setUiMessage?: (s: string) => void) {
 
   // IMPORTANT: configJson MUST include modelPath (and your ObjC now resolves it)
   const micConfig = {
@@ -841,7 +840,7 @@ async function runSpeakerVerifyDemo_old(setUiMessage?: (s: string) => void) {
 }
 
 /* New Speaker verification  
-async function runSpeakerVerifyDemo() {
+async function runSpeakerVerifyEnrollment() {
   // 1) Create instance
   const sv = await createSpeakerVerificationInstance('sv1');
 
@@ -892,7 +891,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
   // Fallback when no special port match
   default: {
     category: 'playAndRecord',
-    mode: 'measurement',
+    mode: 'default',
     options: [
       'mixWithOthers',
       'allowBluetooth',
@@ -906,7 +905,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
     // 1. CarPlay: run in CarPlay
     carAudio: {
       category: 'playAndRecord',
-      mode: 'measurement',
+      mode: 'default',
       options: [
         'mixWithOthers',
         'allowBluetooth',
@@ -920,7 +919,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
     // 2. Built-in receiver (earpiece): force speaker so user hears responses
     builtInReceiver: {
       category: 'playAndRecord',
-      mode: 'measurement',
+      mode: 'default',
       options: [
         'mixWithOthers',
         'allowBluetooth',
@@ -934,7 +933,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
     // ✅ NEW: when we’re already on built-in speaker, keep SAME config
     builtInSpeaker: {
       category: 'playAndRecord',
-      mode: 'measurement',
+      mode: 'default',
       options: [
         'mixWithOthers',
         'allowBluetooth',
@@ -949,7 +948,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
     // 3. Bluetooth A2DP (Spotify etc) – capture from phone mic
     bluetoothA2DP: {
       category: 'playAndRecord',
-      mode: 'measurement',
+      mode: 'default',
       options: [
         'mixWithOthers',
         'allowBluetooth',
@@ -962,7 +961,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
     // 4. Bluetooth HFP – call-like; you can later change this if needed
     bluetoothHFP: {
       category: 'playAndRecord',
-      mode: 'measurement',
+      mode: 'default',
       options: [
         'mixWithOthers',
         'allowBluetooth',
@@ -975,7 +974,7 @@ const defaultAudioRoutingConfig: AudioRoutingConfig = {
     // 5. Wired headphones – play in ears, mic from phone
     headphones: {
       category: 'playAndRecord',
-      mode: 'measurement',
+      mode: 'default',
       options: [
         'mixWithOthers',
         'allowBluetooth',
@@ -1491,7 +1490,8 @@ function App(): React.JSX.Element {
       console.log("keywordCallbackDuringSpeech: #callbacks == ", callbackTimes);
       callbackTimes +=1;
     }
-    // --> WAKE WORD CALLED ENTRY !!!!
+
+    // --> WAKE WORD CALLBACK ENTRY !!!!
     // *** === keyword callback === ***
     //
     // THIS IS THE PLACE TO PLAY WITH ASR/STT and TTS
@@ -1528,6 +1528,7 @@ function App(): React.JSX.Element {
       setMessage(`WakeWord '${keywordIndex}' DETECTED`);
       setIsFlashing(true);
 
+      /***** SPEAKER VERIFICATION CODE ONLY *****/
       try {
         // Show SV prompt and wait for user choice
         setShowSVPrompt(true);
@@ -1537,7 +1538,8 @@ function App(): React.JSX.Element {
         setShowSVPrompt(false);
 
         if (testSV) {
-          const enrollmentJson = await runSpeakerVerifyDemo(setMessage);
+          /*** --> ENROLLMENT HERE ***/
+          const enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
           // Reset score tracking and start elapsed timer
           setLastSVScore(null);
           lastSVScoreTimeRef.current = null;
@@ -1571,8 +1573,11 @@ function App(): React.JSX.Element {
             svElapsedIntervalRef.current = null;
           }
           setSvRunning(false);
-          console.log('Calling Speech.initAll');
         }
+        /***** END OF SPEAKER VERIFICATION CODE ONLY END *****/
+ 
+        console.log('Calling Speech.initAll');
+
         setIsSpeechSessionActive(true);
         setCurrentSpeechSentence('');
         await Speech.initAll({ locale:'en-US', model: ttsModel });
@@ -1647,6 +1652,8 @@ function App(): React.JSX.Element {
       //   await Speech.unPauseSpeechRecognition(1);
       // }, 100000);
       //  Restart detection after timeout
+
+      /*** RESTARTING THE WAKEWORD ***/
       setTimeout(async () => {
         console.log('Restarting wake word');
         setMessage(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
@@ -1663,7 +1670,7 @@ function App(): React.JSX.Element {
         // re-attach listener then start detection
         await attachListenerOnce(instance, keywordCallback);
         await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
-      }, 3000000);
+      }, 300000);
 //      }, 300000);
     };
 
@@ -1691,6 +1698,7 @@ function App(): React.JSX.Element {
           }
         }
 
+        // --> CREATE THE INSTANCE !!!!
         try {
           console.log('Adding element:', instanceConfigs[0]);
           const instance = await addInstanceMulti(instanceConfigs[0]);
@@ -1700,6 +1708,7 @@ function App(): React.JSX.Element {
           return;
         }
 
+        // --> Attach the callback !!!!
         const inst = myInstanceRef.current!;
         await attachListenerOnce(inst, keywordCallback);
 
