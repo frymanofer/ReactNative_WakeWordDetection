@@ -1505,20 +1505,21 @@ function App(): React.JSX.Element {
         await detachListener();
 
       // TODO:
-      // 1. Speech and wakeword running in parallel.
-      // 2. Smooth pause keyword detection and speech.
-      // 3. We need the wake word to stop the speaker.
-      let wavFilePath = '';
-      // 2) Stop detection (native)
-      try {
-        if (stopWakeWord)
-          await instance.stopKeywordDetection(/* FR add if stop microphone or */);
-        /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
-        // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
+      // let wavFilePath = '';
+      // let recordedWavPaths: string[] = [];
+      // // 2) Stop detection (native)
+      // try {
+      //   if (stopWakeWord)
+      //     await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+      //   /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
+      //   // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
         
-        wavFilePath = await instance.getRecordingWav();
-        console.log("wavFilePath == ", wavFilePath);
-      } catch {}
+      //   wavFilePath = await instance.getRecordingWav();
+      //   if (Platform.OS === "android") {
+      //     recordedWavPaths = await instance.getRecordingWavArray();
+      //   }
+      //   console.log("paths == ", recordedWavPaths);
+      // } catch {}
       await sleep(1500);
 
       console.log('detected keyword: ', keywordIndex);
@@ -1590,16 +1591,29 @@ function App(): React.JSX.Element {
         console.error('Failed to start speech recognition:', err);
       }
 
-      const runWakeWordWithSpeech = true;
-      if (runWakeWordWithSpeech) {
-              // re-attach listener then start detection
-        await attachListenerOnce(instance, keywordCallbackDuringSpeech);
-        await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
-      }
+      // const runWakeWordWithSpeech = true;
+      // if (runWakeWordWithSpeech) {
+      //         // re-attach listener then start detection
+      //   await attachListenerOnce(instance, keywordCallbackDuringSpeech);
+      //   await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
+      // }
 
       /**** You can play what activated the wake word ****/
-      // await Speech.playWav(wavFilePath, false);
-      // await sleep(1500);
+      // const wavPathsToPlay =
+      //   recordedWavPaths.length > 0
+      //     ? recordedWavPaths.filter(Boolean)
+      //     : [wavFilePath].filter(Boolean);
+
+      // for (const path of wavPathsToPlay) {
+      //   const exists = await RNFS.exists(path);
+      //   if (!exists) {
+      //     console.log('Skipping missing wav path:', path);
+      //     continue;
+      //   }
+      //   console.log('Speech.playWav ', path);
+      //   await Speech.playWav(path, false);
+      //   await sleep(1500);
+      // }
       /**** END: You can play what activated the wake word ****/
 
       // await Speech.playWav(moonRocksSound, false);
