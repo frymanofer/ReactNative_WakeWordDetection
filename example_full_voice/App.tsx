@@ -150,9 +150,10 @@ async function startEndlessVerificationWithEnrollmentFix(
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.5,
+      //tailSeconds: 0.5,
+      tailSeconds: 1.0,
       frameSize: 1280,
-      maxTailSeconds: 0.8,
+      maxTailSeconds: 1.5,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -560,9 +561,10 @@ async function runSpeakerVerifyDemo(setUiMessage?: (s: string) => void): Promise
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.5,
+      // TODO IOS IGNORES tailSeconds!!! AND ANDROID DOES NOT!!!
+      tailSeconds: 1.0,
       frameSize: 1280,
-      maxTailSeconds: 0.8,
+      maxTailSeconds: 1.5,
       cmn: true,
       expectedLayoutBDT: false,
     },
