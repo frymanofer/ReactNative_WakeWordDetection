@@ -27,6 +27,7 @@ const ARIANA = 1;
 const RICH = 0;
 const SPEAKER = ARIANA;
 const SPEAKER_SPEED = 0.90;
+const SV_MATCH_HOLD_MS = 1000;
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -145,12 +146,13 @@ async function startEndlessVerificationWithEnrollmentFix(
   const firstResultTimeoutMs = Number(opts?.firstResultTimeoutMs ?? 3000);
   const onStopReady = opts?.onStopReady;
   const onScore = opts?.onScore;
+  const matchHoldMs = Number(opts?.matchHoldMs ?? SV_MATCH_HOLD_MS);
 
   const micConfig = {
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      //tailSeconds: 0.5,
+      //tailSeconds: 2.0,
       tailSeconds: 1.0,
       frameSize: 1280,
       maxTailSeconds: 1.5,
@@ -213,9 +215,22 @@ async function startEndlessVerificationWithEnrollmentFix(
 
     const best = Number(e?.scoreBest ?? e?.bestScore ?? e?.score ?? NaN);
     const ok = !!e?.isMatch;
+    const nowMs = Date.now();
+    const hasBest = Number.isFinite(best);
+    if (ok) {
+      matchHoldUntilMs = nowMs + matchHoldMs;
+      holdBestScore = hasBest ? best : holdBestScore;
+    }
+    const inHoldWindow = nowMs < matchHoldUntilMs;
+    if (!ok && inHoldWindow && hasBest) {
+      holdBestScore = Number.isFinite(holdBestScore) ? Math.max(holdBestScore, best) : best;
+    }
+
+    const showAsMatch = ok || inHoldWindow;
+    const scoreToShow = showAsMatch && Number.isFinite(holdBestScore) ? holdBestScore : best;
     console.log('[SVJS-FIX] SV VERIFY:', e);
-    setUiMessage?.(`🔐 SV(best=${Number.isFinite(best) ? best.toFixed(3) : 'n/a'}) match=${ok ? '✅' : '❌'}`);
-    onScore?.(best, ok);
+    setUiMessage?.(`🔐 SV(best=${Number.isFinite(scoreToShow) ? scoreToShow.toFixed(3) : 'n/a'}) match=${showAsMatch ? '✅' : '❌'}`);
+    onScore?.(scoreToShow, showAsMatch);
 
     if (!firstDone) {
       firstDone = true;
@@ -225,6 +240,8 @@ async function startEndlessVerificationWithEnrollmentFix(
     // Native endless mode keeps emitting; only stop here if requested.
     if (stopOnMatch && ok) stop();
   });
+  let matchHoldUntilMs = -1_000_000_000;
+  let holdBestScore = Number.NaN;
 
   setUiMessage?.(`🎙️ SV continuous verify FIX started (hop=${hopSeconds}s)`);
 
@@ -267,9 +284,9 @@ async function startEndlessVerificationWithEnrollment(
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.5,
+      tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 0.8,
+      maxTailSeconds: 3.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -406,9 +423,9 @@ async function verifyFromMicWithEnrollment(
     options: {
       decisionThreshold: 0.35,
       // tailSeconds: 2.0,
-      tailSeconds: 0.5,
+      tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 0.8,
+      maxTailSeconds: 3.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -470,9 +487,9 @@ async function runVerificationWithEnrollment(
     modelPath: 'speaker_model.dm',
     options: {
       decisionThreshold: 0.35,
-      tailSeconds: 0.5,
+      tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 0.8,
+      maxTailSeconds: 3.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -693,152 +710,6 @@ async function runSpeakerVerifyEnrollment(setUiMessage?: (s: string) => void): P
   return enrollmentJson;
 }
 
-async function runSpeakerVerifyEnrollment_old(setUiMessage?: (s: string) => void) {
-
-  // IMPORTANT: configJson MUST include modelPath (and your ObjC now resolves it)
-  const micConfig = {
-    modelPath: 'speaker_model.dm',
-    options: {
-      decisionThreshold: 0.35,
-      tailSeconds: 0.5,
-      frameSize: 1280,
-      maxTailSeconds: 0.8,
-      cmn: true,
-      expectedLayoutBDT: false,
-    },
-  };
-
-  const ctrl = await createSpeakerVerificationMicController('svMic1');
-  setUiMessage?.('🎙️ Speaker onboarding: preparing mic…');
-
-  console.log('[SVJS] create mic controller...');
-  await ctrl.create(JSON.stringify(micConfig));
-
-  // Subscribe (and keep latest state)
-  let collected = 0;
-  let target = 3;
-  let enrollmentJson = null;
-  setUiMessage?.('🎙️ Speaker onboarding: ready. Press / wait for embedding #1…');
-
-  // --- helper: wait for next PROGRESS (collected increases) OR DONE OR ERROR ---
-  const waitForNextSVStep = (controllerId: string, beforeCollected: number, timeoutMs = 25000) => {
-    return new Promise<{ type: 'progress' | 'done'; ev: any }>((resolve, reject) => {
-      const t = setTimeout(() => {
-        offP?.();
-        offD?.();
-        offE?.();
-        reject(new Error(`[SVJS] timeout waiting for progress/done (before=${beforeCollected})`));
-      }, timeoutMs);
-
-      const cleanup = () => {
-        clearTimeout(t);
-        offP?.();
-        offD?.();
-        offE?.();
-      };
-
-      const offE = onSpeakerVerificationError((e) => {
-        if (e?.controllerId !== controllerId) return;
-        cleanup();
-        reject(new Error(`[SVJS] SV ERROR event: ${JSON.stringify(e)}`));
-      });
-
-      const offP = onSpeakerVerificationOnboardingProgress((e) => {
-        if (e?.controllerId !== controllerId) return;
-        const c = Number(e?.collected ?? 0);
-        if (c > beforeCollected) {
-          cleanup();
-          resolve({ type: 'progress', ev: e });
-        }
-      });
-
-      const offD = onSpeakerVerificationOnboardingDone((e) => {
-        if (e?.controllerId !== controllerId) return;
-        cleanup();
-        resolve({ type: 'done', ev: e });
-      });
-    });
-  };
-
-
-  const offErr = onSpeakerVerificationError((e) => {
-    console.log('[SVJS] ERROR event:', e);
-  });
-
-  const offProg = onSpeakerVerificationOnboardingProgress((e) => {
-    if (e?.controllerId !== 'svMic1') return;
-    console.log('[SVJS] PROGRESS event:', e);
-    collected = Number(e?.collected ?? collected);
-    target = Number(e?.target ?? target);
-  });
-
-  const donePromise = new Promise((resolve, reject) => {
-    let finished = false;
-    const offDone = onSpeakerVerificationOnboardingDone((e) => {
-      if (e?.controllerId !== 'svMic1') return;
-      if (finished) return;
-      finished = true;
-      console.log('[SVJS] DONE event:', e);
-      enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? null;
-      offDone?.();
-      resolve(e);
-    });
-    const t = setTimeout(() => {
-      if (finished) return;
-      finished = true;
-      offDone?.();
-      reject(new Error('[SVJS] timeout waiting for onboarding done'));
-    }, 60000);
-    // (timeout auto-clears by finished guard)
-  });
-
-  // Begin onboarding
-  setUiMessage?.('🎙️ Speaker onboarding: start. Please speak clearly when asked…');
-
-  await ctrl.beginOnboarding('yaroslav', 3, true);
-
-  // Request embeddings ONE BY ONE, and WAIT for progress to advance
-  for (let i = 1; i <= 3; i++) {
-    console.log('[SVJS] requesting embedding', i, '/', 3);
-    setUiMessage?.(`🎙️ Please speak now… collecting sample ${i}/3 (about 2s)`);
-    const before = collected;
-
-    // IMPORTANT: attach listeners BEFORE triggering native to avoid missing fast events
-    const stepPromise = waitForNextSVStep('svMic1', before, 30000);
-    await ctrl.getNextEmbeddingFromMic();
-    const step = await stepPromise;
-
-    if (step.type === 'done') {
-      // native completed early (should be after 3/3)
-      // enrollmentJson is captured by donePromise subscription too, but capture here as well
-      const e = step.ev;
-      enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? enrollmentJson;
-      setUiMessage?.('✅ Speaker onboarding completed.');
-
-      break;
-    }
-
-    // progress happened
-    setUiMessage?.(`✅ Collected ${Math.min(collected, 3)}/3 samples`);
-
-  }
-
-  // Wait for DONE event (contains enrollment JSON)
-  setUiMessage?.('✅ Finalizing speaker profile…');
-  await donePromise;
-
-  console.log('[SVJS] enrollmentJson len=', enrollmentJson?.length ?? 0);
-  await ctrl.setEnrollmentJson(enrollmentJson);
-  setUiMessage?.('✅ Speaker profile saved. Continuing…');
-
-  // cleanup listeners
-  offProg?.();
-  offErr?.();
-
-  // optionally keep controller for verify-from-mic; or destroy
-  // await ctrl.destroy();
-}
-
 /* New Speaker verification  
 async function runSpeakerVerifyEnrollment() {
   // 1) Create instance
@@ -852,7 +723,7 @@ async function runSpeakerVerifyEnrollment() {
       decisionThreshold: 0.35,
       tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 0.8,
+      maxTailSeconds: 3.0,
       cmn: true,
       expectedLayoutBDT: false,
       // logLevel: 5, // trace
