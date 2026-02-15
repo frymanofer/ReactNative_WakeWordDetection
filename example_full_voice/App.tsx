@@ -28,6 +28,7 @@ const RICH = 0;
 const SPEAKER = ARIANA;
 const SPEAKER_SPEED = 0.90;
 const SV_MATCH_HOLD_MS = 1000;
+const SV_ONBOARDING_SAMPLE_COUNT = 5;
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -572,7 +573,11 @@ async function runVerificationWithEnrollment(
   await sv.destroy();
 }
 
-async function runSpeakerVerifyEnrollment(setUiMessage?: (s: string) => void): Promise<string> {
+async function runSpeakerVerifyEnrollment(
+  setUiMessage?: (s: string) => void,
+  sampleCount: number = SV_ONBOARDING_SAMPLE_COUNT
+): Promise<string> {
+  const targetSamples = Math.max(1, Math.floor(sampleCount));
   const micConfig = {
     modelPath: 'speaker_model.dm',
     options: {
@@ -593,7 +598,7 @@ async function runSpeakerVerifyEnrollment(setUiMessage?: (s: string) => void): P
   await ctrl.create(JSON.stringify(micConfig));
 
   let collected = 0;
-  let target = 3;
+  let target = targetSamples;
   let enrollmentJson: string | null = null;
 
   const waitForNextSVStep = (controllerId: string, beforeCollected: number, timeoutMs = 25000) => {
@@ -666,11 +671,11 @@ async function runSpeakerVerifyEnrollment(setUiMessage?: (s: string) => void): P
   });
 
   setUiMessage?.('🎙️ Speaker onboarding: start. Please speak clearly when asked…');
-  await ctrl.beginOnboarding?.('yaroslav', 3, true);
+  await ctrl.beginOnboarding?.('yaroslav', targetSamples, true);
 
-  for (let i = 1; i <= 3; i++) {
-    console.log('[SVJS] requesting embedding', i, '/', 3);
-    setUiMessage?.(`🎙️ Please speak now… collecting sample ${i}/3 (about 2s)`);
+  for (let i = 1; i <= targetSamples; i++) {
+    console.log('[SVJS] requesting embedding', i, '/', targetSamples);
+    setUiMessage?.(`🎙️ Please speak now… collecting sample ${i}/${targetSamples} (about 2s)`);
 
     const before = collected;
     const stepPromise = waitForNextSVStep('svMic1', before, 30000);
@@ -684,7 +689,7 @@ async function runSpeakerVerifyEnrollment(setUiMessage?: (s: string) => void): P
       break;
     }
 
-    setUiMessage?.(`✅ Collected ${Math.min(collected, 3)}/3 samples`);
+    setUiMessage?.(`✅ Collected ${Math.min(collected, targetSamples)}/${targetSamples} samples`);
   }
 
   setUiMessage?.('✅ Finalizing speaker profile…');
