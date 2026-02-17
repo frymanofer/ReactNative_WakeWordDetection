@@ -26,7 +26,7 @@ import {
 const ARIANA = 1;
 const RICH = 0;
 const SPEAKER = ARIANA;
-const SPEAKER_SPEED = 0.90;
+const SPEAKER_SPEED = 0.85;
 const SV_MATCH_HOLD_MS = 1000;
 const SV_ONBOARDING_SAMPLE_COUNT = 5;
 
@@ -935,6 +935,7 @@ interface instanceConfig {
 }
 
 const modelName = 'hey_lookdeep' + (Platform.OS === 'ios' ? '.onnx' : '.dm');
+//const modelName = 'ayuda_model_28_05022026' + (Platform.OS === 'ios' ? '.onnx' : '.dm');
 // Create an array of instance configurations
 const instanceConfigs: instanceConfig[] = [
   { id: 'multi_model_instance', modelName, threshold: 0.99, bufferCnt: 3, sticky: false, msBetweenCallbacks: 1000 },
@@ -1171,6 +1172,8 @@ function App(): React.JSX.Element {
   const SILENCE_TIMEOUT = 2000;
   function resetTranscript() {
     lastTranscriptRef.current = '';
+    lastProcessedRef.current = '';
+    setCurrentSpeechSentence('');
   }
 
   // Speech handlers (kept)
@@ -1268,15 +1271,9 @@ function App(): React.JSX.Element {
 
   Speech.onSpeechEnd = async () => {
     console.log('***Sentence ended***:', lastTranscriptRef.current);
-    if (lastTranscriptRef.current == '') {
-      return;
-    }
-    //Speech.speak(lastTranscriptRef.current, 0);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = null;
-    lastTranscriptRef.current = '';
-    setCurrentSpeechSentence('');
-    //await Speech.start('en-US');
+    // Keep AIChat-like behavior: do not clear timeout or reset transcript here.
+    // Timeout lifecycle is handled by onSpeechPartialResults/onSpeechResults.
+    return;
   };
 
   Speech.onSpeechPartialResults = (e) => {
@@ -1311,8 +1308,7 @@ function App(): React.JSX.Element {
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
         setCurrentSpeechSentence(newText);
-        lastProcessedRef.current = lastTranscriptRef.current;
-        lastTranscriptRef.current = '';
+        resetTranscript();
         await Speech.pauseSpeechRecognition();
         await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
         await Speech.unPauseSpeechRecognition(1);
@@ -1337,22 +1333,21 @@ function App(): React.JSX.Element {
     if (!current || current === lastTranscriptRef.current) return;
     setCurrentSpeechSentence(current);
 
-    const newWords = current.replace(lastTranscriptRef.current, '').trim();
-    console.log('Heard new words:', newWords);
-
     lastTranscriptRef.current = current;
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(async () => {
       console.log('⏳ Silence timeout reached, speaking:', lastTranscriptRef.current);
-      const newText = lastTranscriptRef.current.slice(lastProcessedRef.current.length).trim();
+      const newText = lastTranscriptRef.current.trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
         setCurrentSpeechSentence(newText);
         await Speech.pauseSpeechRecognition();
         await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
         await Speech.unPauseSpeechRecognition(1);
-        lastProcessedRef.current = lastTranscriptRef.current;
+        // Reset phrase state per timeout cycle so OS transcript rewrites
+        // (e.g. "one" -> "1 2") don't break delta logic.
+        resetTranscript();
       }
     }, silenceThresholdMsRef.current);
 
@@ -1385,19 +1380,20 @@ function App(): React.JSX.Element {
       // TODO:
       // let wavFilePath = '';
       // let recordedWavPaths: string[] = [];
-      // // 2) Stop detection (native)
-      // try {
-      //   if (stopWakeWord)
-      //     await instance.stopKeywordDetection(/* FR add if stop microphone or */);
-      //   /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
-      //   // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
+      
+      // 2) Stop Detection (native)
+      try {
+         if (stopWakeWord)
+           await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+         /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
+         // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
         
       //   wavFilePath = await instance.getRecordingWav();
       //   if (Platform.OS === "android") {
       //     recordedWavPaths = await instance.getRecordingWavArray();
       //   }
       //   console.log("paths == ", recordedWavPaths);
-      // } catch {}
+      } catch {}
       await sleep(1500);
 
       console.log('detected keyword: ', keywordIndex);
@@ -1412,10 +1408,10 @@ function App(): React.JSX.Element {
           svChoiceResolverRef.current = resolve;
         });
         setShowSVPrompt(false);
-
+        let enrollmentJson = null;
         if (testSV) {
           /*** --> ENROLLMENT HERE ***/
-          const enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
+          enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
           // Reset score tracking and start elapsed timer
           setLastSVScore(null);
           lastSVScoreTimeRef.current = null;
@@ -1456,7 +1452,19 @@ function App(): React.JSX.Element {
 
         setIsSpeechSessionActive(true);
         setCurrentSpeechSentence('');
-        await Speech.initAll({ locale:'en-US', model: ttsModel });
+        if (typeof enrollmentJson === 'string' && enrollmentJson.length > 0) {
+          const enrollmentPath = await writeEnrollmentJsonToFile(
+            enrollmentJson,
+            `sv_enrollment_runtime_${Date.now()}.json`,
+          );
+          await Speech.initAll({
+            locale: 'en-US',
+            model: ttsModel,
+            onboardingJsonPath: enrollmentPath,
+          });
+        } else {
+          await Speech.initAll({ locale: 'en-US', model: ttsModel });
+        }
         
         //await Speech.initAll({ locale:'en-US', model: ttsModel });
         // Spanish:
@@ -1502,6 +1510,7 @@ function App(): React.JSX.Element {
       // await Speech.playWav(moonRocksSound, false);
       // await Speech.pauseSpeechRecognition();
       // await Speech.playWav(moonRocksSound, false);
+      
       // await Speech.speak("Hi! Welcome to Lunafit! My name is " + ((SPEAKER == RICH) ? "Rich" : "Ariana") + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
       // await Speech.unPauseSpeechRecognition(-1);
 
