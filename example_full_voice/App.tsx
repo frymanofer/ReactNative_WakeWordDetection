@@ -26,8 +26,10 @@ import {
 const ARIANA = 1;
 const RICH = 0;
 const SPEAKER = ARIANA;
-const SPEAKER_SPEED = 0.85;
-const SV_MATCH_HOLD_MS = 1000;
+const RICH_SPEAKER_SPEED = 0.8;
+const ARIANA_SPEAKER_SPEED = 0.8;
+const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
+const SV_MATCH_HOLD_MS = 500;
 const SV_ONBOARDING_SAMPLE_COUNT = 5;
 
 export async function ensureMicPermission(): Promise<boolean> {
@@ -230,7 +232,8 @@ async function startEndlessVerificationWithEnrollmentFix(
     const showAsMatch = ok || inHoldWindow;
     const scoreToShow = showAsMatch && Number.isFinite(holdBestScore) ? holdBestScore : best;
     console.log('[SVJS-FIX] SV VERIFY:', e);
-    setUiMessage?.(`🔐 SV(best=${Number.isFinite(scoreToShow) ? scoreToShow.toFixed(3) : 'n/a'}) match=${showAsMatch ? '✅' : '❌'}`);
+    setUiMessage?.(`🔐 Speaker Identificaiton Match=${showAsMatch ? '✅' : '❌'}`);
+    //setUiMessage?.(`🔐 SV(best=${Number.isFinite(scoreToShow) ? scoreToShow.toFixed(3) : 'n/a'}) match=${showAsMatch ? '✅' : '❌'}`);
     onScore?.(scoreToShow, showAsMatch);
 
     if (!firstDone) {
@@ -244,7 +247,7 @@ async function startEndlessVerificationWithEnrollmentFix(
   let matchHoldUntilMs = -1_000_000_000;
   let holdBestScore = Number.NaN;
 
-  setUiMessage?.(`🎙️ SV continuous verify FIX started (hop=${hopSeconds}s)`);
+  setUiMessage?.(`🎙️ Verify Speaker Identification Now`);//  (hop=${hopSeconds}s)`);
 
   // ✅ KEY FIX: use native endless mode (mic stays open, emits every hopSeconds)
   await ctrl.startEndlessVerifyFromMic(hopSeconds, stopOnMatch, true);
@@ -934,11 +937,12 @@ interface instanceConfig {
   msBetweenCallbacks: number;
 }
 
-const modelName = 'hey_lookdeep' + (Platform.OS === 'ios' ? '.onnx' : '.dm');
+const modelName = 'hey_coach_model_28_22012026b.onnx';
+//const modelName = 'hey_lookdeep' + (Platform.OS === 'ios' ? '.onnx' : '.dm');
 //const modelName = 'ayuda_model_28_05022026' + (Platform.OS === 'ios' ? '.onnx' : '.dm');
 // Create an array of instance configurations
 const instanceConfigs: instanceConfig[] = [
-  { id: 'multi_model_instance', modelName, threshold: 0.99, bufferCnt: 3, sticky: false, msBetweenCallbacks: 1000 },
+  { id: 'multi_model_instance', modelName, threshold: 0.999, bufferCnt: 3, sticky: false, msBetweenCallbacks: 1000 },
 ];
 
 // Helper function to format the ONNX file name
@@ -1034,6 +1038,7 @@ function App(): React.JSX.Element {
   const lastSVScoreTimeRef = useRef<number | null>(null);
   const [svElapsed, setSvElapsed] = useState<string>('N/A');
   const svElapsedIntervalRef = useRef<any>(null);
+  const initStartedRef = useRef(false);
 
   const sidRef = useRef<any>(null);
   const [didInitSID, setDidInitSID] = useState(false);
@@ -1133,10 +1138,16 @@ function App(): React.JSX.Element {
     const handleAppStateChange = async (nextAppState: string) => {
       if (nextAppState === 'active') {
         try {
-          await AudioPermissionComponent();
-          setIsPermissionGranted(true);
+          if (Platform.OS === 'android') {
+            const granted = await AudioPermissionComponent();
+            setIsPermissionGranted(!!granted);
+          } else {
+            // Keep iOS behavior unchanged by Android-first permission gating.
+            setIsPermissionGranted(true);
+          }
         } catch (error) {
           console.error('Error requesting permissions:', error);
+          setIsPermissionGranted(Platform.OS !== 'android');
         }
       }
     };
@@ -1162,6 +1173,10 @@ function App(): React.JSX.Element {
   const [message, setMessage] = useState(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
   const [isSpeechSessionActive, setIsSpeechSessionActive] = useState(false);
   const [currentSpeechSentence, setCurrentSpeechSentence] = useState('');
+  const [isIntroSpeaking, setIsIntroSpeaking] = useState(false);
+  const [introSpeakerName, setIntroSpeakerName] = useState<'Rich' | 'Ariana'>('Ariana');
+  const [introScript, setIntroScript] = useState('');
+  const [isSpeakerIdentificationActive, setIsSpeakerIdentificationActive] = useState(false);
   const lastPartialTimeRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   let vadCBintervalID: any = null;
@@ -1264,6 +1279,23 @@ function App(): React.JSX.Element {
     return nc.length >= np.length ? curr : prev;
   };
 
+  function getAdjustedSpeed(text: string, baseSpeed: number): number {
+    /*const wordCount = text
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    if (wordCount <= 4) {
+      return baseSpeed * 0.5;
+    }
+
+    if (wordCount <= 8) {
+      return baseSpeed * 0.8;
+    }
+*/
+    return baseSpeed;
+  }
+
   Speech.onSpeechStart = async () => {
     console.log('Speech started');
     setIsSpeechSessionActive(true);
@@ -1307,10 +1339,11 @@ function App(): React.JSX.Element {
       const newText = lastTranscriptRef.current.trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        setCurrentSpeechSentence(newText);
-        resetTranscript();
+        setCurrentSpeechSentence("Speaking now:" + newText);
         await Speech.pauseSpeechRecognition();
-        await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
+        const adjustedSpeed = getAdjustedSpeed(newText, SPEAKER_SPEED);
+        await Speech.speak(newText, SPEAKER, adjustedSpeed);
+        resetTranscript();
         await Speech.unPauseSpeechRecognition(1);
       }
       //await Speech.start('en-US');
@@ -1341,9 +1374,10 @@ function App(): React.JSX.Element {
       const newText = lastTranscriptRef.current.trim();
       if (newText.length > 0) {
         console.log('🗣️ Speaking:', newText);
-        setCurrentSpeechSentence(newText);
+        setCurrentSpeechSentence("Speaking now:" + newText);
         await Speech.pauseSpeechRecognition();
-        await Speech.speak(newText, SPEAKER, SPEAKER_SPEED);
+        const adjustedSpeed = getAdjustedSpeed(newText, SPEAKER_SPEED);
+        await Speech.speak(newText, SPEAKER, adjustedSpeed);
         await Speech.unPauseSpeechRecognition(1);
         // Reset phrase state per timeout cycle so OS transcript rewrites
         // (e.g. "one" -> "1 2") don't break delta logic.
@@ -1397,7 +1431,14 @@ function App(): React.JSX.Element {
       await sleep(1500);
 
       console.log('detected keyword: ', keywordIndex);
-      setMessage(`WakeWord '${keywordIndex}' DETECTED`);
+      const keywordText = String(keywordIndex ?? '');
+      const keywordWords = keywordText.trim().split(/\s+/).filter(Boolean);
+      const modelWordIndex = keywordWords.findIndex((w) => w.toLowerCase() === 'model');
+      const cleanWakeWord =
+        modelWordIndex >= 0
+          ? keywordWords.slice(0, modelWordIndex).join(' ')
+          : keywordText;
+      setMessage(`WakeWord '${cleanWakeWord}' DETECTED`);
       setIsFlashing(true);
 
       /***** SPEAKER VERIFICATION CODE ONLY *****/
@@ -1452,6 +1493,7 @@ function App(): React.JSX.Element {
 
         setIsSpeechSessionActive(true);
         setCurrentSpeechSentence('');
+        setIsSpeakerIdentificationActive(typeof enrollmentJson === 'string' && enrollmentJson.length > 0);
         if (typeof enrollmentJson === 'string' && enrollmentJson.length > 0) {
           const enrollmentPath = await writeEnrollmentJsonToFile(
             enrollmentJson,
@@ -1477,6 +1519,7 @@ function App(): React.JSX.Element {
         const off = Speech.onFinishedSpeaking = async () => {
           //await Speech.unPauseSpeechRecognition(1);
           console.log('onFinishedSpeaking(): ✅ Finished speaking (last WAV done).');
+          setIsIntroSpeaking(false);
         };
       } catch (err) {
         console.error('Failed to start speech recognition:', err);
@@ -1508,11 +1551,61 @@ function App(): React.JSX.Element {
       /**** END: You can play what activated the wake word ****/
 
       // await Speech.playWav(moonRocksSound, false);
-      // await Speech.pauseSpeechRecognition();
-      // await Speech.playWav(moonRocksSound, false);
-      
-      // await Speech.speak("Hi! Welcome to Lunafit! My name is " + ((SPEAKER == RICH) ? "Rich" : "Ariana") + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!", SPEAKER, SPEAKER_SPEED);
-      // await Speech.unPauseSpeechRecognition(-1);
+      await Speech.pauseSpeechRecognition();
+      const selectedSpeakerName: 'Rich' | 'Ariana' = (SPEAKER == RICH) ? 'Rich' : 'Ariana';
+      const introLine = "Hi! Welcome to Lunafit! My name is " + selectedSpeakerName + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!";
+      setMessage(`${selectedSpeakerName} is speaking...`);
+      setIntroSpeakerName(selectedSpeakerName);
+      setIntroScript(introLine);
+      setCurrentSpeechSentence("Into Message: " + introLine);
+      setIsIntroSpeaking(true);
+
+      try {
+        await Speech.speak(introLine, SPEAKER, SPEAKER_SPEED);
+      } finally {
+        setIsIntroSpeaking(false);
+        resetTranscript();
+      }
+      // await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+
+      /*      await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.3);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED * 0.3);
+      await Speech.speak("Hello! how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello! how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello! how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello! how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello! how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
+      await Speech.speak("Hello! how are you?", SPEAKER, SPEAKER_SPEED * 0.3);
+      await Speech.speak("Hello good people, how are you?", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you?", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you?", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you?", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you?", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
+      await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
+      */
+      await Speech.unPauseSpeechRecognition(-1);
 
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
@@ -1545,6 +1638,9 @@ function App(): React.JSX.Element {
         setIsFlashing(false);
         setIsSpeechSessionActive(false);
         setCurrentSpeechSentence('');
+        setIsIntroSpeaking(false);
+        setIntroScript('');
+        setIsSpeakerIdentificationActive(false);
 
         await Speech.destroyAll();
 
@@ -1630,6 +1726,10 @@ function App(): React.JSX.Element {
       }
     };
 
+    if (initStartedRef.current) return;
+    if (!isPermissionGranted || !didInitSID) return;
+
+    initStartedRef.current = true;
     if (!calledOnce) {
       calledOnce = true;
       console.log('Calling initializeKeywordDetection();');
@@ -1637,7 +1737,7 @@ function App(): React.JSX.Element {
       console.log('After calling AudioPermissionComponent();');
     }
 
-  }, [isPermissionGranted && didInitSID]); // same dependency
+  }, [isPermissionGranted, didInitSID]);
 
   return (
     <LinearGradient
@@ -1653,7 +1753,7 @@ function App(): React.JSX.Element {
         <View
           style={[
             styles.messageCard,
-            isFlashing && styles.messageCardFlashing,
+            showSVPrompt ? styles.messageCardSVPromptFocus : (isFlashing && styles.messageCardFlashing),
           ]}>
           <Text style={styles.appLabel}>VOICE DEMO</Text>
           <Text style={styles.title}>{message}</Text>
@@ -1661,17 +1761,26 @@ function App(): React.JSX.Element {
 
         {isSpeechSessionActive && (
           <View style={styles.speechSentenceCard}>
-            <Text style={styles.speechSentenceLabel}>Current Sentence</Text>
-            <Text style={styles.speechSentenceText}>
-              {currentSpeechSentence || 'Listening...'}
-            </Text>
+            {isIntroSpeaking ? (
+              <Text style={styles.speechSentenceText}>{introScript}</Text>
+            ) : (
+              <>
+                <Text style={styles.speechSentenceLabel}>
+                  Speaker identification: {isSpeakerIdentificationActive ? 'ON' : 'OFF'}
+                </Text>
+                <Text style={styles.speechSentenceLabel}>Current Sentence</Text>
+                <Text style={styles.speechSentenceText}>
+                  {currentSpeechSentence || 'Listening...'}
+                </Text>
+              </>
+            )}
           </View>
         )}
 
         {/* Speaker Verification prompt */}
         {showSVPrompt && (
           <View style={styles.svPromptContainer}>
-            <Text style={styles.svPromptText}>Test Speaker Verification?</Text>
+            <Text style={styles.svPromptText}>Activate Speaker Verification?</Text>
             <View style={styles.svButtonRow}>
               <TouchableOpacity
                 style={[styles.svButton, styles.svButtonYes]}
@@ -1725,7 +1834,7 @@ function App(): React.JSX.Element {
                 }
                 setSvRunning(false);
               }}>
-            <Text style={styles.svStopButtonText}>Stop Verification</Text>
+            <Text style={styles.svStopButtonText}>Continue To Test Full Speech</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -1762,8 +1871,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   messageCardFlashing: {
-    backgroundColor: 'rgba(255, 77, 77, 0.35)',
-    borderColor: 'rgba(255, 100, 100, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  messageCardSVPromptFocus: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   appLabel: {
     fontSize: 13,
@@ -1782,12 +1895,12 @@ const styles = StyleSheet.create({
   svPromptContainer: {
     marginTop: 28,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(255, 77, 77, 0.35)',
     borderRadius: 20,
     paddingVertical: 24,
     paddingHorizontal: 28,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 100, 100, 0.5)',
   },
   speechSentenceCard: {
     marginTop: 18,
@@ -1812,6 +1925,13 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#ffffff',
     fontWeight: '500',
+  },
+  introScriptText: {
+    marginTop: 10,
+    fontSize: 15,
+    lineHeight: 22,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '400',
   },
   svPromptText: {
     fontSize: 18,
