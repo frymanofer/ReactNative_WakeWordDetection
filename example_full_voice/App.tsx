@@ -23,14 +23,14 @@ import {
   AppState,
 } from 'react-native';
 
-const ARIANA = 1;
-const RICH = 0;
+const ARIANA = 0;
+const RICH = 1;
 const SPEAKER = ARIANA;
 const RICH_SPEAKER_SPEED = 0.8;
-const ARIANA_SPEAKER_SPEED = 0.8;
+const ARIANA_SPEAKER_SPEED = 0.75;
 const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
 const SV_MATCH_HOLD_MS = 500;
-const SV_ONBOARDING_SAMPLE_COUNT = 5;
+const SV_ONBOARDING_SAMPLE_COUNT = 3;
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -156,9 +156,9 @@ async function startEndlessVerificationWithEnrollmentFix(
     options: {
       decisionThreshold: 0.35,
       //tailSeconds: 2.0,
-      tailSeconds: 1.0,
+      tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 1.5,
+      maxTailSeconds: 3.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -586,9 +586,9 @@ async function runSpeakerVerifyEnrollment(
     options: {
       decisionThreshold: 0.35,
       // TODO IOS IGNORES tailSeconds!!! AND ANDROID DOES NOT!!!
-      tailSeconds: 1.0,
+      tailSeconds: 2.0,
       frameSize: 1280,
-      maxTailSeconds: 1.5,
+      maxTailSeconds: 3.0,
       cmn: true,
       expectedLayoutBDT: false,
     },
@@ -1561,20 +1561,20 @@ function App(): React.JSX.Element {
       setIsIntroSpeaking(true);
 
       try {
-        await Speech.speak(introLine, SPEAKER, SPEAKER_SPEED);
+         await Speech.speak(introLine, SPEAKER, SPEAKER_SPEED);
       } finally {
-        setIsIntroSpeaking(false);
-        resetTranscript();
+       setIsIntroSpeaking(false);
+       resetTranscript();
       }
+
+//      await Speech.speak("Hello, as an AI , I don't have feelings , but I'm here and ready to help you with anything you need. Today, how can I assist you?", SPEAKER, SPEAKER_SPEED);
+
+
       // await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+      // // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
 
