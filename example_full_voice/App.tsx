@@ -17,20 +17,28 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useColorScheme,
   View,
   AppState,
+  InputAccessoryView,
+  Keyboard,
 } from 'react-native';
 
 const ARIANA = 0;
 const RICH = 1;
-const SPEAKER = ARIANA;
+
+const SPEAKER = 0;
+
 const RICH_SPEAKER_SPEED = 0.8;
 const ARIANA_SPEAKER_SPEED = 0.75;
-const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
+// const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
+const SPEAKER_SPEED = 1.0;
 const SV_MATCH_HOLD_MS = 500;
 const SV_ONBOARDING_SAMPLE_COUNT = 3;
+const TTS_INPUT_ACCESSORY_ID = 'ttsInputAccessory';
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -1177,6 +1185,9 @@ function App(): React.JSX.Element {
   const [introSpeakerName, setIntroSpeakerName] = useState<'Rich' | 'Ariana'>('Ariana');
   const [introScript, setIntroScript] = useState('');
   const [isSpeakerIdentificationActive, setIsSpeakerIdentificationActive] = useState(false);
+  const [isTTSTestMode, setIsTTSTestMode] = useState(false);
+  const [ttsInputText, setTtsInputText] = useState('');
+  const [isManualTTSSpeaking, setIsManualTTSSpeaking] = useState(false);
   const lastPartialTimeRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   let vadCBintervalID: any = null;
@@ -1309,6 +1320,7 @@ function App(): React.JSX.Element {
   };
 
   Speech.onSpeechPartialResults = (e) => {
+    if (isTTSTestMode) return;
     const curr = e.value?.[0];
     if (Platform.OS === 'ios') {
       if (curr && curr !== lastTranscriptRef.current) {
@@ -1351,6 +1363,7 @@ function App(): React.JSX.Element {
   };
 
   Speech.onSpeechResults = async (e) => {
+    if (isTTSTestMode) return;
     if (Platform.OS === 'android') {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -1574,7 +1587,6 @@ function App(): React.JSX.Element {
       // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
-      // // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
       // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
 
@@ -1640,6 +1652,9 @@ function App(): React.JSX.Element {
         setCurrentSpeechSentence('');
         setIsIntroSpeaking(false);
         setIntroScript('');
+        setIsTTSTestMode(false);
+        setTtsInputText('');
+        setIsManualTTSSpeaking(false);
         setIsSpeakerIdentificationActive(false);
 
         await Speech.destroyAll();
@@ -1739,30 +1754,109 @@ function App(): React.JSX.Element {
 
   }, [isPermissionGranted, didInitSID]);
 
+  const enterTTSTestMode = async () => {
+    try {
+      await Speech.pauseSpeechRecognition();
+    } catch (error) {
+      console.log('pauseSpeechRecognition failed when entering TTS test mode:', error);
+    }
+    resetTranscript();
+    setMessage('TTS Test Mode');
+    setIsTTSTestMode(true);
+  };
+
+  const speakManualTTS = async () => {
+    const text = ttsInputText.trim();
+    if (!text || isManualTTSSpeaking) return;
+    setIsManualTTSSpeaking(true);
+    setCurrentSpeechSentence(`Speaking now: ${text}`);
+    try {
+      await Speech.speak(text, SPEAKER, SPEAKER_SPEED);
+      setCurrentSpeechSentence('');
+    } finally {
+      setIsManualTTSSpeaking(false);
+    }
+  };
+
   return (
-    <LinearGradient
-      colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
-      style={styles.linearGradient}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
-      <View style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <LinearGradient
+        colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
+        style={styles.linearGradient}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <View style={styles.container}>
         {/* Main message card */}
-        <View
-          style={[
-            styles.messageCard,
-            showSVPrompt ? styles.messageCardSVPromptFocus : (isFlashing && styles.messageCardFlashing),
-          ]}>
-          <Text style={styles.appLabel}>VOICE DEMO</Text>
-          <Text style={styles.title}>{message}</Text>
-        </View>
+        {!isTTSTestMode && (
+          <View
+            style={[
+              styles.messageCard,
+              showSVPrompt ? styles.messageCardSVPromptFocus : (isFlashing && styles.messageCardFlashing),
+            ]}>
+            <Text style={styles.appLabel}>VOICE DEMO</Text>
+            <Text style={styles.title}>{message}</Text>
+          </View>
+        )}
 
         {isSpeechSessionActive && (
-          <View style={styles.speechSentenceCard}>
+          <View
+            style={[
+              styles.speechSentenceCard,
+              Platform.OS === 'ios' && isTTSTestMode && styles.speechSentenceCardTTSIOS,
+            ]}>
             {isIntroSpeaking ? (
               <Text style={styles.speechSentenceText}>{introScript}</Text>
+            ) : isTTSTestMode ? (
+              <>
+                <View style={styles.ttsHeaderRow}>
+                  <Text style={styles.speechSentenceLabel}>TTS Test Mode</Text>
+                  <TouchableOpacity
+                    style={styles.hideKeyboardButton}
+                    activeOpacity={0.7}
+                    onPress={() => Keyboard.dismiss()}>
+                    <Text style={styles.hideKeyboardButtonText}>Hide Keyboard</Text>
+                  </TouchableOpacity>
+                </View>
+                <TextInput
+                  style={styles.ttsInput}
+                  placeholder="Write text to speak..."
+                  placeholderTextColor="rgba(255, 255, 255, 0.55)"
+                  value={ttsInputText}
+                  onChangeText={setTtsInputText}
+                  multiline
+                  blurOnSubmit
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? TTS_INPUT_ACCESSORY_ID : undefined}
+                />
+                {Platform.OS === 'ios' && (
+                  <InputAccessoryView nativeID={TTS_INPUT_ACCESSORY_ID}>
+                    <View style={styles.keyboardAccessory}>
+                      <TouchableOpacity
+                        style={styles.keyboardDoneButton}
+                        activeOpacity={0.7}
+                        onPress={() => Keyboard.dismiss()}>
+                        <Text style={styles.keyboardDoneButtonText}>Done</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </InputAccessoryView>
+                )}
+                <TouchableOpacity
+                  style={[
+                    styles.ttsSpeakButton,
+                    (isManualTTSSpeaking || !ttsInputText.trim()) && styles.ttsSpeakButtonDisabled,
+                  ]}
+                  activeOpacity={0.7}
+                  disabled={isManualTTSSpeaking || !ttsInputText.trim()}
+                  onPress={speakManualTTS}>
+                  <Text style={styles.ttsSpeakButtonText}>
+                    {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
+                  </Text>
+                </TouchableOpacity>
+              </>
             ) : (
               <>
                 <Text style={styles.speechSentenceLabel}>
@@ -1772,6 +1866,12 @@ function App(): React.JSX.Element {
                 <Text style={styles.speechSentenceText}>
                   {currentSpeechSentence || 'Listening...'}
                 </Text>
+                <TouchableOpacity
+                  style={styles.ttsModeButton}
+                  activeOpacity={0.7}
+                  onPress={enterTTSTestMode}>
+                  <Text style={styles.ttsModeButtonText}>Move To Test TTS</Text>
+                </TouchableOpacity>
               </>
             )}
           </View>
@@ -1838,8 +1938,9 @@ function App(): React.JSX.Element {
             </TouchableOpacity>
           </View>
         )}
-      </View>
-    </LinearGradient>
+        </View>
+      </LinearGradient>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -1911,6 +2012,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  speechSentenceCardTTSIOS: {
+    marginTop: -80,
   },
   speechSentenceLabel: {
     fontSize: 12,
@@ -2024,6 +2128,87 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
+  },
+  ttsModeButton: {
+    marginTop: 14,
+    backgroundColor: '#2E86DE',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  ttsModeButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  ttsInput: {
+    width: '100%',
+    minHeight: 96,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    backgroundColor: 'rgba(0, 0, 0, 0.22)',
+    color: '#ffffff',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  ttsHeaderRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  hideKeyboardButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  hideKeyboardButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  ttsSpeakButton: {
+    backgroundColor: '#34C759',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  ttsSpeakButtonDisabled: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  ttsSpeakButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  keyboardAccessory: {
+    backgroundColor: '#1f2937',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'flex-end',
+  },
+  keyboardDoneButton: {
+    backgroundColor: '#2E86DE',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  keyboardDoneButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
 
