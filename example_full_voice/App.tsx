@@ -1580,16 +1580,15 @@ function App(): React.JSX.Element {
        resetTranscript();
       }
 
-//      await Speech.speak("Hello, as an AI , I don't have feelings , but I'm here and ready to help you with anything you need. Today, how can I assist you?", SPEAKER, SPEAKER_SPEED);
-
-
-      // await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
-      // await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
-
+      /*
+      await Speech.speak("Hello, as an AI , I don't have feelings , but I'm here and ready to help you with anything you need. Today, how can I assist you?", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("Hi guys, how are you?", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+      await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
+*/
       /*      await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
       await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
       await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
