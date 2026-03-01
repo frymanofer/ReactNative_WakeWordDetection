@@ -951,6 +951,8 @@ const modelName = 'hey_coach_model_28_22012026b.onnx';
 // Create an array of instance configurations
 const instanceConfigs: instanceConfig[] = [
   { id: 'multi_model_instance', modelName, threshold: 0.999, bufferCnt: 3, sticky: false, msBetweenCallbacks: 1000 },
+  // Ayuda:
+  //   { id: 'multi_model_instance', modelName, threshold: 0.95, bufferCnt: 3, sticky: false, msBetweenCallbacks: 1000 },
 ];
 
 // Helper function to format the ONNX file name
@@ -1401,6 +1403,7 @@ function App(): React.JSX.Element {
   };
 
   let callbackTimes = 0;
+  const isFirstKeywordCallbackRef = useRef(true);
   useEffect(() => {
     
     
@@ -1415,9 +1418,20 @@ function App(): React.JSX.Element {
     // THIS IS THE PLACE TO PLAY WITH ASR/STT and TTS
     //
     const keywordCallback = async (keywordIndex: any) => {
+      const isFirstCall = isFirstKeywordCallbackRef.current;
+      console.log(
+        `[keywordCallback] ${isFirstCall ? 'first call' : 'subsequent call'}`,
+        { keywordIndex }
+      );
+      if (isFirstCall) {
+        isFirstKeywordCallbackRef.current = false;
+      }
+
       const instance = myInstanceRef.current;
       if (!instance) return;
-      const stopWakeWord = true;
+
+      // Stop or Pause keyword detection.
+      const stopWakeWord = false;
       callbackTimes = 1;
       // 1) Remove listener first (prevents late events)
       /** *** NEW *** do not detachListener when not stopping wake word **/ 
@@ -1430,8 +1444,11 @@ function App(): React.JSX.Element {
       
       // 2) Stop Detection (native)
       try {
-         if (stopWakeWord)
-           await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+        if (stopWakeWord)
+            await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+          else
+            await instance.pauseDetection(Platform.OS === 'ios' ? false : true);///* FR add if stop microphone or */);
+
          /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
          // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
         
@@ -1456,50 +1473,70 @@ function App(): React.JSX.Element {
 
       /***** SPEAKER VERIFICATION CODE ONLY *****/
       try {
-        // Show SV prompt and wait for user choice
-        setShowSVPrompt(true);
-        const testSV = await new Promise<boolean>((resolve) => {
-          svChoiceResolverRef.current = resolve;
-        });
-        setShowSVPrompt(false);
-        let enrollmentJson = null;
-        if (testSV) {
-          /*** --> ENROLLMENT HERE ***/
-          enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
-          // Reset score tracking and start elapsed timer
-          setLastSVScore(null);
-          lastSVScoreTimeRef.current = null;
-          setSvElapsed('N/A');
-          svElapsedIntervalRef.current = setInterval(() => {
-            const t = lastSVScoreTimeRef.current;
-            if (t === null) {
-              setSvElapsed('N/A');
-            } else {
-              const sec = (Date.now() - t) / 1000;
-              setSvElapsed(sec < 60 ? `${sec.toFixed(1)}s` : `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`);
-            }
-          }, 100);
+//        await Speech.initAll({ locale: 'en-US', model: ttsModel });
+        // await sleep(1000);
+        // await Speech.pauseSpeechRecognition();
+        // await sleep(1000);
 
-          setSvRunning(true);
-          // await runVerificationWithEnrollment(enrollmentJson, setMessage);
-  //        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
-          svStopRef.current = await startEndlessVerificationWithEnrollmentFix(
-            enrollmentJson,
-            setMessage,
-            { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000,
-              onStopReady: (stopFn: () => Promise<void>) => { svStopRef.current = stopFn; },
-              onScore: (score: number, isMatch: boolean) => {
-                setLastSVScore({ score, isMatch });
-                lastSVScoreTimeRef.current = Date.now();
-              } }
-          );
-          // Cleanup timer when verification ends
+        let enrollmentJson = null;
+        if (isFirstCall) {
+          // Show SV prompt and wait for user choice (first invocation only)
+          setShowSVPrompt(true);
+          const testSV = await new Promise<boolean>((resolve) => {
+            svChoiceResolverRef.current = resolve;
+          });
+          setShowSVPrompt(false);
+
+          if (testSV) {
+            /*** --> ENROLLMENT HERE ***/
+            enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
+            // Reset score tracking and start elapsed timer
+            setLastSVScore(null);
+            lastSVScoreTimeRef.current = null;
+            setSvElapsed('N/A');
+            svElapsedIntervalRef.current = setInterval(() => {
+              const t = lastSVScoreTimeRef.current;
+              if (t === null) {
+                setSvElapsed('N/A');
+              } else {
+                const sec = (Date.now() - t) / 1000;
+                setSvElapsed(sec < 60 ? `${sec.toFixed(1)}s` : `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`);
+              }
+            }, 100);
+
+            setSvRunning(true);
+            // await runVerificationWithEnrollment(enrollmentJson, setMessage);
+    //        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
+            svStopRef.current = await startEndlessVerificationWithEnrollmentFix(
+              enrollmentJson,
+              setMessage,
+              { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000,
+                onStopReady: (stopFn: () => Promise<void>) => { svStopRef.current = stopFn; },
+                onScore: (score: number, isMatch: boolean) => {
+                  setLastSVScore({ score, isMatch });
+                  lastSVScoreTimeRef.current = Date.now();
+                } }
+            );
+            // Cleanup timer when verification ends
+            if (svElapsedIntervalRef.current) {
+              clearInterval(svElapsedIntervalRef.current);
+              svElapsedIntervalRef.current = null;
+            }
+            setSvRunning(false);
+          }
+        } else {
+          console.log('[keywordCallback] skipping SV onboarding/verification for non-first call');
+          setShowSVPrompt(false);
+          setSvRunning(false);
           if (svElapsedIntervalRef.current) {
             clearInterval(svElapsedIntervalRef.current);
             svElapsedIntervalRef.current = null;
           }
-          setSvRunning(false);
         }
+
+        // await Speech.destroyAll();
+        // await sleep(300);
+
         /***** END OF SPEAKER VERIFICATION CODE ONLY END *****/
  
         console.log('Calling Speech.initAll');
@@ -1507,20 +1544,29 @@ function App(): React.JSX.Element {
         setIsSpeechSessionActive(true);
         setCurrentSpeechSentence('');
         setIsSpeakerIdentificationActive(typeof enrollmentJson === 'string' && enrollmentJson.length > 0);
-        if (typeof enrollmentJson === 'string' && enrollmentJson.length > 0) {
-          const enrollmentPath = await writeEnrollmentJsonToFile(
-            enrollmentJson,
-            `sv_enrollment_runtime_${Date.now()}.json`,
-          );
-          await Speech.initAll({
-            locale: 'en-US',
-            model: ttsModel,
-            onboardingJsonPath: enrollmentPath,
-          });
+        if (isFirstCall) {
+          if (typeof enrollmentJson === 'string' && enrollmentJson.length > 0) {
+            const enrollmentPath = await writeEnrollmentJsonToFile(
+              enrollmentJson,
+              `sv_enrollment_runtime_${Date.now()}.json`,
+            );
+            await Speech.initAll({
+              locale: 'en-US',
+              model: ttsModel,
+              onboardingJsonPath: enrollmentPath,
+            });
+          } else {
+            await Speech.initAll({ locale: 'en-US', model: ttsModel });
+          }
+          const off = Speech.onFinishedSpeaking = async () => {
+            //await Speech.unPauseSpeechRecognition(1);
+            console.log('onFinishedSpeaking(): ✅ Finished speaking (last WAV done).');
+            setIsIntroSpeaking(false);
+          };
         } else {
-          await Speech.initAll({ locale: 'en-US', model: ttsModel });
-        }
-        
+          await Speech.unPauseSpeechRecognition(-1);
+        } 
+
         //await Speech.initAll({ locale:'en-US', model: ttsModel });
         // Spanish:
         // Spain: es-ES
@@ -1529,13 +1575,8 @@ function App(): React.JSX.Element {
         // Argentina: es-AR
         // Colombia: es-CO
 
-        const off = Speech.onFinishedSpeaking = async () => {
-          //await Speech.unPauseSpeechRecognition(1);
-          console.log('onFinishedSpeaking(): ✅ Finished speaking (last WAV done).');
-          setIsIntroSpeaking(false);
-        };
       } catch (err) {
-        console.error('Failed to start speech recognition:', err);
+        console.error('Failed with SV or Speech Recognition:', err);
       }
 
       // const runWakeWordWithSpeech = true;
@@ -1579,7 +1620,6 @@ function App(): React.JSX.Element {
        setIsIntroSpeaking(false);
        resetTranscript();
       }
-
       /*
       await Speech.speak("Hello, as an AI , I don't have feelings , but I'm here and ready to help you with anything you need. Today, how can I assist you?", SPEAKER, SPEAKER_SPEED);
       await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
@@ -1588,7 +1628,7 @@ function App(): React.JSX.Element {
       await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
       await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
       await Speech.speak("Hello. how are you?", SPEAKER, SPEAKER_SPEED);
-*/
+    */
       /*      await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
       await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
       await Speech.speak("Hello, how are you?", SPEAKER, SPEAKER_SPEED * 0.5);
@@ -1617,6 +1657,15 @@ function App(): React.JSX.Element {
       await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
       */
       await Speech.unPauseSpeechRecognition(-1);
+
+      /*
+      setTimeout(async () => {
+        await Speech.pauseSpeechRecognition();
+         await Speech.speak(introLine, SPEAKER, SPEAKER_SPEED);
+        await Speech.unPauseSpeechRecognition(-1);
+//      }, 45000);
+      }, 20000);
+      */
 
       // await Speech.speak("This is the first, \
       //   react native package with full voice support! \
@@ -1656,17 +1705,27 @@ function App(): React.JSX.Element {
         setIsManualTTSSpeaking(false);
         setIsSpeakerIdentificationActive(false);
 
-        await Speech.destroyAll();
+        if (stopWakeWord) {
+          await Speech.destroyAll();
+//           await instance.stopKeywordDetection(/* FR add if stop microphone or */);
+          if (Platform.OS === 'android') {
+            await sleep(300);
+          }
 
-        if (Platform.OS === 'android') {
-          await sleep(300);
+          // re-attach listener then start detection
+          await attachListenerOnce(instance, keywordCallback);
+          await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
+
+        } else {
+           await Speech.pauseSpeechRecognition();
+           await sleep(500);
+           console.log("calling unPauseDetection!!!")
+           await instance.unPauseDetection(/* FR add if stop microphone or */);
         }
 
-        // re-attach listener then start detection
-        await attachListenerOnce(instance, keywordCallback);
-        await instance.startKeywordDetection(instanceConfigs[0].threshold, true);
+
+//      }, 45000);
       }, 300000);
-//      }, 300000);
     };
 
     const updateVoiceProps = async () => {
