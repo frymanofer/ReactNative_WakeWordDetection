@@ -35,9 +35,9 @@ const SPEAKER = 0;
 const RICH_SPEAKER_SPEED = 0.8;
 const ARIANA_SPEAKER_SPEED = 0.75;
 // const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
-const SPEAKER_SPEED = 1.0;
+const SPEAKER_SPEED = 0.75;
 const SV_MATCH_HOLD_MS = 500;
-const SV_ONBOARDING_SAMPLE_COUNT = 3;
+const SV_ONBOARDING_SAMPLE_COUNT = 5;
 const TTS_INPUT_ACCESSORY_ID = 'ttsInputAccessory';
 
 export async function ensureMicPermission(): Promise<boolean> {
@@ -93,8 +93,11 @@ export async function ensureMicPermission(): Promise<boolean> {
 const moonRocksSound = require('./assets/cashRegisterSound.mp3');
 const subtractMoonRocksSound = require('./assets/bellServiceDeskPressXThree.mp3');
 
+const ttsModelFast = require('./assets/models/model_ex_ariana_fast.dm');
+const ttsModelSlow = require('./assets/models/model_ex_ariana.dm');
+
 // This is how you send the speech library the tts model.
-const ttsModel = require('./assets/models/model_ex.dm');
+// const ttsModel = require('./assets/models/model_ex.dm');
 //const ttsModel = 'model.onnx';
 
 // If you want to use only TTS:
@@ -1042,8 +1045,11 @@ function App(): React.JSX.Element {
   const listenerRef = useRef<any>(null);
   const svStopRef = useRef<null | (() => Promise<void>)>(null);
   const [showSVPrompt, setShowSVPrompt] = useState(false);
+  const [showTTSModelPrompt, setShowTTSModelPrompt] = useState(false);
   const [svRunning, setSvRunning] = useState(false);
   const svChoiceResolverRef = useRef<null | ((choice: boolean) => void)>(null);
+  const ttsModelChoiceResolverRef = useRef<null | ((choice: 'fast' | 'slow') => void)>(null);
+  const selectedTTSModelRef = useRef(ttsModelSlow);
   const [lastSVScore, setLastSVScore] = useState<{ score: number; isMatch: boolean } | null>(null);
   const lastSVScoreTimeRef = useRef<number | null>(null);
   const [svElapsed, setSvElapsed] = useState<string>('N/A');
@@ -1190,6 +1196,8 @@ function App(): React.JSX.Element {
   const [isTTSTestMode, setIsTTSTestMode] = useState(false);
   const [ttsInputText, setTtsInputText] = useState('');
   const [isManualTTSSpeaking, setIsManualTTSSpeaking] = useState(false);
+  const [isAndroidKeyboardVisible, setIsAndroidKeyboardVisible] = useState(false);
+  const [androidKeyboardHeight, setAndroidKeyboardHeight] = useState(0);
   const lastPartialTimeRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   let vadCBintervalID: any = null;
@@ -1405,6 +1413,25 @@ function App(): React.JSX.Element {
   let callbackTimes = 0;
   const isFirstKeywordCallbackRef = useRef(true);
   useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const onKeyboardShow = Keyboard.addListener('keyboardDidShow', (e) => {
+      setAndroidKeyboardHeight(e.endCoordinates?.height ?? 0);
+      setIsAndroidKeyboardVisible(true);
+    });
+
+    const onKeyboardHide = Keyboard.addListener('keyboardDidHide', () => {
+      setIsAndroidKeyboardVisible(false);
+      setAndroidKeyboardHeight(0);
+    });
+
+    return () => {
+      onKeyboardShow.remove();
+      onKeyboardHide.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     
     
     const keywordCallbackDuringSpeech = async (keywordIndex: any) => {
@@ -1533,6 +1560,14 @@ function App(): React.JSX.Element {
             svElapsedIntervalRef.current = null;
           }
         }
+        if (isFirstCall) {
+          setShowTTSModelPrompt(true);
+          const selectedModelChoice = await new Promise<'fast' | 'slow'>((resolve) => {
+            ttsModelChoiceResolverRef.current = resolve;
+          });
+          setShowTTSModelPrompt(false);
+          selectedTTSModelRef.current = selectedModelChoice === 'fast' ? ttsModelFast : ttsModelSlow;
+        }
 
         // await Speech.destroyAll();
         // await sleep(300);
@@ -1552,11 +1587,11 @@ function App(): React.JSX.Element {
             );
             await Speech.initAll({
               locale: 'en-US',
-              model: ttsModel,
+              model: selectedTTSModelRef.current,
               onboardingJsonPath: enrollmentPath,
             });
           } else {
-            await Speech.initAll({ locale: 'en-US', model: ttsModel });
+            await Speech.initAll({ locale: 'en-US', model: selectedTTSModelRef.current });
           }
           const off = Speech.onFinishedSpeaking = async () => {
             //await Speech.unPauseSpeechRecognition(1);
@@ -1620,6 +1655,9 @@ function App(): React.JSX.Element {
        setIsIntroSpeaking(false);
        resetTranscript();
       }
+      // Hi! Welcome to Lunafit! My name is Ariana. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!
+      // Hi, Welcome to Lunafit, My name is Ariana, Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals, It's about owning your journey!
+      
       /*
       await Speech.speak("Hello, as an AI , I don't have feelings , but I'm here and ready to help you with anything you need. Today, how can I assist you?", SPEAKER, SPEAKER_SPEED);
       await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
@@ -1836,6 +1874,15 @@ function App(): React.JSX.Element {
     }
   };
 
+  const clearManualTTSInput = () => {
+    setTtsInputText('');
+  };
+
+  const speakFromKeyboardAccessory = async () => {
+    await speakManualTTS();
+    Keyboard.dismiss();
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <LinearGradient
@@ -1894,10 +1941,36 @@ function App(): React.JSX.Element {
                   <InputAccessoryView nativeID={TTS_INPUT_ACCESSORY_ID}>
                     <View style={styles.keyboardAccessory}>
                       <TouchableOpacity
-                        style={styles.keyboardDoneButton}
+                        style={[
+                          styles.keyboardAccessoryButton,
+                          styles.keyboardClearButton,
+                        ]}
+                        activeOpacity={0.7}
+                        onPress={clearManualTTSInput}>
+                        <Text style={styles.keyboardAccessoryButtonText}>Clear</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.keyboardAccessoryButton,
+                          styles.keyboardSpeakButton,
+                          (isManualTTSSpeaking || !ttsInputText.trim()) &&
+                            styles.keyboardAccessoryButtonDisabled,
+                        ]}
+                        activeOpacity={0.7}
+                        disabled={isManualTTSSpeaking || !ttsInputText.trim()}
+                        onPress={speakFromKeyboardAccessory}>
+                        <Text style={styles.keyboardAccessoryButtonText}>
+                          {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.keyboardAccessoryButton,
+                          styles.keyboardDoneButton,
+                        ]}
                         activeOpacity={0.7}
                         onPress={() => Keyboard.dismiss()}>
-                        <Text style={styles.keyboardDoneButtonText}>Done</Text>
+                        <Text style={styles.keyboardAccessoryButtonText}>Done</Text>
                       </TouchableOpacity>
                     </View>
                   </InputAccessoryView>
@@ -1935,6 +2008,54 @@ function App(): React.JSX.Element {
           </View>
         )}
 
+        {Platform.OS === 'android' &&
+          isTTSTestMode &&
+          isSpeechSessionActive &&
+          !isIntroSpeaking &&
+          isAndroidKeyboardVisible && (
+            <View pointerEvents="box-none" style={styles.androidKeyboardAccessoryWrapper}>
+              <View
+                style={[
+                  styles.keyboardAccessory,
+                  styles.keyboardAccessoryAndroid,
+                  { bottom: androidKeyboardHeight },
+                ]}>
+                <TouchableOpacity
+                  style={[
+                    styles.keyboardAccessoryButton,
+                    styles.keyboardClearButton,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={clearManualTTSInput}>
+                  <Text style={styles.keyboardAccessoryButtonText}>Clear</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.keyboardAccessoryButton,
+                    styles.keyboardSpeakButton,
+                    (isManualTTSSpeaking || !ttsInputText.trim()) &&
+                      styles.keyboardAccessoryButtonDisabled,
+                  ]}
+                  activeOpacity={0.7}
+                  disabled={isManualTTSSpeaking || !ttsInputText.trim()}
+                  onPress={speakFromKeyboardAccessory}>
+                  <Text style={styles.keyboardAccessoryButtonText}>
+                    {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.keyboardAccessoryButton,
+                    styles.keyboardDoneButton,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => Keyboard.dismiss()}>
+                  <Text style={styles.keyboardAccessoryButtonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
         {/* Speaker Verification prompt */}
         {showSVPrompt && (
           <View style={styles.svPromptContainer}>
@@ -1943,14 +2064,46 @@ function App(): React.JSX.Element {
               <TouchableOpacity
                 style={[styles.svButton, styles.svButtonYes]}
                 activeOpacity={0.7}
-                onPress={() => svChoiceResolverRef.current?.(true)}>
+                onPress={() => {
+                  svChoiceResolverRef.current?.(true);
+                  svChoiceResolverRef.current = null;
+                }}>
                 <Text style={styles.svButtonText}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.svButton, styles.svButtonNo]}
                 activeOpacity={0.7}
-                onPress={() => svChoiceResolverRef.current?.(false)}>
+                onPress={() => {
+                  svChoiceResolverRef.current?.(false);
+                  svChoiceResolverRef.current = null;
+                }}>
                 <Text style={styles.svButtonText}>Skip</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {showTTSModelPrompt && (
+          <View style={styles.svPromptContainer}>
+            <Text style={styles.svPromptText}>Choose Ariana Voice Model</Text>
+            <View style={styles.svButtonRow}>
+              <TouchableOpacity
+                style={[styles.svButton, styles.svButtonYes]}
+                activeOpacity={0.7}
+                onPress={() => {
+                  ttsModelChoiceResolverRef.current?.('fast');
+                  ttsModelChoiceResolverRef.current = null;
+                }}>
+                <Text style={styles.svButtonText}>Fast Ariana</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.svButton, styles.svButtonNo]}
+                activeOpacity={0.7}
+                onPress={() => {
+                  ttsModelChoiceResolverRef.current?.('slow');
+                  ttsModelChoiceResolverRef.current = null;
+                }}>
+                <Text style={styles.svButtonText}>Slow Ariana</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -2255,15 +2408,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.15)',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
-  keyboardDoneButton: {
-    backgroundColor: '#2E86DE',
+  androidKeyboardAccessoryWrapper: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+    elevation: 100,
+  },
+  keyboardAccessoryAndroid: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderTopWidth: 1,
+  },
+  keyboardAccessoryButton: {
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
-  keyboardDoneButtonText: {
+  keyboardAccessoryButtonDisabled: {
+    opacity: 0.5,
+  },
+  keyboardClearButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  keyboardSpeakButton: {
+    backgroundColor: '#34C759',
+  },
+  keyboardDoneButton: {
+    backgroundColor: '#2E86DE',
+  },
+  keyboardAccessoryButtonText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '700',
