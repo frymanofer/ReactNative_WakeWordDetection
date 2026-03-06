@@ -32,13 +32,17 @@ const RICH = 1;
 
 const SPEAKER = 0;
 
-const RICH_SPEAKER_SPEED = 0.8;
+const RICH_SPEAKER_SPEED = 0.85;
 const ARIANA_SPEAKER_SPEED = 0.75;
 // const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
-const SPEAKER_SPEED = 0.75;
+//const SPEAKER_SPEED = 0.75;
+// const SPEAKER_SPEED_ = 0.85;
+const SPEAKER_SPEED = 0.85;
 const SV_MATCH_HOLD_MS = 500;
 const SV_ONBOARDING_SAMPLE_COUNT = 5;
 const TTS_INPUT_ACCESSORY_ID = 'ttsInputAccessory';
+type TTSVoiceChoice = 'Ariana' | 'Rich';
+type TTSQualityChoice = 'lite' | 'heavy';
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -95,6 +99,8 @@ const subtractMoonRocksSound = require('./assets/bellServiceDeskPressXThree.mp3'
 
 const ttsModelFast = require('./assets/models/model_ex_ariana_fast.dm');
 const ttsModelSlow = require('./assets/models/model_ex_ariana.dm');
+const ttsModelRichFast = require('./assets/models/model_ex_rich_fast.dm');
+const ttsModelRichSlow = require('./assets/models/model_ex_rich.dm');
 
 // This is how you send the speech library the tts model.
 // const ttsModel = require('./assets/models/model_ex.dm');
@@ -1048,7 +1054,12 @@ function App(): React.JSX.Element {
   const [showTTSModelPrompt, setShowTTSModelPrompt] = useState(false);
   const [svRunning, setSvRunning] = useState(false);
   const svChoiceResolverRef = useRef<null | ((choice: boolean) => void)>(null);
-  const ttsModelChoiceResolverRef = useRef<null | ((choice: 'fast' | 'slow') => void)>(null);
+  const ttsModelChoiceResolverRef = useRef<
+    null | ((choice: { quality: TTSQualityChoice; voice: TTSVoiceChoice }) => void)
+  >(null);
+  const [ttsQualityChoice, setTtsQualityChoice] = useState<TTSQualityChoice>('heavy');
+  const [ttsVoiceChoice, setTtsVoiceChoice] = useState<TTSVoiceChoice>('Ariana');
+  const selectedTTSVoiceRef = useRef<TTSVoiceChoice>('Ariana');
   const selectedTTSModelRef = useRef(ttsModelSlow);
   const [lastSVScore, setLastSVScore] = useState<{ score: number; isMatch: boolean } | null>(null);
   const lastSVScoreTimeRef = useRef<number | null>(null);
@@ -1317,6 +1328,9 @@ function App(): React.JSX.Element {
     return baseSpeed;
   }
 
+  const getSelectedSpeakerSpeed = (): number =>
+    selectedTTSVoiceRef.current === 'Rich' ? RICH_SPEAKER_SPEED : ARIANA_SPEAKER_SPEED;
+
   Speech.onSpeechStart = async () => {
     console.log('Speech started');
     setIsSpeechSessionActive(true);
@@ -1363,7 +1377,7 @@ function App(): React.JSX.Element {
         console.log('🗣️ Speaking:', newText);
         setCurrentSpeechSentence("Speaking now:" + newText);
         await Speech.pauseSpeechRecognition();
-        const adjustedSpeed = getAdjustedSpeed(newText, SPEAKER_SPEED);
+        const adjustedSpeed = getAdjustedSpeed(newText, getSelectedSpeakerSpeed());
         await Speech.speak(newText, SPEAKER, adjustedSpeed);
         resetTranscript();
         await Speech.unPauseSpeechRecognition(1);
@@ -1380,7 +1394,7 @@ function App(): React.JSX.Element {
       console.log('Results: ', e.value?.[0]);
       const current = e.value?.[0];
       if (current) setCurrentSpeechSentence(current);
-      await Speech.speak(current, SPEAKER, SPEAKER_SPEED);
+      await Speech.speak(current, SPEAKER, getSelectedSpeakerSpeed());
       return;
     }
 
@@ -1399,7 +1413,7 @@ function App(): React.JSX.Element {
         console.log('🗣️ Speaking:', newText);
         setCurrentSpeechSentence("Speaking now:" + newText);
         await Speech.pauseSpeechRecognition();
-        const adjustedSpeed = getAdjustedSpeed(newText, SPEAKER_SPEED);
+        const adjustedSpeed = getAdjustedSpeed(newText, getSelectedSpeakerSpeed());
         await Speech.speak(newText, SPEAKER, adjustedSpeed);
         await Speech.unPauseSpeechRecognition(1);
         // Reset phrase state per timeout cycle so OS transcript rewrites
@@ -1561,12 +1575,21 @@ function App(): React.JSX.Element {
           }
         }
         if (isFirstCall) {
+          setTtsQualityChoice('heavy');
+          setTtsVoiceChoice('Ariana');
           setShowTTSModelPrompt(true);
-          const selectedModelChoice = await new Promise<'fast' | 'slow'>((resolve) => {
+          const selectedModelChoice = await new Promise<{ quality: TTSQualityChoice; voice: TTSVoiceChoice }>((resolve) => {
             ttsModelChoiceResolverRef.current = resolve;
           });
           setShowTTSModelPrompt(false);
-          selectedTTSModelRef.current = selectedModelChoice === 'fast' ? ttsModelFast : ttsModelSlow;
+          selectedTTSVoiceRef.current = selectedModelChoice.voice;
+          if (selectedModelChoice.voice === 'Rich') {
+            selectedTTSModelRef.current =
+              selectedModelChoice.quality === 'lite' ? ttsModelRichFast : ttsModelRichSlow;
+          } else {
+            selectedTTSModelRef.current =
+              selectedModelChoice.quality === 'lite' ? ttsModelFast : ttsModelSlow;
+          }
         }
 
         // await Speech.destroyAll();
@@ -1641,8 +1664,8 @@ function App(): React.JSX.Element {
 
       // await Speech.playWav(moonRocksSound, false);
       await Speech.pauseSpeechRecognition();
-      const selectedSpeakerName: 'Rich' | 'Ariana' = (SPEAKER == RICH) ? 'Rich' : 'Ariana';
-      const introLine = "Hi! Welcome to Lunafit! My name is " + selectedSpeakerName + ". Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!";
+      const selectedSpeakerName: 'Rich' | 'Ariana' = selectedTTSVoiceRef.current;
+      const introLine = "My name is " + selectedSpeakerName + ", I am one of the coaches in the Lunafit app! I love helping people reach their fitness goals!";
       setMessage(`${selectedSpeakerName} is speaking...`);
       setIntroSpeakerName(selectedSpeakerName);
       setIntroScript(introLine);
@@ -1650,7 +1673,7 @@ function App(): React.JSX.Element {
       setIsIntroSpeaking(true);
 
       try {
-         await Speech.speak(introLine, SPEAKER, SPEAKER_SPEED);
+         await Speech.speak(introLine, SPEAKER, getSelectedSpeakerSpeed());
       } finally {
        setIsIntroSpeaking(false);
        resetTranscript();
@@ -1867,7 +1890,7 @@ function App(): React.JSX.Element {
     setIsManualTTSSpeaking(true);
     setCurrentSpeechSentence(`Speaking now: ${text}`);
     try {
-      await Speech.speak(text, SPEAKER, SPEAKER_SPEED);
+      await Speech.speak(text, SPEAKER, getSelectedSpeakerSpeed());
       setCurrentSpeechSentence('');
     } finally {
       setIsManualTTSSpeaking(false);
@@ -2085,25 +2108,65 @@ function App(): React.JSX.Element {
 
         {showTTSModelPrompt && (
           <View style={styles.svPromptContainer}>
-            <Text style={styles.svPromptText}>Choose Ariana Voice Model</Text>
+            <Text style={styles.svPromptText}>Choose Voice Model</Text>
+            <View style={styles.ttsOptionSection}>
+              <Text style={styles.ttsOptionLabel}>Quality</Text>
+              <View style={styles.svButtonRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.svButton,
+                    ttsQualityChoice === 'heavy' ? styles.ttsOptionButtonSelected : styles.ttsOptionButtonIdle,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => setTtsQualityChoice('heavy')}>
+                  <Text style={styles.svButtonText}>Heavy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.svButton,
+                    ttsQualityChoice === 'lite' ? styles.ttsOptionButtonSelected : styles.ttsOptionButtonIdle,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => setTtsQualityChoice('lite')}>
+                  <Text style={styles.svButtonText}>Lite</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.ttsOptionSection}>
+              <Text style={styles.ttsOptionLabel}>Voice</Text>
+              <View style={styles.svButtonRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.svButton,
+                    ttsVoiceChoice === 'Ariana' ? styles.ttsOptionButtonSelected : styles.ttsOptionButtonIdle,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => setTtsVoiceChoice('Ariana')}>
+                  <Text style={styles.svButtonText}>Ariana</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.svButton,
+                    ttsVoiceChoice === 'Rich' ? styles.ttsOptionButtonSelected : styles.ttsOptionButtonIdle,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => setTtsVoiceChoice('Rich')}>
+                  <Text style={styles.svButtonText}>Rich</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             <View style={styles.svButtonRow}>
               <TouchableOpacity
-                style={[styles.svButton, styles.svButtonYes]}
+                style={[styles.svButton, styles.ttsContinueButton]}
                 activeOpacity={0.7}
                 onPress={() => {
-                  ttsModelChoiceResolverRef.current?.('fast');
+                  ttsModelChoiceResolverRef.current?.({
+                    quality: ttsQualityChoice,
+                    voice: ttsVoiceChoice,
+                  });
                   ttsModelChoiceResolverRef.current = null;
                 }}>
-                <Text style={styles.svButtonText}>Fast Ariana</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.svButton, styles.svButtonNo]}
-                activeOpacity={0.7}
-                onPress={() => {
-                  ttsModelChoiceResolverRef.current?.('slow');
-                  ttsModelChoiceResolverRef.current = null;
-                }}>
-                <Text style={styles.svButtonText}>Slow Ariana</Text>
+                <Text style={styles.svButtonText}>Continue</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -2281,6 +2344,32 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
+  },
+  ttsOptionSection: {
+    width: '100%',
+    marginBottom: 14,
+  },
+  ttsOptionLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.85)',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  ttsOptionButtonSelected: {
+    backgroundColor: '#34C759',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  ttsOptionButtonIdle: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  ttsContinueButton: {
+    backgroundColor: '#2E86DE',
+    minWidth: 180,
   },
   svScoreContainer: {
     marginTop: 28,
