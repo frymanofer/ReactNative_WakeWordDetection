@@ -21,7 +21,7 @@ class MainApplication : Application(), ReactApplication {
       override fun getPackages(): List<ReactPackage> =
         PackageList(this).packages.apply {
           // Manually add non-autolinkable packages here if needed
-          // add(MyPackage())
+          add(WakewordRecordingSharePackage())
         }
 
       override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG

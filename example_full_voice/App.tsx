@@ -9,7 +9,7 @@ import RNFS from 'react-native-fs';
 
 import React, { useEffect, useState, useRef } from 'react';
 
-import { Platform, PermissionsAndroid, Linking, Alert } from 'react-native';
+import { Platform, PermissionsAndroid, Linking, Alert, Share, NativeModules } from 'react-native';
 //import { check, request, openSettings, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 import {
@@ -527,13 +527,14 @@ async function runVerificationWithEnrollment(
     micConfig.options
   );
 
+  /*
   // ---------- (A) Verify WAV files ----------
   const wavs = [
-    'ekaterina_sample_1760703001874.wav',
-    'james_sample_1760701252720.wav',
-    'y1.wav',
-    'y2.wav',
-    'y3.wav',
+    '1.wav',
+    '2.wav',
+    '3.wav',
+    '4.wav',
+    '5.wav',
   ];
 
   setUiMessage?.('🔐 Verifying WAV files...');
@@ -547,7 +548,7 @@ async function runVerificationWithEnrollment(
       setUiMessage?.(`⚠️ WAV verify failed: ${wav}`);
     }
   }
-
+*/
   // ---------- (B) 3 mic trials, wait up to 60s each ----------
   const lines: string[] = [];
   let lastScore: any = null;
@@ -755,20 +756,6 @@ async function runSpeakerVerifyEnrollment() {
     }
   );
   console.log('SV createRes:', createRes);
-
-  // 3) Verify multiple wavs (bundle resource names)
-  const wavs = [
-    'ekaterina_sample_1760703001874.wav',
-    'james_sample_1760701252720.wav',
-    'y1.wav',
-    'y2.wav',
-    'y3.wav',
-  ];
-
-  for (const wav of wavs) {
-    const out = await sv.verifyWavStreaming(wav, true); // true == resetState
-    console.log('SV verify:', wav, out);
-  }
 
   // 4) Cleanup
   await sv.destroy();
@@ -1209,6 +1196,8 @@ function App(): React.JSX.Element {
   const [isManualTTSSpeaking, setIsManualTTSSpeaking] = useState(false);
   const [isAndroidKeyboardVisible, setIsAndroidKeyboardVisible] = useState(false);
   const [androidKeyboardHeight, setAndroidKeyboardHeight] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [latestWakewordRecordingPaths, setLatestWakewordRecordingPaths] = useState<string[]>([]);
   const lastPartialTimeRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   let vadCBintervalID: any = null;
@@ -1378,6 +1367,7 @@ function App(): React.JSX.Element {
         setCurrentSpeechSentence("Speaking now:" + newText);
         await Speech.pauseSpeechRecognition();
         const adjustedSpeed = getAdjustedSpeed(newText, getSelectedSpeakerSpeed());
+        //await Speech.speak("Hi, Welcome to Lunafit! My name is Ariana. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!");
         await Speech.speak(newText, SPEAKER, adjustedSpeed);
         resetTranscript();
         await Speech.unPauseSpeechRecognition(1);
@@ -1479,9 +1469,8 @@ function App(): React.JSX.Element {
       if (stopWakeWord)
         await detachListener();
 
-      // TODO:
-      // let wavFilePath = '';
-      // let recordedWavPaths: string[] = [];
+      let wavFilePath = '';
+      let recordedWavPaths: string[] = [];
       
       // 2) Stop Detection (native)
       try {
@@ -1489,16 +1478,21 @@ function App(): React.JSX.Element {
             await instance.stopKeywordDetection(/* FR add if stop microphone or */);
           else
             await instance.pauseDetection(Platform.OS === 'ios' ? false : true);///* FR add if stop microphone or */);
-
-         /** ********* TODO ******* - NEW create a lite pause instead of full stop: **/
-         // await instance.pauseKeywordDetection(/* FR add if stop microphone or */);
         
-      //   wavFilePath = await instance.getRecordingWav();
-      //   if (Platform.OS === "android") {
-      //     recordedWavPaths = await instance.getRecordingWavArray();
-      //   }
-      //   console.log("paths == ", recordedWavPaths);
+        wavFilePath = await instance.getRecordingWav();
+        if (Platform.OS === 'android') {
+          recordedWavPaths = await instance.getRecordingWavArray();
+        }
+        console.log('paths == ', recordedWavPaths);
       } catch {}
+
+      const pathsForSharing =
+        Platform.OS === 'android'
+          ? (recordedWavPaths.length > 0 ? recordedWavPaths : [wavFilePath]).filter(Boolean)
+          : [wavFilePath].filter(Boolean);
+      if (pathsForSharing.length > 0) {
+        setLatestWakewordRecordingPaths(pathsForSharing);
+      }
       await sleep(1500);
 
       console.log('detected keyword: ', keywordIndex);
@@ -1680,8 +1674,8 @@ function App(): React.JSX.Element {
       }
       // Hi! Welcome to Lunafit! My name is Ariana. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!
       // Hi, Welcome to Lunafit, My name is Ariana, Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals, It's about owning your journey!
-      
       /*
+      await Speech.speak("Hi, Welcome to Lunafit, My name is Ariana, Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals, It's about owning your journey!");
       await Speech.speak("Hello, as an AI , I don't have feelings , but I'm here and ready to help you with anything you need. Today, how can I assist you?", SPEAKER, SPEAKER_SPEED);
       await Speech.speak("let me demonstrate. Are you ready.", SPEAKER, SPEAKER_SPEED);
       await Speech.speak("Hey, how are you?", SPEAKER, SPEAKER_SPEED);
@@ -1906,8 +1900,57 @@ function App(): React.JSX.Element {
     Keyboard.dismiss();
   };
 
+  const toFileUrl = (path: string): string => (path.startsWith('file://') ? path : `file://${path}`);
+
+  const shareLatestRecordings = async () => {
+    setIsMenuOpen(false);
+
+    if (latestWakewordRecordingPaths.length === 0) {
+      Alert.alert('No recordings', 'No wake-word recordings are available yet.');
+      return;
+    }
+
+    const existingPaths: string[] = [];
+    for (const path of latestWakewordRecordingPaths) {
+      try {
+        if (await RNFS.exists(path)) existingPaths.push(path);
+      } catch {}
+    }
+
+    if (existingPaths.length === 0) {
+      Alert.alert('Missing files', 'Recorded files were not found on disk.');
+      return;
+    }
+
+    if (Platform.OS === 'android') {
+      const nativeShare = NativeModules.WakewordRecordingShare as
+        | { shareRecordings: (paths: string[], title?: string) => Promise<boolean> }
+        | undefined;
+      if (!nativeShare?.shareRecordings) {
+        Alert.alert('Share unavailable', 'Native share module is not available in this build.');
+        return;
+      }
+      await nativeShare.shareRecordings(existingPaths, 'Share wake-word recordings');
+      return;
+    }
+
+    if (Platform.OS === 'ios') {
+      const lastPath = existingPaths[existingPaths.length - 1];
+      await Share.share({
+        title: 'Share wake-word recording',
+        url: toFileUrl(lastPath),
+      });
+      return;
+    }
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+        setIsMenuOpen(false);
+      }}
+      accessible={false}>
       <LinearGradient
         colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
         style={styles.linearGradient}>
@@ -1917,6 +1960,24 @@ function App(): React.JSX.Element {
           translucent
         />
         <View style={styles.container}>
+        <View style={styles.topMenuContainer}>
+          <TouchableOpacity
+            style={styles.menuButton}
+            activeOpacity={0.7}
+            onPress={() => setIsMenuOpen((prev) => !prev)}>
+            <Text style={styles.menuButtonText}>☰</Text>
+          </TouchableOpacity>
+          {isMenuOpen && (
+            <View style={styles.menuDropdown}>
+              <TouchableOpacity
+                style={styles.menuItemButton}
+                activeOpacity={0.7}
+                onPress={shareLatestRecordings}>
+                <Text style={styles.menuItemText}>Share recordings</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
         {/* Main message card */}
         {!isTTSTestMode && (
           <View
@@ -2229,6 +2290,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 80,
     paddingBottom: 40,
+  },
+  topMenuContainer: {
+    position: 'absolute',
+    top: 44,
+    right: 16,
+    zIndex: 200,
+    alignItems: 'flex-end',
+  },
+  menuButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuButtonText: {
+    color: '#ffffff',
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  menuDropdown: {
+    marginTop: 8,
+    minWidth: 180,
+    borderRadius: 10,
+    backgroundColor: 'rgba(16, 24, 39, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    overflow: 'hidden',
+  },
+  menuItemButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  menuItemText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   messageCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
