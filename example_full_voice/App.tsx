@@ -25,6 +25,7 @@ import {
   AppState,
   InputAccessoryView,
   Keyboard,
+  InteractionManager,
 } from 'react-native';
 
 const ARIANA = 0;
@@ -32,17 +33,23 @@ const RICH = 1;
 
 const SPEAKER = 0;
 
-const RICH_SPEAKER_SPEED = 0.85;
-const ARIANA_SPEAKER_SPEED = 0.75;
+const RICH_SPEAKER_SPEED = 0.95;
+const ARIANA_SPEAKER_SPEED = 0.9; //0.75;
 // const SPEAKER_SPEED = ARIANA_SPEAKER_SPEED;
 //const SPEAKER_SPEED = 0.75;
 // const SPEAKER_SPEED_ = 0.85;
-const SPEAKER_SPEED = 0.85;
+const SPEAKER_SPEED = 1.0;// 0.85;
 const SV_MATCH_HOLD_MS = 500;
 const SV_ONBOARDING_SAMPLE_COUNT = 5;
 const TTS_INPUT_ACCESSORY_ID = 'ttsInputAccessory';
 type TTSVoiceChoice = 'Ariana' | 'Rich';
 type TTSQualityChoice = 'lite' | 'heavy';
+type SVPromptChoice = 'use_existing' | 'redo_onboarding' | 'skip';
+
+const waitForNextInteraction = () =>
+  new Promise<void>((resolve) => {
+    InteractionManager.runAfterInteractions(() => resolve());
+  });
 
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -130,8 +137,14 @@ import LinearGradient from 'react-native-linear-gradient';
 
 // import KeyWordRNBridge from 'react-native-wakeword';
 import { KeyWordRNBridgeInstance } from 'react-native-wakeword';
-import { createKeyWordRNBridgeInstance } from 'react-native-wakeword';
-// If you created audioRoutingConfig.ts in the lib:
+import { createKeyWordRNBridgeInstance,
+  hasIOSMicPermissions,
+  requestIOSMicPermissions,
+  hasIOSSpeechRecognitionPermissions,
+  requestIOSSpeechRecognitionPermissions
+ } from 'react-native-wakeword';
+
+ // If you created audioRoutingConfig.ts in the lib:
 import { setWakewordAudioRoutingConfig } from 'react-native-wakeword';
 import type { AudioRoutingConfig } from 'react-native-wakeword';
 import {
@@ -148,6 +161,26 @@ async function writeEnrollmentJsonToFile(enrollmentJson: string, filename = 'sv_
   await RNFS.writeFile(path, enrollmentJson, 'utf8');
   console.log('[SVJS] wrote enrollment json to', path, 'len=', enrollmentJson.length);
   return path;
+}
+
+async function loadEnrollmentJsonFromFile(filename = 'sv_enrollment.json') {
+  const path = `${RNFS.DocumentDirectoryPath}/${filename}`;
+  const exists = await RNFS.exists(path);
+  console.log('loadEnrollmentJsonFromFile() path == ', path);
+
+  if (!exists) {
+    console.log('[SVJS] no saved enrollment json at', path);
+    return null;
+  }
+
+  const enrollmentJson = await RNFS.readFile(path, 'utf8');
+  if (!enrollmentJson || enrollmentJson.length < 10) {
+    console.warn('[SVJS] saved enrollment json invalid at', path);
+    return null;
+  }
+
+  console.log('[SVJS] loaded enrollment json from', path, 'len=', enrollmentJson.length);
+  return enrollmentJson;
 }
 
 // ✅ NEW: endless/continuous mic verification (FIXED: uses native endless mode)
@@ -278,7 +311,6 @@ async function startEndlessVerificationWithEnrollmentFix(
     } catch {
       // ignore here; error handler already stopped
     }
-    await stoppedPromise; // blocks until stop()
   }
 
   return stop;
@@ -517,7 +549,7 @@ async function runVerificationWithEnrollment(
   };
 
   // 1) Persist enrollmentJson so native can load it like a normal file
-  const enrollmentPath = await writeEnrollmentJsonToFile(enrollmentJson, 'yaroslav_enrollment_runtime.json');
+  const enrollmentPath = await writeEnrollmentJsonToFile(enrollmentJson, 'davoice_enrollment_runtime.json');
 
   // 2) Create a SpeakerVerification engine instance (NOT the mic controller)
   const sv = await createSpeakerVerificationInstance('svVerify1');
@@ -613,7 +645,7 @@ async function runSpeakerVerifyEnrollment(
   };
 
   const ctrl = await createSpeakerVerificationMicController('svMic1');
-  setUiMessage?.('🎙️ Speaker onboarding: preparing mic…');
+  setUiMessage?.('Speaker verification: preparing mic controller...');
 
   console.log('[SVJS] create mic controller...');
   await ctrl.create(JSON.stringify(micConfig));
@@ -691,12 +723,12 @@ async function runSpeakerVerifyEnrollment(
     }, 60000);
   });
 
-  setUiMessage?.('🎙️ Speaker onboarding: start. Please speak clearly when asked…');
-  await ctrl.beginOnboarding?.('yaroslav', targetSamples, true);
+  setUiMessage?.(`Speaker verification: onboarding started. Collecting ${targetSamples} samples.`);
+  await ctrl.beginOnboarding?.('davoice', targetSamples, true);
 
   for (let i = 1; i <= targetSamples; i++) {
     console.log('[SVJS] requesting embedding', i, '/', targetSamples);
-    setUiMessage?.(`🎙️ Please speak now… collecting sample ${i}/${targetSamples} (about 2s)`);
+    setUiMessage?.(`Speaker verification: collecting sample ${i}/${targetSamples}...`);
 
     const before = collected;
     const stepPromise = waitForNextSVStep('svMic1', before, 30000);
@@ -706,14 +738,14 @@ async function runSpeakerVerifyEnrollment(
     if (step.type === 'done') {
       const e = step.ev;
       enrollmentJson = e?.enrollmentJson ?? e?.enrollment ?? e?.json ?? enrollmentJson;
-      setUiMessage?.('✅ Speaker onboarding completed.');
+      setUiMessage?.('Speaker verification: onboarding completed.');
       break;
     }
 
-    setUiMessage?.(`✅ Collected ${Math.min(collected, targetSamples)}/${targetSamples} samples`);
+    setUiMessage?.(`Speaker verification: collected ${Math.min(collected, targetSamples)}/${targetSamples} samples.`);
   }
 
-  setUiMessage?.('✅ Finalizing speaker profile…');
+  setUiMessage?.('Speaker verification: finalizing speaker profile...');
   await donePromise;
 
   if (!enrollmentJson || typeof enrollmentJson !== 'string' || enrollmentJson.length < 10) {
@@ -725,7 +757,7 @@ async function runSpeakerVerifyEnrollment(
 
   console.log('[SVJS] enrollmentJson len=', enrollmentJson.length);
   await ctrl.setEnrollmentJson(enrollmentJson);
-  setUiMessage?.('✅ Speaker profile saved. Continuing…');
+  setUiMessage?.('Speaker verification: speaker profile saved.');
 
   offProg?.();
   offErr?.();
@@ -744,7 +776,7 @@ async function runSpeakerVerifyEnrollment() {
   // 2) Create native engine (bundle resource names)
   const createRes = await sv.create(
     'speaker_model.dm',
-    'yaroslav_enrollment.json',
+    'davoice_enrollment.json',
     {
       decisionThreshold: 0.35,
       tailSeconds: 2.0,
@@ -1038,9 +1070,13 @@ function App(): React.JSX.Element {
   const listenerRef = useRef<any>(null);
   const svStopRef = useRef<null | (() => Promise<void>)>(null);
   const [showSVPrompt, setShowSVPrompt] = useState(false);
+  const [svPromptHasSavedEnrollment, setSvPromptHasSavedEnrollment] = useState(false);
+  const [showSVStatusScreen, setShowSVStatusScreen] = useState(false);
+  const [svStatusCanContinue, setSvStatusCanContinue] = useState(false);
   const [showTTSModelPrompt, setShowTTSModelPrompt] = useState(false);
   const [svRunning, setSvRunning] = useState(false);
-  const svChoiceResolverRef = useRef<null | ((choice: boolean) => void)>(null);
+  const svChoiceResolverRef = useRef<null | ((choice: SVPromptChoice) => void)>(null);
+  const svContinueResolverRef = useRef<null | (() => void)>(null);
   const ttsModelChoiceResolverRef = useRef<
     null | ((choice: { quality: TTSQualityChoice; voice: TTSVoiceChoice }) => void)
   >(null);
@@ -1048,6 +1084,8 @@ function App(): React.JSX.Element {
   const [ttsVoiceChoice, setTtsVoiceChoice] = useState<TTSVoiceChoice>('Ariana');
   const selectedTTSVoiceRef = useRef<TTSVoiceChoice>('Ariana');
   const selectedTTSModelRef = useRef(ttsModelSlow);
+  const enrollmentJsonRef = useRef<string | null>(null);
+  const enrollmentJsonPathRef = useRef<string | null>(null);
   const [lastSVScore, setLastSVScore] = useState<{ score: number; isMatch: boolean } | null>(null);
   const lastSVScoreTimeRef = useRef<number | null>(null);
   const [svElapsed, setSvElapsed] = useState<string>('N/A');
@@ -1156,6 +1194,12 @@ function App(): React.JSX.Element {
             const granted = await AudioPermissionComponent();
             setIsPermissionGranted(!!granted);
           } else {
+            if (await hasIOSMicPermissions() != true) {
+              await requestIOSMicPermissions(20000);
+            }
+            if (await hasIOSSpeechRecognitionPermissions() != true) {
+              requestIOSSpeechRecognitionPermissions(20000)
+            }
             // Keep iOS behavior unchanged by Android-first permission gating.
             setIsPermissionGranted(true);
           }
@@ -1513,17 +1557,13 @@ function App(): React.JSX.Element {
         // await Speech.pauseSpeechRecognition();
         // await sleep(1000);
 
-        let enrollmentJson = null;
+        let enrollmentJson = enrollmentJsonRef.current;
+        /*
         if (isFirstCall) {
-          // Show SV prompt and wait for user choice (first invocation only)
-          setShowSVPrompt(true);
-          const testSV = await new Promise<boolean>((resolve) => {
-            svChoiceResolverRef.current = resolve;
-          });
-          setShowSVPrompt(false);
+          const testSV = true;
 
           if (testSV) {
-            /*** --> ENROLLMENT HERE ***/
+            // *** --> ENROLLMENT HERE *** /
             enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
             // Reset score tracking and start elapsed timer
             setLastSVScore(null);
@@ -1559,8 +1599,9 @@ function App(): React.JSX.Element {
             }
             setSvRunning(false);
           }
-        } else {
-          console.log('[keywordCallback] skipping SV onboarding/verification for non-first call');
+        } else */
+        {
+          console.log('[keywordCallback] Moving past SV onboarding');
           setShowSVPrompt(false);
           setSvRunning(false);
           if (svElapsedIntervalRef.current) {
@@ -1584,6 +1625,7 @@ function App(): React.JSX.Element {
             selectedTTSModelRef.current =
               selectedModelChoice.quality === 'lite' ? ttsModelFast : ttsModelSlow;
           }
+          await waitForNextInteraction();
         }
 
         // await Speech.destroyAll();
@@ -1595,25 +1637,34 @@ function App(): React.JSX.Element {
 
         setIsSpeechSessionActive(true);
         setCurrentSpeechSentence('');
+        enrollmentJson = enrollmentJsonRef.current ?? enrollmentJson;
         setIsSpeakerIdentificationActive(typeof enrollmentJson === 'string' && enrollmentJson.length > 0);
         if (isFirstCall) {
           if (typeof enrollmentJson === 'string' && enrollmentJson.length > 0) {
-            const enrollmentPath = await writeEnrollmentJsonToFile(
-              enrollmentJson,
-              `sv_enrollment_runtime_${Date.now()}.json`,
-            );
+            // const enrollmentPath = await writeEnrollmentJsonToFile(
+            //   enrollmentJson,
+            //   `sv_enrollment_runtime_${Date.now()}.json`,
+            // );
+            console.log('Calling Speech.initAll with enrollmentJson:', enrollmentJsonPathRef.current);
+
+            // Using:
+            //'Calling Speech.initAll with enrollmentJson:', '/var/mobile/Containers/Data/Application/1F53F93F-0471-497F-BC30-C55BA1812668/Documents/sv_enrollment.json'
+            // 'Calling Speech.initAll with enrollmentJson:', '/var/mobile/Containers/Data/Application/813E7D11-B21F-4683-B78B-C7FC47AF9E31/Documents/sv_enrollment.json'
+            // Fresh:
+            // 'Calling Speech.initAll with enrollmentJson:', '/var/mobile/Containers/Data/Application/DED7A104-E77F-4FEF-84AC-83E33F010473/Documents/sv_enrollment.json'
+            // 'Calling Speech.initAll with enrollmentJson:', '/var/mobile/Containers/Data/Application/6EA869CC-D7F0-45F0-9BFC-1D8E55BFDAAA/Documents/sv_enrollment.json'
+
             await Speech.initAll({
               locale: 'en-US',
               model: selectedTTSModelRef.current,
-              onboardingJsonPath: enrollmentPath,
+              onboardingJsonPath: enrollmentJsonPathRef.current ? enrollmentJsonPathRef.current : '',//enrollmentPath,
             });
           } else {
+            console.log('Calling Speech.initAll WITHOUT');
             await Speech.initAll({ locale: 'en-US', model: selectedTTSModelRef.current });
           }
           const off = Speech.onFinishedSpeaking = async () => {
-            //await Speech.unPauseSpeechRecognition(1);
             console.log('onFinishedSpeaking(): ✅ Finished speaking (last WAV done).');
-            setIsIntroSpeaking(false);
           };
         } else {
           await Speech.unPauseSpeechRecognition(-1);
@@ -1669,8 +1720,8 @@ function App(): React.JSX.Element {
       try {
          await Speech.speak(introLine, SPEAKER, getSelectedSpeakerSpeed());
       } finally {
-       setIsIntroSpeaking(false);
-       resetTranscript();
+        setIsIntroSpeaking(false);
+        resetTranscript();
       }
       // Hi! Welcome to Lunafit! My name is Ariana. Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals. It's about owning your journey!
       // Hi, Welcome to Lunafit, My name is Ariana, Besides tracking, LunaFit also gives you personalized plans for all those pillars and helps you crush your health and fitness goals, It's about owning your journey!
@@ -1711,6 +1762,7 @@ function App(): React.JSX.Element {
       await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
       await Speech.speak("Hello good people, how are you.", SPEAKER, SPEAKER_SPEED * 0.8);
       */
+      await waitForNextInteraction();
       await Speech.unPauseSpeechRecognition(-1);
 
       /*
@@ -1797,6 +1849,107 @@ function App(): React.JSX.Element {
     // ************ INIT **************
     // --> STARTING POINT - INIT OF KEYWORD DETECTION !!!!
     const initializeKeywordDetection = async () => {
+      let enrollmentJson = enrollmentJsonRef.current;
+      console.log('initializeKeywordDetection() enrollmentJson == ', enrollmentJson);
+      let svChoice = 'skip';
+      try {
+          if (!enrollmentJson) {
+            enrollmentJson = await loadEnrollmentJsonFromFile('sv_enrollment.json');
+            console.log('initializeKeywordDetection() 2 enrollmentJson == ', enrollmentJson);
+
+            if (enrollmentJson) {
+              console.log('initializeKeywordDetection() 3 enrollmentJson == ', enrollmentJson);
+              enrollmentJsonRef.current = enrollmentJson;
+              enrollmentJsonPathRef.current = `${RNFS.DocumentDirectoryPath}/sv_enrollment.json`;
+              console.log('initializeKeywordDetection() 4 enrollmentJsonPathRef.current == ', enrollmentJsonPathRef.current);
+            }
+          }
+          const hasSavedEnrollment = typeof enrollmentJson === 'string' && enrollmentJson.length > 0;
+          setSvPromptHasSavedEnrollment(hasSavedEnrollment);
+          setShowSVPrompt(true);
+          console.log('initializeKeywordDetection() 2');
+          svChoice = await new Promise<SVPromptChoice>((resolve) => {
+            console.log('initializeKeywordDetection() 3');
+            svChoiceResolverRef.current = resolve;
+            console.log('initializeKeywordDetection() 4');
+          });
+          console.log('initializeKeywordDetection() 5');
+          setShowSVPrompt(false);
+          setSvPromptHasSavedEnrollment(false);
+          if (svChoice !== 'skip') {
+            setShowSVStatusScreen(true);
+            setSvStatusCanContinue(false);
+            console.log('initializeKeywordDetection() 6');
+            console.log('initializeKeywordDetection() 7');
+            if (svChoice === 'redo_onboarding' || !enrollmentJson) {
+              /*** --> ENROLLMENT HERE ***/
+              enrollmentJson = await runSpeakerVerifyEnrollment(setMessage);
+              enrollmentJsonRef.current = enrollmentJson;
+              enrollmentJsonPathRef.current = await writeEnrollmentJsonToFile(
+                enrollmentJson,
+                'sv_enrollment.json',
+              );
+            }
+            console.log('initializeKeywordDetection() 8');
+            // Reset score tracking and start elapsed timer
+            setLastSVScore(null);
+          console.log('initializeKeywordDetection() 9');
+            lastSVScoreTimeRef.current = null;
+          console.log('initializeKeywordDetection() 10');
+            setSvElapsed('N/A');
+          console.log('initializeKeywordDetection() 11');
+            svElapsedIntervalRef.current = setInterval(() => {
+          console.log('initializeKeywordDetection() 12');
+              const t = lastSVScoreTimeRef.current;
+              if (t === null) {
+                setSvElapsed('N/A');
+              } else {
+                const sec = (Date.now() - t) / 1000;
+                setSvElapsed(sec < 60 ? `${sec.toFixed(1)}s` : `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`);
+              }
+            }, 100);
+          console.log('initializeKeywordDetection() 13');
+
+            setSvRunning(true);
+          console.log('initializeKeywordDetection() 14');
+            // await runVerificationWithEnrollment(enrollmentJson, setMessage);
+    //        svStopRef.current = await startEndlessVerificationWithEnrollment(enrollmentJson, setMessage, { hopSeconds: 0.5, stopOnMatch: false });
+            svStopRef.current = await startEndlessVerificationWithEnrollmentFix(
+              enrollmentJson,
+              setMessage,
+              { hopSeconds: 0.25, stopOnMatch: false, waitFirstResult: true, firstResultTimeoutMs: 3000,
+                onStopReady: (stopFn: () => Promise<void>) => { svStopRef.current = stopFn; },
+                onScore: (score: number, isMatch: boolean) => {
+                  setLastSVScore({ score, isMatch });
+                  lastSVScoreTimeRef.current = Date.now();
+                  setSvStatusCanContinue(true);
+                } }
+            );
+          await new Promise<void>((resolve) => {
+            svContinueResolverRef.current = resolve;
+          });
+          console.log('initializeKeywordDetection()');
+            // Cleanup timer when verification ends
+            if (svElapsedIntervalRef.current) {
+              clearInterval(svElapsedIntervalRef.current);
+              svElapsedIntervalRef.current = null;
+            }
+            setSvRunning(false);
+          }
+          setShowSVStatusScreen(false);
+          setSvStatusCanContinue(false);
+          svContinueResolverRef.current = null;
+        } catch (error) {
+          console.error('Error loading model:', error);
+          setShowSVPrompt(false);
+          setSvPromptHasSavedEnrollment(false);
+          setShowSVStatusScreen(false);
+          setSvStatusCanContinue(false);
+          svContinueResolverRef.current = null;
+          setMessage(`Speaker verification debug mode failed: ${String((error as any)?.message ?? error)}`);
+          return;
+        }
+
       try {
         // 🔹 *** NEW ***: configure routing once (iOS only) BEFORE creating instances
         if (Platform.OS === 'ios') {
@@ -1837,7 +1990,17 @@ function App(): React.JSX.Element {
         // await enableDucking();
         // await inst.startKeywordDetection(instanceConfigs[0].threshold, false);
         */
+
+       if (svChoice !== 'skip' && typeof enrollmentJsonPathRef.current === 'string' && enrollmentJsonPathRef.current.length > 0) {
+        console.log ("startKeywordDetection with SV:", enrollmentJsonPathRef.current);
+        await inst.startKeywordDetection(instanceConfigs[0].threshold, 
+          enrollmentJsonPathRef.current || '' , true);
+       }
+       else {
+        console.log ("startKeywordDetection without SV:");
         await inst.startKeywordDetection(instanceConfigs[0].threshold, true);
+       }
+        setMessage(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
         //await disableDucking();
 
         let ms = 5000;
@@ -1860,6 +2023,9 @@ function App(): React.JSX.Element {
     initStartedRef.current = true;
     if (!calledOnce) {
       calledOnce = true;
+      if (Platform.OS === 'android') {
+        setMessage('Loading speaker verification...');
+      }
       console.log('Calling initializeKeywordDetection();');
       initializeKeywordDetection();
       console.log('After calling AudioPermissionComponent();');
@@ -1868,11 +2034,6 @@ function App(): React.JSX.Element {
   }, [isPermissionGranted, didInitSID]);
 
   const enterTTSTestMode = async () => {
-    try {
-      await Speech.pauseSpeechRecognition();
-    } catch (error) {
-      console.log('pauseSpeechRecognition failed when entering TTS test mode:', error);
-    }
     resetTranscript();
     setMessage('TTS Test Mode');
     setIsTTSTestMode(true);
@@ -1944,13 +2105,8 @@ function App(): React.JSX.Element {
     }
   };
 
-  return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        Keyboard.dismiss();
-        setIsMenuOpen(false);
-      }}
-      accessible={false}>
+  if (showSVPrompt) {
+    return (
       <LinearGradient
         colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
         style={styles.linearGradient}>
@@ -1959,217 +2115,140 @@ function App(): React.JSX.Element {
           backgroundColor="transparent"
           translucent
         />
-        <View style={styles.container}>
-        <View style={styles.topMenuContainer}>
-          <TouchableOpacity
-            style={styles.menuButton}
-            activeOpacity={0.7}
-            onPress={() => setIsMenuOpen((prev) => !prev)}>
-            <Text style={styles.menuButtonText}>☰</Text>
-          </TouchableOpacity>
-          {isMenuOpen && (
-            <View style={styles.menuDropdown}>
+        <View style={styles.svPromptScreen}>
+          <View style={styles.svPromptCard}>
+            <Text style={styles.svPromptTitle}>
+              {svPromptHasSavedEnrollment ? 'Use Saved Signature?' : 'Enable Speaker Verification?'}
+            </Text>
+            <Text style={styles.svPromptSubtitle}>
+              {svPromptHasSavedEnrollment
+                ? 'Use the saved speaker signature, redo onboarding to replace it, or skip speaker verification.'
+                : 'Create a speaker signature now, or skip speaker verification.'}
+            </Text>
+            <View style={styles.svPromptActionStack}>
               <TouchableOpacity
-                style={styles.menuItemButton}
-                activeOpacity={0.7}
-                onPress={shareLatestRecordings}>
-                <Text style={styles.menuItemText}>Share recordings</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-        {/* Main message card */}
-        {!isTTSTestMode && (
-          <View
-            style={[
-              styles.messageCard,
-              showSVPrompt ? styles.messageCardSVPromptFocus : (isFlashing && styles.messageCardFlashing),
-            ]}>
-            <Text style={styles.appLabel}>VOICE DEMO</Text>
-            <Text style={styles.title}>{message}</Text>
-          </View>
-        )}
-
-        {isSpeechSessionActive && (
-          <View
-            style={[
-              styles.speechSentenceCard,
-              Platform.OS === 'ios' && isTTSTestMode && styles.speechSentenceCardTTSIOS,
-            ]}>
-            {isIntroSpeaking ? (
-              <Text style={styles.speechSentenceText}>{introScript}</Text>
-            ) : isTTSTestMode ? (
-              <>
-                <View style={styles.ttsHeaderRow}>
-                  <Text style={styles.speechSentenceLabel}>TTS Test Mode</Text>
-                  <TouchableOpacity
-                    style={styles.hideKeyboardButton}
-                    activeOpacity={0.7}
-                    onPress={() => Keyboard.dismiss()}>
-                    <Text style={styles.hideKeyboardButtonText}>Hide Keyboard</Text>
-                  </TouchableOpacity>
-                </View>
-                <TextInput
-                  style={styles.ttsInput}
-                  placeholder="Write text to speak..."
-                  placeholderTextColor="rgba(255, 255, 255, 0.55)"
-                  value={ttsInputText}
-                  onChangeText={setTtsInputText}
-                  multiline
-                  blurOnSubmit
-                  returnKeyType="done"
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                  inputAccessoryViewID={Platform.OS === 'ios' ? TTS_INPUT_ACCESSORY_ID : undefined}
-                />
-                {Platform.OS === 'ios' && (
-                  <InputAccessoryView nativeID={TTS_INPUT_ACCESSORY_ID}>
-                    <View style={styles.keyboardAccessory}>
-                      <TouchableOpacity
-                        style={[
-                          styles.keyboardAccessoryButton,
-                          styles.keyboardClearButton,
-                        ]}
-                        activeOpacity={0.7}
-                        onPress={clearManualTTSInput}>
-                        <Text style={styles.keyboardAccessoryButtonText}>Clear</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[
-                          styles.keyboardAccessoryButton,
-                          styles.keyboardSpeakButton,
-                          (isManualTTSSpeaking || !ttsInputText.trim()) &&
-                            styles.keyboardAccessoryButtonDisabled,
-                        ]}
-                        activeOpacity={0.7}
-                        disabled={isManualTTSSpeaking || !ttsInputText.trim()}
-                        onPress={speakFromKeyboardAccessory}>
-                        <Text style={styles.keyboardAccessoryButtonText}>
-                          {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[
-                          styles.keyboardAccessoryButton,
-                          styles.keyboardDoneButton,
-                        ]}
-                        activeOpacity={0.7}
-                        onPress={() => Keyboard.dismiss()}>
-                        <Text style={styles.keyboardAccessoryButtonText}>Done</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </InputAccessoryView>
-                )}
-                <TouchableOpacity
-                  style={[
-                    styles.ttsSpeakButton,
-                    (isManualTTSSpeaking || !ttsInputText.trim()) && styles.ttsSpeakButtonDisabled,
-                  ]}
-                  activeOpacity={0.7}
-                  disabled={isManualTTSSpeaking || !ttsInputText.trim()}
-                  onPress={speakManualTTS}>
-                  <Text style={styles.ttsSpeakButtonText}>
-                    {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
-                  </Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <>
-                <Text style={styles.speechSentenceLabel}>
-                  Speaker identification: {isSpeakerIdentificationActive ? 'ON' : 'OFF'}
-                </Text>
-                <Text style={styles.speechSentenceLabel}>Current Sentence</Text>
-                <Text style={styles.speechSentenceText}>
-                  {currentSpeechSentence || 'Listening...'}
-                </Text>
-                <TouchableOpacity
-                  style={styles.ttsModeButton}
-                  activeOpacity={0.7}
-                  onPress={enterTTSTestMode}>
-                  <Text style={styles.ttsModeButtonText}>Move To Test TTS</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        )}
-
-        {Platform.OS === 'android' &&
-          isTTSTestMode &&
-          isSpeechSessionActive &&
-          !isIntroSpeaking &&
-          isAndroidKeyboardVisible && (
-            <View pointerEvents="box-none" style={styles.androidKeyboardAccessoryWrapper}>
-              <View
-                style={[
-                  styles.keyboardAccessory,
-                  styles.keyboardAccessoryAndroid,
-                  { bottom: androidKeyboardHeight },
-                ]}>
-                <TouchableOpacity
-                  style={[
-                    styles.keyboardAccessoryButton,
-                    styles.keyboardClearButton,
-                  ]}
-                  activeOpacity={0.7}
-                  onPress={clearManualTTSInput}>
-                  <Text style={styles.keyboardAccessoryButtonText}>Clear</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.keyboardAccessoryButton,
-                    styles.keyboardSpeakButton,
-                    (isManualTTSSpeaking || !ttsInputText.trim()) &&
-                      styles.keyboardAccessoryButtonDisabled,
-                  ]}
-                  activeOpacity={0.7}
-                  disabled={isManualTTSSpeaking || !ttsInputText.trim()}
-                  onPress={speakFromKeyboardAccessory}>
-                  <Text style={styles.keyboardAccessoryButtonText}>
-                    {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.keyboardAccessoryButton,
-                    styles.keyboardDoneButton,
-                  ]}
-                  activeOpacity={0.7}
-                  onPress={() => Keyboard.dismiss()}>
-                  <Text style={styles.keyboardAccessoryButtonText}>Done</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
-        {/* Speaker Verification prompt */}
-        {showSVPrompt && (
-          <View style={styles.svPromptContainer}>
-            <Text style={styles.svPromptText}>Activate Speaker Verification?</Text>
-            <View style={styles.svButtonRow}>
-              <TouchableOpacity
-                style={[styles.svButton, styles.svButtonYes]}
+                style={[styles.svButton, styles.svPromptActionButton, styles.svButtonYes]}
                 activeOpacity={0.7}
                 onPress={() => {
-                  svChoiceResolverRef.current?.(true);
+                  svChoiceResolverRef.current?.(
+                    svPromptHasSavedEnrollment ? 'use_existing' : 'redo_onboarding',
+                  );
                   svChoiceResolverRef.current = null;
                 }}>
-                <Text style={styles.svButtonText}>Yes</Text>
+                <Text style={styles.svButtonText}>
+                  {svPromptHasSavedEnrollment ? 'Use Existing' : 'Create Signature'}
+                </Text>
               </TouchableOpacity>
+              {svPromptHasSavedEnrollment && (
+                <TouchableOpacity
+                  style={[styles.svButton, styles.svPromptActionButton, styles.svButtonRedo]}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    svChoiceResolverRef.current?.('redo_onboarding');
+                    svChoiceResolverRef.current = null;
+                  }}>
+                  <Text style={styles.svButtonText}>Redo Onboarding</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
-                style={[styles.svButton, styles.svButtonNo]}
+                style={[styles.svButton, styles.svPromptActionButton, styles.svButtonNo]}
                 activeOpacity={0.7}
                 onPress={() => {
-                  svChoiceResolverRef.current?.(false);
+                  svChoiceResolverRef.current?.('skip');
                   svChoiceResolverRef.current = null;
                 }}>
                 <Text style={styles.svButtonText}>Skip</Text>
               </TouchableOpacity>
             </View>
           </View>
-        )}
+        </View>
+      </LinearGradient>
+    );
+  }
 
-        {showTTSModelPrompt && (
-          <View style={styles.svPromptContainer}>
-            <Text style={styles.svPromptText}>Choose Voice Model</Text>
+  if (showSVStatusScreen) {
+    return (
+      <LinearGradient
+        colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
+        style={styles.linearGradient}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <View style={styles.svPromptScreen}>
+          <View style={styles.svPromptCard}>
+            <Text style={styles.svPromptTitle}>Speaker Verification Running</Text>
+            <Text style={styles.svPromptSubtitle}>{message}</Text>
+            <View style={styles.svStatusMetricsRow}>
+              <View style={styles.svStatusMetricCard}>
+                <Text style={styles.svScoreItemLabel}>Last Score</Text>
+                <Text style={styles.svScoreValue}>
+                  {lastSVScore ? lastSVScore.score.toFixed(3) : 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.svStatusMetricCard}>
+                <Text style={styles.svScoreItemLabel}>Match</Text>
+                <Text style={styles.svScoreValue}>
+                  {lastSVScore ? (lastSVScore.isMatch ? 'YES' : 'NO') : 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.svStatusMetricCard}>
+                <Text style={styles.svScoreItemLabel}>Since Last</Text>
+                <Text style={styles.svScoreValue}>{svElapsed}</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.svButton,
+                styles.ttsContinueButton,
+                !svStatusCanContinue && styles.keyboardAccessoryButtonDisabled,
+              ]}
+              activeOpacity={0.7}
+              disabled={!svStatusCanContinue}
+              onPress={async () => {
+                if (svElapsedIntervalRef.current) {
+                  clearInterval(svElapsedIntervalRef.current);
+                  svElapsedIntervalRef.current = null;
+                }
+                if (svStopRef.current) {
+                  try {
+                    await svStopRef.current();
+                  } finally {
+                    svStopRef.current = null;
+                  }
+                }
+                setIsSpeechSessionActive(false);
+                setCurrentSpeechSentence('');
+                setIsSpeakerIdentificationActive(false);
+                setShowSVStatusScreen(false);
+                setSvStatusCanContinue(false);
+                setSvRunning(false);
+                setMessage(`Full end-to-end voice demo app.\nSay the wake word "${wakeWords}" to continue.`);
+                svContinueResolverRef.current?.();
+                svContinueResolverRef.current = null;
+              }}>
+              <Text style={styles.svButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </LinearGradient>
+    );
+  }
+
+  if (showTTSModelPrompt) {
+    return (
+      <LinearGradient
+        colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
+        style={styles.linearGradient}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <View style={styles.svPromptScreen}>
+          <View style={styles.svPromptCard}>
+            <Text style={styles.svPromptTitle}>Choose Voice Model</Text>
             <View style={styles.ttsOptionSection}>
               <Text style={styles.ttsOptionLabel}>Quality</Text>
               <View style={styles.svButtonRow}>
@@ -2231,48 +2310,244 @@ function App(): React.JSX.Element {
               </TouchableOpacity>
             </View>
           </View>
-        )}
+        </View>
+      </LinearGradient>
+    );
+  }
 
-        {/* SV score tracking + Stop button */}
-        {svRunning && (
-          <View style={styles.svScoreContainer}>
-            <Text style={styles.svScoreLabel}>Speaker Verification</Text>
-            <View style={styles.svScoreRow}>
-              <View style={styles.svScoreItem}>
-                <Text style={styles.svScoreItemLabel}>Last Score</Text>
-                <Text style={styles.svScoreValue}>
-                  {lastSVScore ? lastSVScore.score.toFixed(3) : 'N/A'}
-                </Text>
-              </View>
-              <View style={styles.svScoreItem}>
-                <Text style={styles.svScoreItemLabel}>Match</Text>
-                <Text style={styles.svScoreValue}>
-                  {lastSVScore ? (lastSVScore.isMatch ? 'YES' : 'NO') : 'N/A'}
-                </Text>
-              </View>
-              <View style={styles.svScoreItem}>
-                <Text style={styles.svScoreItemLabel}>Since Last</Text>
-                <Text style={styles.svScoreValue}>{svElapsed}</Text>
+  if (isTTSTestMode) {
+    return (
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss();
+          setIsMenuOpen(false);
+        }}
+        accessible={false}>
+        <LinearGradient
+          colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
+          style={styles.linearGradient}>
+          <StatusBar
+            barStyle="light-content"
+            backgroundColor="transparent"
+            translucent
+          />
+          <View style={styles.svPromptScreen}>
+            <View style={[styles.svPromptCard, styles.ttsTestScreenCard]}>
+              <Text style={styles.svPromptTitle}>TTS Test Mode</Text>
+              <Text style={styles.svPromptSubtitle}>
+                Write text to speak with the selected voice model.
+              </Text>
+              <TextInput
+                style={styles.ttsInput}
+                placeholder="Write text to speak..."
+                placeholderTextColor="rgba(255, 255, 255, 0.55)"
+                value={ttsInputText}
+                onChangeText={setTtsInputText}
+                multiline
+                blurOnSubmit
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                inputAccessoryViewID={Platform.OS === 'ios' ? TTS_INPUT_ACCESSORY_ID : undefined}
+              />
+              {Platform.OS === 'ios' && (
+                <InputAccessoryView nativeID={TTS_INPUT_ACCESSORY_ID}>
+                  <View style={styles.keyboardAccessory}>
+                    <TouchableOpacity
+                      style={[
+                        styles.keyboardAccessoryButton,
+                        styles.keyboardClearButton,
+                      ]}
+                      activeOpacity={0.7}
+                      onPress={clearManualTTSInput}>
+                      <Text style={styles.keyboardAccessoryButtonText}>Clear</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.keyboardAccessoryButton,
+                        styles.keyboardSpeakButton,
+                        (isManualTTSSpeaking || !ttsInputText.trim()) &&
+                          styles.keyboardAccessoryButtonDisabled,
+                      ]}
+                      activeOpacity={0.7}
+                      disabled={isManualTTSSpeaking || !ttsInputText.trim()}
+                      onPress={speakFromKeyboardAccessory}>
+                      <Text style={styles.keyboardAccessoryButtonText}>
+                        {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.keyboardAccessoryButton,
+                        styles.keyboardDoneButton,
+                      ]}
+                      activeOpacity={0.7}
+                      onPress={() => Keyboard.dismiss()}>
+                      <Text style={styles.keyboardAccessoryButtonText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                </InputAccessoryView>
+              )}
+              <View style={styles.ttsTestActionRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.ttsSpeakButton,
+                    (isManualTTSSpeaking || !ttsInputText.trim()) && styles.ttsSpeakButtonDisabled,
+                  ]}
+                  activeOpacity={0.7}
+                  disabled={isManualTTSSpeaking || !ttsInputText.trim()}
+                  onPress={speakManualTTS}>
+                  <Text style={styles.ttsSpeakButtonText}>
+                    {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.svButton, styles.svButtonNo, styles.ttsTestBackButton]}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setIsTTSTestMode(false);
+                    setTtsInputText('');
+                    resetTranscript();
+                  }}>
+                  <Text style={styles.svButtonText}>Back</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.svStopButton}
-              activeOpacity={0.7}
-              onPress={async () => {
-                if (svElapsedIntervalRef.current) {
-                  clearInterval(svElapsedIntervalRef.current);
-                  svElapsedIntervalRef.current = null;
-                }
-                if (svStopRef.current) {
-                  await svStopRef.current();
-                  svStopRef.current = null;
-                }
-                setSvRunning(false);
-              }}>
-            <Text style={styles.svStopButtonText}>Continue To Test Full Speech</Text>
-            </TouchableOpacity>
+          </View>
+          {Platform.OS === 'android' && isAndroidKeyboardVisible && (
+            <View pointerEvents="box-none" style={styles.androidKeyboardAccessoryWrapper}>
+              <View
+                style={[
+                  styles.keyboardAccessory,
+                  styles.keyboardAccessoryAndroid,
+                  { bottom: androidKeyboardHeight },
+                ]}>
+                <TouchableOpacity
+                  style={[
+                    styles.keyboardAccessoryButton,
+                    styles.keyboardClearButton,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={clearManualTTSInput}>
+                  <Text style={styles.keyboardAccessoryButtonText}>Clear</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.keyboardAccessoryButton,
+                    styles.keyboardSpeakButton,
+                    (isManualTTSSpeaking || !ttsInputText.trim()) &&
+                      styles.keyboardAccessoryButtonDisabled,
+                  ]}
+                  activeOpacity={0.7}
+                  disabled={isManualTTSSpeaking || !ttsInputText.trim()}
+                  onPress={speakFromKeyboardAccessory}>
+                  <Text style={styles.keyboardAccessoryButtonText}>
+                    {isManualTTSSpeaking ? 'Speaking...' : 'Speak'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.keyboardAccessoryButton,
+                    styles.keyboardDoneButton,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => Keyboard.dismiss()}>
+                  <Text style={styles.keyboardAccessoryButtonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </LinearGradient>
+      </TouchableWithoutFeedback>
+    );
+  }
+
+  const shouldShowSpeechSessionCard = isSpeechSessionActive;
+  const displayedSpeakerName: TTSVoiceChoice =
+    isIntroSpeaking ? introSpeakerName : selectedTTSVoiceRef.current;
+
+  return (
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+        setIsMenuOpen(false);
+      }}
+      accessible={false}>
+      <LinearGradient
+        colors={isDarkMode ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#667eea', '#764ba2']}
+        style={styles.linearGradient}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <View style={styles.container}>
+        <View style={styles.topMenuContainer}>
+          <TouchableOpacity
+            style={styles.menuButton}
+            activeOpacity={0.7}
+            onPress={() => setIsMenuOpen((prev) => !prev)}>
+            <Text style={styles.menuButtonText}>☰</Text>
+          </TouchableOpacity>
+          {isMenuOpen && (
+            <View style={styles.menuDropdown}>
+              <TouchableOpacity
+                style={styles.menuItemButton}
+                activeOpacity={0.7}
+                onPress={shareLatestRecordings}>
+                <Text style={styles.menuItemText}>Share recordings</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+        {/* Main message card */}
+        {!shouldShowSpeechSessionCard && (
+          <View
+            style={[
+              styles.messageCard,
+              isFlashing && styles.messageCardFlashing,
+            ]}>
+            <Text style={styles.appLabel}>VOICE DEMO</Text>
+            <Text style={styles.title}>{message}</Text>
           </View>
         )}
+
+        {shouldShowSpeechSessionCard && (
+          <View style={styles.ttsPromptWrapper}>
+            <View style={styles.svPromptCard}>
+              <Text style={styles.svPromptTitle}>
+                {isIntroSpeaking ? `${displayedSpeakerName} is speaking...` : 'Manual TTS Test'}
+              </Text>
+              <View style={styles.speechSummaryBlock}>
+                <Text style={styles.speechSentenceLabel}>Speaker</Text>
+                <Text style={styles.speechSentenceText}>{displayedSpeakerName}</Text>
+              </View>
+              <View style={styles.speechSummaryBlock}>
+                <Text style={styles.speechSentenceLabel}>Current Sentence</Text>
+                <Text style={styles.speechSentenceText}>
+                  {isIntroSpeaking ? introScript : currentSpeechSentence || 'Listening...'}
+                </Text>
+              </View>
+              <View style={styles.speechSummaryBlock}>
+                <Text style={styles.speechSentenceLabel}>Speaker Identification</Text>
+                <Text style={styles.speechSentenceText}>
+                  {isSpeakerIdentificationActive ? 'ON' : 'OFF'}
+                </Text>
+              </View>
+              {!isIntroSpeaking && (
+                <View style={styles.svButtonRow}>
+                  <TouchableOpacity
+                    style={[styles.svButton, styles.ttsContinueButton]}
+                    activeOpacity={0.7}
+                    onPress={enterTTSTestMode}>
+                    <Text style={styles.svButtonText}>Continue</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
         </View>
       </LinearGradient>
     </TouchableWithoutFeedback>
@@ -2379,6 +2654,56 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 100, 100, 0.5)',
   },
+  svPromptScreen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  svPromptCard: {
+    width: '100%',
+    maxWidth: 420,
+    alignItems: 'center',
+    backgroundColor: 'rgba(7, 12, 26, 0.92)',
+    borderRadius: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+  },
+  svPromptTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    textAlign: 'center',
+  },
+  svPromptSubtitle: {
+    marginTop: 10,
+    fontSize: 15,
+    lineHeight: 22,
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+  },
+  svStatusMetricsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 18,
+    marginBottom: 18,
+  },
+  svStatusMetricCard: {
+    flex: 1,
+    minHeight: 82,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+  },
   speechSentenceCard: {
     marginTop: 18,
     width: '100%',
@@ -2388,6 +2713,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  ttsTestScreenCard: {
+    alignItems: 'stretch',
+  },
+  ttsTestActionRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  ttsTestBackButton: {
+    minWidth: 120,
   },
   speechSentenceCardTTSIOS: {
     marginTop: -80,
@@ -2413,11 +2750,51 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '400',
   },
+  sectionContainer: {
+    width: '100%',
+    marginTop: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  sectionDescription: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  ttsPromptWrapper: {
+    width: '100%',
+    marginTop: 18,
+  },
+  speechSummaryBlock: {
+    width: '100%',
+    marginTop: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+  },
   svPromptText: {
     fontSize: 18,
     fontWeight: '600',
     color: '#ffffff',
     marginBottom: 18,
+  },
+  svPromptActionStack: {
+    width: '100%',
+    marginTop: 18,
+    gap: 12,
   },
   svButtonRow: {
     flexDirection: 'row',
@@ -2433,8 +2810,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  svPromptActionButton: {
+    width: '100%',
+    minWidth: 0,
+    paddingHorizontal: 18,
+  },
   svButtonYes: {
     backgroundColor: '#34C759',
+  },
+  svButtonRedo: {
+    backgroundColor: '#FF9500',
   },
   svButtonNo: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -2443,7 +2828,7 @@ const styles = StyleSheet.create({
   },
   svButtonText: {
     color: '#ffffff',
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',
   },
@@ -2535,7 +2920,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     backgroundColor: '#2E86DE',
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     borderRadius: 10,
     alignSelf: 'flex-start',
   },
@@ -2557,26 +2942,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     marginBottom: 12,
-  },
-  ttsHeaderRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  hideKeyboardButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  hideKeyboardButtonText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '700',
   },
   ttsSpeakButton: {
     backgroundColor: '#34C759',
