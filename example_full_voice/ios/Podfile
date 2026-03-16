@@ -2,31 +2,6 @@
 def node_resolve(script)
   Pod::Executable.execute_command(
     'node',
-    ['-p', "(()=>{try{return require.resolve('#{script}',{paths:[process.argv[1]]})}catch(e){''}})()", __dir__]
-  ).strip
-end
-
-def node_require(script)
-  path = node_resolve(script)
-  if path && !path.empty?
-    require path
-  else
-    Pod::UI.puts "⏭️  Skipping optional script: #{script}".yellow
-  end
-end
-
-# Load RN pods helpers **before** using min_ios_version_supported
-node_require('react-native/scripts/react_native_pods.rb')
-
-# Fallback in case the script didn’t load for some reason
-ios_min = defined?(min_ios_version_supported) ? min_ios_version_supported : '13.4'
-platform :ios, ios_min
-
-prepare_react_native_project!
-# Helpers to resolve Node modules (works with hoisting)
-def node_resolve(script)
-  Pod::Executable.execute_command(
-    'node',
     ['-p', "(()=>{try{return require.resolve('#{script}',{paths:[process.argv[1]]})}catch(e){return ''}})()", __dir__]
   ).strip
 end
@@ -36,12 +11,16 @@ def node_require(script)
   if path && !path.empty?
     require path
   else
-    Pod::UI.puts "⏭️  Skipping optional script: #{script}".yellow
+    Pod::UI.puts "Skipping optional script: #{script}".yellow
   end
 end
 
-# Optional: react-native-permissions setup (only if installed)
+# Load RN pod helpers before using min_ios_version_supported
+node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
+
+ios_min = defined?(min_ios_version_supported) ? min_ios_version_supported : '13.4'
+platform :ios, ios_min
 
 prepare_react_native_project!
 
@@ -52,7 +31,6 @@ if linkage
   use_frameworks! :linkage => linkage.to_sym
 end
 
-# ---- Permissions ----
 # ---- Permissions ----
 if defined?(setup_permissions)
   setup_permissions([
@@ -78,46 +56,42 @@ if defined?(setup_permissions)
     # 'StoreKit',
   ])
 else
-  Pod::UI.puts "⏭️  react-native-permissions not installed; skipping setup_permissions".yellow
+  Pod::UI.puts 'react-native-permissions not installed; skipping setup_permissions'.yellow
 end
 
-target 'ExampleApp' do
+abstract_target 'ExampleAppShared' do
   config = use_native_modules!
+  react_native_path = config[:reactNativePath]
 
   use_react_native!(
-    :path => config[:reactNativePath],
-    # Absolute path to your app root (one level up from ios/)
+    :path => react_native_path,
     :app_path => "#{Pod::Config.instance.installation_root}/..",
-    :hermes_enabled => true,   # RN 0.82 defaults to Hermes; keep explicit
-    :fabric_enabled => true    # Enables the New Architecture rendering (Fabric)
+    :hermes_enabled => true,
+    :fabric_enabled => true
   )
 
-  # Example: add your own pods here
-  # pod 'KeyWordDetection', :path => '../node_modules/react-native-wakeword'
+  target 'ExampleApp' do
+    target 'ExampleAppTests' do
+      inherit! :complete
+    end
+  end
 
-  target 'ExampleAppTests' do
-    inherit! :complete
+  target 'ExampleAppRelease' do
   end
 
   post_install do |installer|
     react_native_post_install(
       installer,
-      config[:reactNativePath],
+      react_native_path,
       :mac_catalyst_enabled => false
-      # , :ccache_enabled => true
     )
 
-    # --- Recommended RN 0.82 build niceties ---
-    # Ensure deployment target is consistent across pods (RN sets this, but enforce just in case)
-    ios_target = min_ios_version_supported
     installer.pods_project.targets.each do |t|
       t.build_configurations.each do |cfg|
-        cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ios_target
+        cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ios_min
       end
     end
 
-    # If you use use_frameworks! :linkage => :static, make Swift libraries emit module maps
-    # (helps with mixed ObjC/Swift pods importing each other)
     if linkage && linkage.to_s == 'static'
       installer.pods_project.targets.each do |t|
         t.build_configurations.each do |cfg|
