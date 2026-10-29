@@ -1,5 +1,7 @@
 # ReactNative KeywordsDetection by Davoice
 
+[License](LICENSE) · [Model and Voice Asset Notice](MODEL_NOTICES.md)
+
 [![GitHub release](https://img.shields.io/github/release/frymanofer/KeyWordDetectionIOSFramework.svg)](https://github.com/frymanofer/KeyWordDetectionIOSFramework/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
