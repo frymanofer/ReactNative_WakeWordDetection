@@ -220,10 +220,14 @@ See example_npm for a specific example of using the code.
 
 To run the demo:
 
-1. Clone the repository:
+1. Install [Git LFS](https://git-lfs.com) (the wake word and speaker models, `*.dm` / `*.onnx`, are stored with LFS), then clone the repository and pull the models:
    ```
+	git lfs install
 	git clone https://github.com/frymanofer/ReactNative_WakeWordDetection
+	cd ReactNative_WakeWordDetection
+	git lfs pull
    ```
+   Without Git LFS the model files are small pointer files and the app cannot load them.
 2. npm install
 
 Run 'npm install'
