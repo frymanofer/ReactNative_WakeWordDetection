@@ -1,0 +1,19 @@
+diff --git a/node_modules/react-native-fs/android/src/main/java/com/rnfs/RNFSManager.java b/node_modules/react-native-fs/android/src/main/java/com/rnfs/RNFSManager.java
+index 351ac06..4b574b4 100755
+--- a/node_modules/react-native-fs/android/src/main/java/com/rnfs/RNFSManager.java
++++ b/node_modules/react-native-fs/android/src/main/java/com/rnfs/RNFSManager.java
+@@ -975,7 +975,13 @@ public class RNFSManager extends ReactContextBaseJavaModule {
+       return;
+     }
+ 
+-    promise.reject(null, ex.getMessage());
++    // Never pass a null code: newer react-native's PromiseImpl.reject(code, message)
++    // declares `code` non-null and throws a hard, uncatchable-from-JS
++    // NullPointerException on a background thread (killing the whole app,
++    // e.g. SIGKILL) if it's null — hit for real via a failed
++    // RNFS.downloadFile() network error. patched via patch-package; see
++    // patches/react-native-fs+*.patch.
++    promise.reject("ERNFS", ex.getMessage());
+   }
+ 
+   private void rejectFileNotFound(Promise promise, String filepath) {

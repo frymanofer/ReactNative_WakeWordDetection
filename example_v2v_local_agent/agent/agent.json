@@ -1,0 +1,856 @@
+{
+  "version": 1,
+  "persona": {
+    "systemPrompt": "You are a helpful voice assistant. Keep all answers under four sentences. Do not use markdown, bullet points, or numbered lists. Do not begin a sentence with \"Certainly\" or \"Of course\". Spell out abbreviations when reading aloud. When asked where you looked something up, answer from the results earlier in this conversation."
+  },
+  "prompts": {
+    "currentDate": "Today's date is {date}.",
+    "webResults": "\n\nWeb search results, newer than your training data:\n{results}\nAnswer my question using these results: they are true today and override what you remember and anything said earlier in this conversation. Do not mention the search, sources or URLs.",
+    "webResultLine": "- {text}",
+    "webSearchFailed": "\n\n(A web search for this question failed, for example because the device is offline. The app already told the user that. Say what was true as of your training data, using words like \"as of my training\". Never say it is true today, and never put today's date on it. Keep it to two sentences.)",
+    "externalToolsNote": "The other tools listed below come from a connected service; use them when they help.",
+    "toolNotAllowed": "Not done: the user did not ask for this. Do not mention it; just answer what the user said.",
+    "toolResultNote": "(This is the tool's result, not a message from the user. Now answer me in one short sentence.)",
+    "noToolRetry": "Reply to what I said above, in plain words.",
+    "noReply": "Sorry, I didn't get that. Could you say it again?",
+    "done": "Done.",
+    "failed": "Sorry, that didn't work.",
+    "notConfirmed": "Okay, I won't do that.",
+    "notAuthorized": "Sorry, you're not allowed to do that.",
+    "invalidArgs": "Sorry, I didn't get all the details for that. Could you say it again?"
+  },
+  "webSearch": {
+    "rules": {
+      "timeWords": "\\b(current|currently|latest|recent|recently|newest|nowadays|today|tonight|tomorrow|yesterday|right now|at the moment|as of now|this (week|month|year)|these days)\\b",
+      "newsy": "\\b(news|headlines|weather|forecast|temperature outside|stock|share price|exchange rate|bitcoin|price of|how much does .* cost|score|standings|who won|winner of|champion|election|elected|release date|just released|happening)\\b",
+      "recentYear": "\\b20(2[3-9]|[3-9]\\d)\\b",
+      "whoRuns": "\\bwho('s| is)? (runs|leads|governs|rules|heads|is running|is leading|is in charge|in charge)\\b",
+      "officeWords": "\\b(president|vice president|prime minister|chancellor|king|queen|pope|ceo|chief executive|leader|mayor|governor|minister|secretary of state|head of state|chairman|coach of|owner of|richest)\\b",
+      "whoQuestion": "\\b(who|whom|whose|name of|is the)\\b",
+      "yesNoQuestion": "^\\s*(is|was|are|were|does|did|has|have)\\b|\\bstill\\b",
+      "asksWho": "^\\s*(who|who's)\\b"
+    },
+    "officePages": {
+      "fixed": [
+        {
+          "pattern": "\\bpope\\b",
+          "page": "Pope"
+        }
+      ],
+      "offices": [
+        {
+          "pattern": "\\bvice president\\b",
+          "title": "Vice President"
+        },
+        {
+          "pattern": "\\bprime minister\\b",
+          "title": "Prime Minister"
+        },
+        {
+          "pattern": "\\bpresident\\b",
+          "title": "President"
+        },
+        {
+          "pattern": "\\bchancellor\\b",
+          "title": "Chancellor"
+        },
+        {
+          "pattern": "\\bmayor\\b",
+          "title": "Mayor"
+        },
+        {
+          "pattern": "\\bgovernor\\b",
+          "title": "Governor"
+        },
+        {
+          "pattern": "\\bking\\b",
+          "title": "King"
+        },
+        {
+          "pattern": "\\bqueen\\b",
+          "title": "Queen"
+        }
+      ],
+      "places": [
+        {
+          "pattern": "\\b(u\\.?s\\.?a?|united states( of america)?|america|american|america's)(?=\\W|$)",
+          "name": "the United States"
+        },
+        {
+          "pattern": "\\b(u\\.?k\\.?|united kingdom|great britain|britain|british|england)(?=\\W|$)",
+          "name": "the United Kingdom"
+        },
+        {
+          "pattern": "\\b(france|french)\\b",
+          "name": "France"
+        },
+        {
+          "pattern": "\\b(germany|german)\\b",
+          "name": "Germany"
+        },
+        {
+          "pattern": "\\b(canada|canadian)\\b",
+          "name": "Canada"
+        }
+      ],
+      "whoRunsPages": {
+        "the United States": "President of the United States",
+        "the United Kingdom": "Prime Minister of the United Kingdom"
+      },
+      "placeAfterOf": "\\bof\\s+(?:the\\s+)?([a-z][a-z .'-]*?)\\s*(?:[?.!,]|$|\\b(?:right now|now|today|currently|these days|at the moment)\\b)",
+      "defaultPlaces": {
+        "President": "the United States",
+        "Vice President": "the United States"
+      },
+      "neutralQuestion": "Who is {office} today?"
+    },
+    "fillers": {
+      "topicProbability": 0.7,
+      "general": [
+        "Well, that is a good question, let me search.",
+        "That is a good question, please let me do some digging.",
+        "Good question, let me look that up for you.",
+        "Let me check the latest information on that.",
+        "Give me a second, I will look that up.",
+        "Great question, let me find out."
+      ],
+      "topics": [
+        {
+          "pattern": "\\b(weather|forecast|temperature|rain|snow|sunny)\\b",
+          "fillers": [
+            "Let me check the latest forecast.",
+            "Good question, let me look at the weather for you.",
+            "Let me see what the weather looks like."
+          ]
+        },
+        {
+          "pattern": "\\b(price|cost|stock|shares?|exchange rate|bitcoin|crypto|dollar|euro|market)\\b",
+          "fillers": [
+            "Prices change all the time, let me check the latest numbers.",
+            "Let me look up the current figures for you.",
+            "Good question, let me check the latest market data."
+          ]
+        },
+        {
+          "pattern": "\\b(score|scores|won|winner|win|match|game|champion|championship|league|cup|standings|tournament)\\b",
+          "fillers": [
+            "Let me check the latest results.",
+            "Good question, let me look up how that turned out.",
+            "Let me see what the latest scores say."
+          ]
+        },
+        {
+          "pattern": "\\b(news|headlines|happening|happened|announced|released|election|elected)\\b",
+          "fillers": [
+            "Let me check the latest news on that.",
+            "Good question, let me see what is new.",
+            "Let me look up the most recent reports."
+          ]
+        },
+        {
+          "pattern": "\\b(who|whom|whose|president|prime minister|ceo|pope|king|queen|leader|minister|mayor|governor|chancellor)\\b",
+          "fillers": [
+            "That can change over time, so let me check who it is right now.",
+            "Good question, let me make sure I have the latest on that.",
+            "Let me check who holds that role today."
+          ]
+        }
+      ],
+      "searchFailed": [
+        "Sorry, I can't reach the internet right now.",
+        "I could not connect to the internet just now.",
+        "It looks like I'm offline at the moment."
+      ]
+    }
+  },
+  "router": {
+    "comment": "Decides what a turn needs before the model answers. Layers, cheapest first: rules (exact commands only), semantic (the closest route by example sentences), classifier (trained on the device from the same examples), llm (the loaded model answers one word), then relevance (web results that don't match the question are dropped). Learning: sentences the model decided, searches that found nothing relevant, and router.feedback corrections become examples. Without an embedding model (configure {router: {embeddingModel: path}}) word overlap is used, with the lexical* thresholds. default: what to do when nothing decides: \"rules\" (webSearch.rules), \"none\", or a route id.",
+    "rules": [
+      {
+        "match": "^\\W*(?:please\\s+)?(?:search(?: the web| online| the internet)?|look up|google)\\b",
+        "route": "webSearch"
+      }
+    ],
+    "routes": [
+      {
+        "id": "webSearch",
+        "action": {
+          "webSearch": true
+        },
+        "examples": [
+          "What's the weather today?",
+          "What's the weather going to be like tomorrow?",
+          "Will it rain this weekend?",
+          "What's the latest news?",
+          "What are today's headlines?",
+          "Who won the game last night?",
+          "What's the score of the Lakers game?",
+          "Who won the election?",
+          "What is the price of bitcoin right now?",
+          "How is the stock market doing today?",
+          "What's the exchange rate for the euro?",
+          "Is Joe Biden still the president?",
+          "Who is the president of the United States?",
+          "Who is the current prime minister of the UK?",
+          "Who is the CEO of Apple now?",
+          "When does the new iPhone come out?",
+          "What movies are playing this week?",
+          "What happened in the world today?",
+          "Is there traffic on the highway right now?",
+          "What time does the store close today?",
+          "Who is the richest person in the world?",
+          "What's the release date of the next season?",
+          "Did the Fed raise interest rates?",
+          "What's the temperature outside?",
+          "Who won the champions league this year?",
+          "What's going on with the strike?",
+          "Is the airport open today?",
+          "What are the latest covid rules?"
+        ]
+      },
+      {
+        "id": "personal",
+        "action": {
+          "webSearch": false
+        },
+        "examples": [
+          "It's my mother's birthday tomorrow.",
+          "My son has an exam tomorrow.",
+          "I have a job interview today.",
+          "My grandfather died yesterday.",
+          "I'm going to the doctor tomorrow.",
+          "My wife is sick today.",
+          "I got a new job this week.",
+          "My car is red and blue.",
+          "I'm feeling tired today.",
+          "We are moving house next month.",
+          "My daughter's wedding is this weekend.",
+          "I have a meeting with my boss tomorrow.",
+          "I'm flying to Paris tomorrow.",
+          "My dog is sick.",
+          "I just finished my workout.",
+          "Today is my birthday.",
+          "My brother is visiting this week.",
+          "I failed my driving test yesterday.",
+          "I'm so stressed about work right now.",
+          "My favorite color is blue.",
+          "I live in Tel Aviv.",
+          "My name is Ofer.",
+          "I started a new diet today.",
+          "I have a dentist appointment tomorrow.",
+          "My friend is getting married tomorrow.",
+          "I didn't sleep well last night."
+        ]
+      },
+      {
+        "id": "general",
+        "action": {
+          "webSearch": false
+        },
+        "examples": [
+          "How many calories are in an apple?",
+          "What is photosynthesis?",
+          "Who wrote Hamlet?",
+          "What's the capital of France?",
+          "How far is the moon from the earth?",
+          "Why is the sky blue?",
+          "How do I boil an egg?",
+          "What does DNA stand for?",
+          "Explain how a car engine works.",
+          "How many legs does a spider have?",
+          "What is the speed of light?",
+          "Who painted the Mona Lisa?",
+          "How do vaccines work?",
+          "What is the tallest mountain in the world?",
+          "How do I convert Celsius to Fahrenheit?",
+          "What causes earthquakes?",
+          "Give me a recipe for pancakes.",
+          "How much protein is in an egg?",
+          "What's a good way to fall asleep faster?",
+          "Translate hello into Spanish.",
+          "What year did World War Two end?",
+          "How many ounces in a pound?",
+          "How many calories does a banana have?",
+          "Is an egg healthy?",
+          "How much protein is in chicken?"
+        ]
+      },
+      {
+        "id": "chat",
+        "action": {
+          "webSearch": false
+        },
+        "examples": [
+          "Hello, how are you?",
+          "Hi there!",
+          "Good morning!",
+          "Thank you so much.",
+          "Tell me a joke.",
+          "Tell me a story.",
+          "What's your name?",
+          "Who are you?",
+          "You're funny.",
+          "That's great!",
+          "OK.",
+          "Never mind.",
+          "I love you.",
+          "Can you help me?",
+          "What can you do?",
+          "Goodbye!",
+          "Let's talk.",
+          "Are you a robot?",
+          "Sing me a song.",
+          "What do you think about that?",
+          "Wow, really?",
+          "Cool.",
+          "Why did you say that?",
+          "What did you just say?",
+          "Can you repeat that?",
+          "Are you sure?"
+        ]
+      },
+      {
+        "id": "sources",
+        "comment": "Where the agent looked things up: answered from what it actually searched (the last web search or food lookup), without the model. {sources} and {query} are filled in; 'none' when nothing was looked up.",
+        "action": {
+          "webSearch": false,
+          "reply": {
+            "text": "I looked on {sources} for {query}.",
+            "none": "I haven't looked anything up online yet."
+          }
+        },
+        "examples": [
+          "Which website did you look at?",
+          "Where did you get that from?",
+          "Where did you look that up?",
+          "What was your source?",
+          "Which site did you check?",
+          "Where did you find that information?",
+          "What did you search?",
+          "Did you look it up online?"
+        ]
+      }
+    ],
+    "semantic": {
+      "enabled": true,
+      "minScore": 0.55,
+      "minMargin": 0.05,
+      "topK": 2,
+      "lexicalMinScore": 0.45,
+      "lexicalMinMargin": 0.1,
+      "lowScore": 0.4,
+      "strongMargin": 0.12,
+      "lexicalLowScore": 0.3,
+      "lexicalStrongMargin": 0.2,
+      "exactMatch": 0.9,
+      "lexicalExactMatch": 0.9
+    },
+    "classifier": {
+      "enabled": true,
+      "minConfidence": 0.6,
+      "minSimilarity": 0.35,
+      "lexicalMinSimilarity": 0.3,
+      "epochs": 80,
+      "learningRate": 2.0,
+      "l2": 0.001
+    },
+    "llm": {
+      "enabled": true,
+      "maxTokens": 8,
+      "question": "(Before you answer: what kind of message is this? Reply with one word only: search if it is a question that needs current information from the internet, such as news, weather, sports, prices or who holds an office; food if I am telling you something I ate or drank, even a food you have never heard of; correction if I am correcting something you logged; remove if I am asking to remove something I logged or saying I did not eat it; total if I am asking how many calories I have had today; personal if I am telling you about my own life, plans, family or feelings; knowledge if it is a general question you can answer yourself; chat if it is small talk.)",
+      "labels": {
+        "search": "webSearch",
+        "food": "calories.log_food",
+        "total": "calories.get_calories_today",
+        "personal": "personal",
+        "knowledge": "general",
+        "chat": "chat",
+        "remove": "calories.delete_food",
+        "correction": "calories.correct_entry"
+      },
+      "dataToolMinScore": 0.65,
+      "dataToolMinScoreComment": "The model's pick of a tool that changes data is taken only when it is also the router's top candidate with at least this score; otherwise no tool."
+    },
+    "relevance": {
+      "enabled": true,
+      "minScore": 0.25,
+      "lexicalMinScore": 0.08,
+      "onNoneRelevant": "answerWithout"
+    },
+    "learning": {
+      "enabled": true,
+      "fromLLM": true,
+      "fromEmptySearch": true,
+      "emptySearchRoute": "general",
+      "maxLearned": 500,
+      "weight": 1.0,
+      "onlyCandidates": true
+    },
+    "default": "rules",
+    "followUp": {
+      "enabled": true,
+      "keepScore": 0.7,
+      "replaces": [
+        "calories.correct_entry"
+      ]
+    }
+  },
+  "onlineToolFillers": [
+    "Let me check that online.",
+    "One moment, I'm getting that from the server.",
+    "Give me a second to look that up.",
+    "Let me fetch that for you."
+  ],
+  "remote": {
+    "layer2": {"instructions": "You are the general-knowledge voice of an assistant on the user's phone. You cannot control anything: not the car (windows, climate, doors, navigation, music) and not the phone (logging, timers, messages, settings). If the user asks for an action, say in one short sentence that you couldn't do it and ask them to say it again. Never say that you did, will do or can do an action. The facts you know about the user are background: mention one only when the user asks about it. Reply only to the user's last message, in one to four short spoken sentences, without lists or markdown.", "unavailable": "My second model isn't ready yet. Please try again in a moment."},
+    "comment": "With configure remote (the DaVoice Agent model): fillers said while the remote assistant (Gemini) answers; what is said when it fails (errors: offline, busy, timeout, unavailable; else failed); the router routes it answers directly (undecided: the router decided nothing), quietRoutes without a filler; the model's own can't-do replies, handed over instead of said.",
+    "fillers": [
+      "One moment, let me check.",
+      "Give me a second to think about that.",
+      "Let me look into that for you.",
+      "Just a moment.",
+      "Let me find out."
+    ],
+    "failed": "Sorry, Gemini couldn't answer that right now. Please try again in a moment.",
+    "errors": {
+      "offline": "I can't reach Gemini. Please check your internet connection and try again.",
+      "busy": "Gemini is busy right now. Please try again in a moment.",
+      "timeout": "Gemini is taking too long to answer. Please try again in a moment.",
+      "unavailable": "Gemini is unavailable right now. Please try again later."
+    },
+    "routes": ["personal", "general", "undecided"],
+    "quietRoutes": ["chat"],
+    "cannotReplies": ["\\bcan(?:'|’)?t do that\\b", "\\bnot able to do that\\b", "not something I can do", "\\bnot available here\\b", "\\bnot available in this car\\b"]
+  },
+  "memory": {
+    "comment": "What the assistant remembers about each user (speaker) across conversations. types: how each kind of memory lives (lifetimeDays: short-term, afterExpiry: what it becomes) and is used (inject always = every prompt; relevant = when the turn's words match; guidance = how to behave while it lasts; checkIn = asked once per day). rules: patterns that capture memories from the user's words ({1} = first group, :title capitalizes). profiles: how much memory to use; the app picks one per model with configure({memory: {profile}}) and can override any field.",
+    "defaultProfile": "small",
+    "profiles": {
+      "off": {
+        "enabled": false
+      },
+      "small": {
+        "enabled": true,
+        "capture": "rules",
+        "alwaysMaxTokens": 120,
+        "relevantMax": 2,
+        "relevantMaxTokens": 100,
+        "maxMemories": 200
+      },
+      "large": {
+        "enabled": true,
+        "capture": "rules+tools",
+        "alwaysMaxTokens": 300,
+        "relevantMax": 6,
+        "relevantMaxTokens": 400,
+        "maxMemories": 2000
+      }
+    },
+    "types": {
+      "profile": {
+        "inject": "always"
+      },
+      "fact": {
+        "inject": "relevant"
+      },
+      "preference": {
+        "inject": "relevant"
+      },
+      "note": {
+        "inject": "relevant"
+      },
+      "grief": {
+        "inject": "always",
+        "lifetimeDays": 7,
+        "announce": false,
+        "guidance": "The user is grieving. Be warm and gentle, keep answers soft, and don't repeat condolences every turn.",
+        "checkIn": "Start your reply with one gentle sentence asking how the user is doing since their {who} died.",
+        "afterExpiry": {
+          "type": "fact",
+          "text": "The user's {who} died on {date}."
+        }
+      },
+      "upcoming": {
+        "inject": "always",
+        "lifetimeDays": 1,
+        "announce": false,
+        "guidance": "If it fits the conversation, wish them well with it."
+      }
+    },
+    "rules": [
+      {
+        "comment": "Forget everything",
+        "match": "^\\W*(?:please\\s+)?forget\\s+(?:everything|all)(?:\\s+(?:about\\s+me|you\\s+know))?\\W*$",
+        "action": "forgetAll"
+      },
+      {
+        "comment": "Forget one thing: the best match is deleted, with its history",
+        "match": "^\\W*(?:please\\s+)?forget\\s+(?:that\\s+|about\\s+)?(.+)$",
+        "action": "forget"
+      },
+      {
+        "comment": "What do you remember about me? / Do you remember my name? (lists what is remembered)",
+        "match": "\\bwhat (?:do|did) you (?:know|remember) about me\\b|\\bwhat have you (?:saved|remembered)\\b|\\b(?:do|did|can) you (?:still )?remember\\b|\\bdon'?t you remember\\b",
+        "action": "recall"
+      },
+      {
+        "match": "\\bmy (?:last|family|sur) ?name is ([a-z][a-z'-]{1,30})",
+        "type": "profile",
+        "key": "last name",
+        "text": "The user's last name is {1:title}."
+      },
+      {
+        "match": "\\b(?:my name is|call me|i am called|i'm called)\\s+([a-z][a-z'-]{1,20}(?:\\s+[a-z][a-z'-]{1,20})?)",
+        "type": "profile",
+        "key": "name",
+        "text": "The user's name is {1:title}."
+      },
+      {
+        "match": "\\bi (?:live|am living|'m living) in ([a-z][a-z .'-]{1,40})",
+        "type": "profile",
+        "key": "home",
+        "text": "The user lives in {1:title}."
+      },
+      {
+        "match": "\\bi(?:'m| am) allergic to ([a-z][a-z ,'-]{1,40})",
+        "type": "profile",
+        "key": "allergy {1}",
+        "text": "The user is allergic to {1}."
+      },
+      {
+        "match": "\\bi(?:'m| am) (?:a |an )?(vegetarian|vegan|pescatarian|diabetic|lactose intolerant)\\b",
+        "type": "profile",
+        "key": "diet",
+        "text": "The user is {1}."
+      },
+      {
+        "match": "\\bmy (wife|husband|partner|girlfriend|boyfriend|son|daughter|brother|sister|mother|father|mom|dad|dog|cat|boss)(?:'s name is| is called| is named) ([a-z][a-z'-]{1,20})\\b",
+        "type": "fact",
+        "key": "{1} name",
+        "text": "The user's {1} is named {2:title}."
+      },
+      {
+        "match": "\\bmy favou?rite ([a-z]+(?: [a-z]+)?) is ([a-z0-9][a-z0-9 .'-]{1,40})",
+        "type": "preference",
+        "key": "favorite {1}",
+        "text": "The user's favorite {1} is {2}."
+      },
+      {
+        "comment": "Any \"my X is Y\" not covered above (\"my car is red with green lines\"); a new value replaces the old one",
+        "match": "\\bmy ((?!(?:name|question|point|problem|guess|pleasure|bad|mistake|fault|turn|answer|request|idea|opinion|issue|concern|plan|goal|day|morning|evening|night)\\b)[a-z]+(?: [a-z]+)?) (?:is|are) ([a-z0-9][a-z0-9 ,'-]{1,40})",
+        "type": "fact",
+        "key": "{1}",
+        "confidence": 0.8,
+        "text": "The user's {1} is {2}."
+      },
+      {
+        "comment": "Grief: short-term (7 days), then a plain fact",
+        "match": "\\bmy ((?:[a-z]+ ){0,2}?[a-z]+) (?:died|passed away|passed on|has died|just died)\\b",
+        "type": "grief",
+        "key": "loss {1}",
+        "vars": {
+          "who": "{1}"
+        },
+        "text": "The user's {1} died on {date}."
+      },
+      {
+        "match": "\\bwe lost (?:my|our) ((?:[a-z]+ ){0,2}?[a-z]+)\\b",
+        "type": "grief",
+        "key": "loss {1}",
+        "vars": {
+          "who": "{1}"
+        },
+        "text": "The user's {1} died on {date}."
+      },
+      {
+        "comment": "Something coming up: remembered until the day after",
+        "match": "\\bi have (?:a |an |my )?((?:[a-z]+ ){0,2}?(?:exam|test|interview|surgery|operation|appointment|flight|meeting|presentation|job interview))\\b",
+        "type": "upcoming",
+        "key": "upcoming {1}",
+        "vars": {
+          "what": "{1}"
+        },
+        "text": "The user has a {1} on {date}."
+      },
+      {
+        "comment": "Explicit 'remember that ...', when no rule above saved it",
+        "match": "^\\W*(?:please\\s+)?(?:remember|note|keep in mind)\\s+(?:that\\s+)?(.+)$",
+        "type": "note",
+        "cut": false,
+        "fallback": true,
+        "confidence": 1.0,
+        "text": "The user told you: \"{1}\""
+      }
+    ],
+    "questions": [
+      "\\?\\s*$",
+      "^\\W*(?:what|who|whom|whose|where|when|why|how|do|does|did|is|are|was|were|can|could|would|will|should|have|has)\\b"
+    ],
+    "valueEnd": "\\s*(?:[,.;!?]|\\b(?:but|so|because|though|which|who)\\b|\\band\\b(?=\\s+(?:i|i'm|i've|i'll|it|it's|its|we|he|she|they|you|my|our|the|that|this|there|is|was|has|have|will|can)\\b)).*$",
+    "rejectValues": [
+      "it",
+      "that",
+      "this",
+      "them",
+      "him",
+      "her",
+      "back",
+      "later",
+      "now",
+      "please",
+      "maybe",
+      "you",
+      "secret"
+    ],
+    "rejectFirstWords": [
+      "the",
+      "not",
+      "just",
+      "what",
+      "that",
+      "this",
+      "so",
+      "very",
+      "really",
+      "also",
+      "still",
+      "actually",
+      "from",
+      "in",
+      "at",
+      "on",
+      "going",
+      "trying",
+      "why",
+      "how",
+      "who",
+      "when",
+      "where",
+      "which",
+      "hello",
+      "hi",
+      "hey",
+      "yes",
+      "no",
+      "okay",
+      "ok"
+    ],
+    "spelling": {
+      "comment": "Letters spelled out in a row (\"O for Oscar, F for Frank\"): the first letters of the words make the word (speech recognition mangles the letters but not the words). replace: what the memory rules see, \"(spelled: ofer)\"; forModel: what the model gets in place of the spelling, \"Ofer (O-F-E-R)\".",
+      "pair": "\\b([a-z]{1,3})(?:\\s+(?:for|four|fore|as in|like)|\\s*4)\\s+([a-z]{3,})\\b",
+      "minLetters": 2,
+      "replace": "(spelled: {word})",
+      "forModel": "{Word} ({LETTERS})",
+      "joiners": [
+        "and",
+        "then"
+      ]
+    },
+    "fields": [
+      {
+        "id": "lastName",
+        "key": "last name",
+        "label": "last name",
+        "text": "The user's last name is {Value}.",
+        "spelling": "allowed",
+        "verify": true,
+        "required": false,
+        "mentions": "\\b(?:last|family|sur) ?name\\b"
+      },
+      {
+        "id": "firstName",
+        "key": "name",
+        "label": "first name",
+        "text": "The user's first name is {Value}.",
+        "spelling": "allowed",
+        "verify": true,
+        "required": false,
+        "mentions": "\\bname\\b"
+      }
+    ],
+    "fieldsComment": "fields: values the app needs right. key = the memory key (rules with that key feed the field); spelling: off | allowed (a spelled value, \"O for Oscar, F for Frank\", wins over what speech recognition heard) | required (only a spelled value is accepted); verify: read it back and keep it after a yes; required: the model asks for it until it is known and verified (again after askAgainMinutes, default 60), and once it is, nothing is added to the prompt; mentions: a spelled word in a message matching this goes to this field (checked in order, so the more specific field first); answer: optional pattern for a direct answer after we asked (group 1). fieldPrompts ask/spellHint go to the model; spell/readBack/confirmed/retry are said as they are, without the model.",
+    "fieldPrompts": {
+      "ask": "\n\n(After answering, ask the user for their {label}{spellHint}.)",
+      "spellHint": ", spelled letter by letter, like A for Apple",
+      "spell": "Please spell your {label} letter by letter, like A for Apple, B for Boy.",
+      "readBack": "I have your {label} as {Value}: {LETTERS}. Is that right?",
+      "confirmed": "Thank you. I'll remember your {label}, {Value}.",
+      "retry": "Sorry about that. Please spell your {label} letter by letter, like A for Apple, B for Boy."
+    },
+    "confirm": {
+      "yes": "^\\W*(?:yes|yeah|yep|yup|correct|right|that'?s right|that is right|exactly|sure|perfect)\\b",
+      "no": "^\\W*(?:no|nope|wrong|incorrect|not (?:right|quite|correct)|that'?s wrong)\\b"
+    },
+    "dates": [
+      {
+        "pattern": "\\b(?:yesterday|last night)\\b",
+        "days": -1
+      },
+      {
+        "pattern": "\\b(?:two|2) days ago\\b",
+        "days": -2
+      },
+      {
+        "pattern": "\\blast week\\b",
+        "days": -7
+      },
+      {
+        "pattern": "\\btomorrow\\b",
+        "days": 1
+      },
+      {
+        "pattern": "\\bnext week\\b",
+        "days": 7
+      }
+    ],
+    "searchStopWords": [
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "but",
+      "of",
+      "to",
+      "in",
+      "on",
+      "at",
+      "for",
+      "with",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "been",
+      "am",
+      "do",
+      "does",
+      "did",
+      "have",
+      "has",
+      "had",
+      "i",
+      "me",
+      "my",
+      "you",
+      "your",
+      "it",
+      "its",
+      "this",
+      "that",
+      "what",
+      "who",
+      "how",
+      "when",
+      "where",
+      "why",
+      "can",
+      "could",
+      "would",
+      "will",
+      "should",
+      "about",
+      "from",
+      "just",
+      "so",
+      "not",
+      "no",
+      "yes",
+      "please",
+      "tell",
+      "know",
+      "think",
+      "user",
+      "user's",
+      "today",
+      "now"
+    ],
+    "prompts": {
+      "line": "- {text}",
+      "relevant": "\n\n(You remember this about the user. It is true: use it to answer, and never say you can't remember things:\n{memories})",
+      "saved": "\n\n(You will remember this from now on: {text} Reply to the user directly, as \"you\", naturally and in one short sentence.)",
+      "updated": "\n\n(You updated what you remember: {text} Reply to the user directly, as \"you\", naturally and in one short sentence.)",
+      "forgotten": "\n\n(You deleted this from your memory: {text} Confirm it to the user in one short sentence.)",
+      "notFound": "\n\n(The user asked you to forget \"{query}\", but you don't remember anything like that. Say so in one short sentence.)",
+      "forgotAll": "\n\n(You deleted everything you remembered about the user. Confirm it in one short sentence.)",
+      "recall": "\n\n(Everything you remember about the user:\n{memories}\nTell the user all of it briefly, every item, speaking to them as \"you\".)",
+      "recallEmpty": "\n\n(You don't remember anything about the user yet. Say so in one short sentence.)",
+      "checkIn": "\n\n({text})"
+    },
+    "toolInstructions": "When the user tells you something about themselves that is worth remembering in future conversations (not small talk or what they ate), call remember_fact with one short sentence about them. When they ask you to forget something, call forget_fact.",
+    "tools": [
+      {
+        "name": "remember_fact",
+        "description": "Save a fact about the user for future conversations, e.g. 'The user works as a nurse'.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "type": "string",
+              "description": "One short sentence about the user, in the third person"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "fact",
+                "preference",
+                "note"
+              ]
+            }
+          },
+          "required": [
+            "fact"
+          ]
+        }
+      },
+      {
+        "name": "forget_fact",
+        "description": "Delete something the app remembers about the user, when they ask to forget it.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "type": "string",
+              "description": "What to forget, in a few words"
+            }
+          },
+          "required": [
+            "fact"
+          ]
+        }
+      }
+    ]
+  },
+  "fixedReplies": [
+    {"id": "car_options", "patterns": ["^(?=.*\\b(?:car|vehicle|automotive)\\b)(?=.*\\b(?:options|commands|features|functions|controls|operations|cooperations|corporations|what\\s+can\\s+you\\s+(?:do|control|change|operate)|what\\s+(?:else\\s+)?(?:you\\s+can|are\\s+you\\s+able\\s+to)\\s+(?:do|control|change|operate)|what\\s+(?:can\\s+)?(?:i|we)\\s+(?:can\\s+)?(?:do|say|ask|control)|can\\s+i\\s+(?:say|ask)|things\\s+you\\s+can\\s+do|list\\s+what)\\b).*$", "^\\W*(?:(?:hey|ok|so)\\W+)?(?:can\\s+you\\s+)?(?:tell\\s+me\\W*)?\\W*(?:which|what)\\s+(?:car\\s+)?(?:operations|cooperations|corporations|options|commands)\\s+(?:do\\s+)?(?:i|we)\\s+(?:have|get)\\W*$"], "replies": ["In the car I can: navigate to a place, find a stop on the route, tell you the arrival time, and avoid tolls or traffic. Set the temperature, the fan, where the air blows and the defrost, or you can just tell me you're hot or cold. Open or close the windows and the sunroof. Open, close, lock or unlock the doors. Heat or cool your seat. Play music, tune the radio, switch the audio source and change the volume. And tell you the range, fuel, battery, tire pressure or warning lights."]},
+    {"id": "capabilities", "patterns": ["^\\W*(?:(?:hey|hi|ok|okay|so)\\W+(?:\\w+\\W+)?)?what\\s+(?:else\\s+|all\\s+|exactly\\s+)?can\\s+you\\s+do(?:\\s+for\\s+me)?\\W*$", "\\b(?:list|tell\\s+me|what\\s+are)\\s+(?:all\\s+)?your\\s+(?:options|commands|features|skills|capabilities|abilities)\\W*$"], "replies": ["I can control the car: navigation, climate, windows, sunroof, doors, seats and music. I can also track your calories, remember what you tell me and look things up. Ask me what I can do in the car for the full list."]},
+    {
+      "id": "identity",
+      "patterns": ["^\\W*(?:(?:hey|hi|hello|ok)\\s+\\w+\\W+)?(?:who|what)\\s+are\\s+you(?:\\s+(?:exactly|really))?\\W*$", "^\\W*(?:(?:hey|hi|ok)\\W+)?(?:(?:you|can\\s+you|could\\s+you|please|so)\\s+)?tell\\s+me\\s+(?:who|what)\\s+you\\s+are\\W*$", "^\\W*(?:and\\s+)?who\\s+am\\s+i\\s+talking\\s+to\\W*$"],
+      "replies": [
+        "I am your AI Agent, tuned by DaVoice.io."
+      ]
+    },
+    {
+      "id": "how_are_you",
+      "patterns": [
+        "^\\W*(?:(?:hey|hi|hello)\\W+(?:\\w+\\W+)?)?how\\s+are\\s+you(?:\\s+doing)?(?:\\s+today)?\\W*$",
+        "^\\W*(?:hey\\W+)?how(?:'|’)?s\\s+it\\s+going\\W*$"
+      ],
+      "replies": [
+        "I am fine and ready to roll, hope you are too."
+      ]
+    },
+    {
+      "id": "story",
+      "patterns": ["^\\W*(?:(?:hey|hi|hello|ok)\\W+(?:\\w+\\W+)?)?(?:(?:can|could|would) you\\s+|please\\s+)?(?:tell|read)\\s+me\\s+(?:a|another|one\\s+more|some)\\s+(?:\\w+\\s+)?stor(?:y|ies)(?:\\s+please)?\\W*$", "^\\W*story\\s+time\\W*$", "^\\W*(?:a\\s+)?story(?:\\s+please)?\\W*$"],
+      "replies": [
+        "Once upon a time, a hare laughed at a slow tortoise and challenged him to a race. The hare dashed ahead, and feeling sure of winning, he lay down under a tree for a nap. The tortoise kept walking, slowly but without ever stopping. When the hare woke up, he ran as fast as he could, but the tortoise was already crossing the finish line. Slow and steady wins the race.",
+        "A lion was sleeping in the forest when a little mouse ran across his nose and woke him. The lion caught the mouse and was about to eat it, but the mouse begged: let me go, and one day I will help you. The lion laughed and let it go. Some days later the lion was caught in a hunter's net. The mouse heard him roar, came running, and chewed through the ropes until the lion was free. Even the smallest friend can be a great help.",
+        "A hungry fox saw a bunch of ripe grapes hanging high on a vine. He jumped and jumped, but they were always just out of reach. At last he walked away with his nose in the air, saying: those grapes were probably sour anyway. It is easy to dislike what we cannot have.",
+        "A young shepherd boy was bored watching his sheep, so he shouted: wolf, wolf! The villagers ran up the hill to help, and he laughed at them. He did it again the next day, and again they came. Then one evening a real wolf came out of the forest. The boy shouted as loud as he could, but this time nobody came. Nobody believes a liar, even when he tells the truth."
+      ]
+    }
+  ]
+}

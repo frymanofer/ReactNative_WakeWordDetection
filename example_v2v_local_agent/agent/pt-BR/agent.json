@@ -1,0 +1,1250 @@
+{
+  "version": 1,
+  "persona": {
+    "systemPrompt": "You are a helpful voice assistant. Keep all answers under four sentences. Do not use markdown, bullet points, or numbered lists. Do not begin a sentence with \"Certainly\" or \"Of course\". Spell out abbreviations when reading aloud. When asked where you looked something up, answer from the results earlier in this conversation."
+  },
+  "prompts": {
+    "currentDate": "Today's date is {date}.",
+    "webResults": "\n\nWeb search results, newer than your training data:\n{results}\nAnswer my question using these results: they are true today and override what you remember and anything said earlier in this conversation. Do not mention the search, sources or URLs.",
+    "webResultLine": "- {text}",
+    "webSearchFailed": "\n\n(A web search for this question failed, for example because the device is offline. The app already told the user that. Say what was true as of your training data, using words like \"até onde sei pelo meu treinamento\". Never say it is true today, and never put today's date on it. Keep it to two sentences.)",
+    "externalToolsNote": "The other tools listed below come from a connected service; use them when they help.",
+    "toolNotAllowed": "Not done: the user did not ask for this. Do not mention it; just answer what the user said.",
+    "toolResultNote": "(This is the tool's result, not a message from the user. Now answer me in one short sentence.)",
+    "noToolRetry": "Reply to what I said above, in plain words.",
+    "noReply": "Desculpe, não entendi. Pode repetir?",
+    "done": "Pronto.",
+    "failed": "Desculpe, não deu certo.",
+    "notConfirmed": "Tudo bem, não vou fazer isso.",
+    "notAuthorized": "Desculpe, você não tem permissão para isso.",
+    "invalidArgs": "Desculpe, não entendi todos os detalhes. Pode repetir?",
+    "unsupported": "Desculpe, isso não está disponível neste app.",
+    "guardConflict": "Desculpe, acho que não entendi direito. Pode repetir?",
+    "replyReminder": "(Responda em português do Brasil.)"
+  },
+  "webSearch": {
+    "rules": {
+      "timeWords": "\\b(current|currently|latest|recent|recently|newest|nowadays|today|tonight|tomorrow|yesterday|right now|at the moment|as of now|this (week|month|year)|these days)\\b|\\b(?:atual|atualmente|recente|recentemente|mais nov[oa]s?|hoje|hoje (?:a|à) noite|amanh(?:ã|a)|ontem|agora|neste momento|no momento|nest[ea] (?:semana|m(?:ê|e)s|ano)|est[ea] (?:semana|m(?:ê|e)s|ano)|hoje em dia)(?![a-z])|(?:\\bultim|últim)[oa]s?(?![a-z])",
+      "newsy": "\\b(news|headlines|weather|forecast|temperature outside|stock|share price|exchange rate|bitcoin|price of|how much does .* cost|score|standings|who won|winner of|champion|election|elected|release date|just released|happening)\\b|\\b(?:not(?:i|í)cias?|manchetes?|previs(?:ã|a)o do tempo|clima|temperatura l(?:á|a) fora|a(?:ç|c)(?:õ|o)es|bolsa de valores|cota(?:ç|c)(?:ã|a)o|c(?:â|a)mbio|bitcoin|pre(?:ç|c)o d[oae]s?|quanto custa|placar|resultado do jogo|classifica(?:ç|c)(?:ã|a)o|quem ganhou|vencedor|campe(?:ã|a)o|elei(?:ç|c)(?:ã|a)o|eleit[oa]|data de lan(?:ç|c)amento|lan(?:ç|c)amento|acabou de sair|acontecendo)(?![a-z])",
+      "recentYear": "\\b20(2[3-9]|[3-9]\\d)\\b",
+      "whoRuns": "\\bwho('s| is)? (runs|leads|governs|rules|heads|is running|is leading|is in charge|in charge)\\b|\\bquem (?:governa|lidera|comanda|manda|chefia|dirige|est(?:á|a) no comando|est(?:á|a) no poder)(?![a-z])",
+      "officeWords": "\\b(president|vice president|prime minister|chancellor|king|queen|pope|ceo|chief executive|leader|mayor|governor|minister|secretary of state|head of state|chairman|coach of|owner of|richest)\\b|\\b(?:presidente|vice-presidente|vice presidente|primeir[oa]-ministr[oa]|primeir[oa] ministr[oa]|chanceler|rei|rainha|papa|diretor executivo|l(?:í|i)der|prefeit[oa]|governador[a]?|ministr[oa]|chefe de estado|t(?:é|e)cnico d[oa]|treinador d[oa]|dono d[oa]|mais ric[oa])(?![a-z])",
+      "whoQuestion": "\\b(who|whom|whose|name of|is the)\\b|\\b(?:quem|de quem|nome d[oa]|qual (?:é|e) o nome)(?![a-z])",
+      "yesNoQuestion": "^\\s*(is|was|are|were|does|did|has|have)\\b|\\bstill\\b|^\\s*(?:ser(?:á|a) que|(?:é|É))(?![a-z])|\\bainda\\b",
+      "asksWho": "^\\s*(?:who|who's|quem)\\b"
+    },
+    "officePages": {
+      "fixed": [
+        {
+          "pattern": "\\b(?:pope|papa)\\b",
+          "page": "Pope"
+        }
+      ],
+      "offices": [
+        {
+          "pattern": "\\b(?:vice president|vice-presidente|vice presidente)\\b",
+          "title": "Vice President"
+        },
+        {
+          "pattern": "\\b(?:prime minister|primeir[oa]-ministr[oa]|primeir[oa] ministr[oa])\\b",
+          "title": "Prime Minister"
+        },
+        {
+          "pattern": "\\b(?:president|presidente)\\b",
+          "title": "President"
+        },
+        {
+          "pattern": "\\b(?:chancellor|chanceler)\\b",
+          "title": "Chancellor"
+        },
+        {
+          "pattern": "\\b(?:mayor|prefeit[oa])\\b",
+          "title": "Mayor"
+        },
+        {
+          "pattern": "\\b(?:governor|governador[a]?)\\b",
+          "title": "Governor"
+        },
+        {
+          "pattern": "\\b(?:king|rei)\\b",
+          "title": "King"
+        },
+        {
+          "pattern": "\\b(?:queen|rainha)\\b",
+          "title": "Queen"
+        }
+      ],
+      "places": [
+        {
+          "pattern": "\\b(?:brasil|brazil|brasileir[oa]s?)\\b",
+          "name": "Brazil"
+        },
+        {
+          "pattern": "\\b(?:portugal|portugu(?:ê|e)s|portuguesa)(?![a-z])",
+          "name": "Portugal"
+        },
+        {
+          "pattern": "\\b(?:argentina|argentin[oa]s?)\\b",
+          "name": "Argentina"
+        },
+        {
+          "pattern": "\\b(?:u\\.?s\\.?a?|united states(?: of america)?|america|american|america's|eua|e\\.u\\.a\\.?|estados unidos|am(?:é|e)rica|american[oa]s?|norte-american[oa]s?)(?=\\W|$)",
+          "name": "the United States"
+        },
+        {
+          "pattern": "\\b(?:u\\.?k\\.?|united kingdom|great britain|britain|british|england|reino unido|gr(?:ã|a)-bretanha|inglaterra|brit(?:â|a)nic[oa]s?|ingl(?:ê|e)s|inglesa)(?=\\W|$)",
+          "name": "the United Kingdom"
+        },
+        {
+          "pattern": "\\b(?:france|french|fran(?:ç|c)a|franc(?:ê|e)s|francesa)(?![a-z])",
+          "name": "France"
+        },
+        {
+          "pattern": "\\b(?:germany|german|alemanha|alem(?:ã|a)o?|alem(?:ã|a)s)(?![a-z])",
+          "name": "Germany"
+        },
+        {
+          "pattern": "\\b(?:canada|canadian|canad(?:á|a)|canadense)(?![a-z])",
+          "name": "Canada"
+        }
+      ],
+      "whoRunsPages": {
+        "Brazil": "President of Brazil",
+        "Portugal": "Prime Minister of Portugal",
+        "Argentina": "President of Argentina",
+        "the United States": "President of the United States",
+        "the United Kingdom": "Prime Minister of the United Kingdom"
+      },
+      "placeAfterOf": "\\bof\\s+(?:the\\s+)?([a-z][a-z .'-]*?)\\s*(?:[?.!,]|$|\\b(?:right now|now|today|currently|these days|at the moment)\\b)",
+      "defaultPlaces": {
+        "President": "Brazil",
+        "Vice President": "Brazil"
+      },
+      "neutralQuestion": "Who is {office} today? Answer in Brazilian Portuguese."
+    },
+    "fillers": {
+      "topicProbability": 0.7,
+      "general": [
+        "Boa pergunta, deixa eu pesquisar.",
+        "Ótima pergunta, me dá um segundo que eu vou procurar.",
+        "Deixa eu procurar isso para você.",
+        "Vou verificar as informações mais recentes sobre isso.",
+        "Só um instante, vou pesquisar.",
+        "Boa pergunta, vou descobrir para você."
+      ],
+      "topics": [
+        {
+          "pattern": "\\b(weather|forecast|temperature|rain|snow|sunny)\\b|(?:\\btempo\\b|previs(?:ã|a)o|temperatura|chuva|chover|neve|sol\\b|ensolarado|clima)",
+          "fillers": [
+            "Deixa eu ver a previsão mais recente.",
+            "Boa pergunta, vou olhar o tempo para você.",
+            "Vou ver como está o tempo."
+          ]
+        },
+        {
+          "pattern": "\\b(price|cost|stock|shares?|exchange rate|bitcoin|crypto|dollar|euro|market)\\b|\\b(?:pre(?:ç|c)o|custa|a(?:ç|c)(?:õ|o)es|cota(?:ç|c)(?:ã|a)o|c(?:â|a)mbio|bitcoin|cripto|d(?:ó|o)lar|euro|real|mercado|bolsa)",
+          "fillers": [
+            "Os preços mudam o tempo todo, deixa eu ver os números mais recentes.",
+            "Vou procurar os valores atuais para você.",
+            "Boa pergunta, vou verificar os dados mais recentes do mercado."
+          ]
+        },
+        {
+          "pattern": "\\b(score|scores|won|winner|win|match|game|champion|championship|league|cup|standings|tournament)\\b|\\b(?:placar|ganhou|vencedor|venceu|partida|jogo|campe(?:ã|a)o|campeonato|liga|copa|classifica(?:ç|c)(?:ã|a)o|torneio)",
+          "fillers": [
+            "Deixa eu ver os resultados mais recentes.",
+            "Boa pergunta, vou ver como terminou.",
+            "Vou ver o que dizem os placares mais recentes."
+          ]
+        },
+        {
+          "pattern": "\\b(news|headlines|happening|happened|announced|released|election|elected)\\b|\\b(?:not(?:í|i)cias?|manchetes?|acontecendo|aconteceu|anunciou|anunciad[oa]|lan(?:ç|c)ad[oa]|elei(?:ç|c)(?:ã|a)o|eleit[oa])",
+          "fillers": [
+            "Deixa eu ver as últimas notícias sobre isso.",
+            "Boa pergunta, vou ver o que há de novo.",
+            "Vou procurar as notícias mais recentes."
+          ]
+        },
+        {
+          "pattern": "\\b(who|whom|whose|president|prime minister|ceo|pope|king|queen|leader|minister|mayor|governor|chancellor)\\b|\\b(?:quem|presidente|primeir[oa]-ministr[oa]|primeir[oa] ministr[oa]|papa|rei|rainha|l(?:í|i)der|ministr[oa]|prefeit[oa]|governador)",
+          "fillers": [
+            "Isso pode mudar com o tempo, então deixa eu ver quem é agora.",
+            "Boa pergunta, vou confirmar a informação mais recente.",
+            "Vou verificar quem ocupa esse cargo hoje."
+          ]
+        }
+      ],
+      "searchFailed": [
+        "Desculpe, não consigo acessar a internet agora.",
+        "Não consegui me conectar à internet agora.",
+        "Parece que estou sem internet no momento."
+      ]
+    }
+  },
+  "router": {
+    "comment": "Decides what a turn needs before the model answers. Layers, cheapest first: rules (exact commands only), semantic (the closest route by example sentences), classifier (trained on the device from the same examples), llm (the loaded model answers one word), then relevance (web results that don't match the question are dropped). Learning: sentences the model decided, searches that found nothing relevant, and router.feedback corrections become examples. Without an embedding model (configure {router: {embeddingModel: path}}) word overlap is used, with the lexical* thresholds. default: what to do when nothing decides: \"rules\" (webSearch.rules), \"none\", or a route id.",
+    "rules": [
+      {
+        "match": "^\\W*(?:please\\s+)?(?:search(?: the web| online| the internet)?|look up|google)\\b",
+        "route": "webSearch"
+      },
+      {
+        "match": "^\\W*(?:por favor\\s+)?(?:pesquis(?:e|a|ar)|procur(?:e|a|ar)|busqu(?:e|ar)|busca|googl(?:e|a))(?: na internet| na web| online| no google)?(?![a-z])",
+        "route": "webSearch"
+      }
+    ],
+    "routes": [
+      {
+        "id": "webSearch",
+        "action": {
+          "webSearch": true
+        },
+        "examples": [
+          "What's the weather today?",
+          "What's the weather going to be like tomorrow?",
+          "Will it rain this weekend?",
+          "What's the latest news?",
+          "What are today's headlines?",
+          "Who won the game last night?",
+          "What's the score of the Lakers game?",
+          "Who won the election?",
+          "What is the price of bitcoin right now?",
+          "How is the stock market doing today?",
+          "What's the exchange rate for the euro?",
+          "Is Joe Biden still the president?",
+          "Who is the president of the United States?",
+          "Who is the current prime minister of the UK?",
+          "Who is the CEO of Apple now?",
+          "When does the new iPhone come out?",
+          "What movies are playing this week?",
+          "What happened in the world today?",
+          "Is there traffic on the highway right now?",
+          "What time does the store close today?",
+          "Who is the richest person in the world?",
+          "What's the release date of the next season?",
+          "Did the Fed raise interest rates?",
+          "What's the temperature outside?",
+          "Who won the champions league this year?",
+          "What's going on with the strike?",
+          "Is the airport open today?",
+          "What are the latest covid rules?",
+          "Como está o tempo hoje?",
+          "Vai chover amanhã?",
+          "Qual é a previsão do tempo para o fim de semana?",
+          "Quais são as últimas notícias?",
+          "Quais são as manchetes de hoje?",
+          "Quem ganhou o jogo ontem à noite?",
+          "Qual foi o placar do jogo do Flamengo?",
+          "Quem ganhou a eleição?",
+          "Qual é o preço do bitcoin agora?",
+          "Como está a bolsa de valores hoje?",
+          "Qual é a cotação do dólar?",
+          "Lula ainda é o presidente?",
+          "Quem é o presidente do Brasil?",
+          "Quem é o atual primeiro-ministro de Portugal?",
+          "Quem é o CEO da Apple agora?",
+          "Quando sai o novo iPhone?",
+          "Quais filmes estão passando esta semana?",
+          "O que aconteceu no mundo hoje?",
+          "Tem trânsito na marginal agora?",
+          "Que horas a loja fecha hoje?",
+          "Quem é a pessoa mais rica do mundo?",
+          "Qual é a data de lançamento da próxima temporada?",
+          "O Banco Central subiu os juros?",
+          "Qual é a temperatura lá fora?",
+          "Quem ganhou a Libertadores este ano?",
+          "O que está acontecendo com a greve?"
+        ]
+      },
+      {
+        "id": "personal",
+        "action": {
+          "webSearch": false
+        },
+        "examples": [
+          "It's my mother's birthday tomorrow.",
+          "My son has an exam tomorrow.",
+          "I have a job interview today.",
+          "My grandfather died yesterday.",
+          "I'm going to the doctor tomorrow.",
+          "My wife is sick today.",
+          "I got a new job this week.",
+          "My car is red and blue.",
+          "I'm feeling tired today.",
+          "We are moving house next month.",
+          "My daughter's wedding is this weekend.",
+          "I have a meeting with my boss tomorrow.",
+          "I'm flying to Paris tomorrow.",
+          "My dog is sick.",
+          "I just finished my workout.",
+          "Today is my birthday.",
+          "My brother is visiting this week.",
+          "I failed my driving test yesterday.",
+          "I'm so stressed about work right now.",
+          "My favorite color is blue.",
+          "I live in Tel Aviv.",
+          "My name is Ofer.",
+          "I started a new diet today.",
+          "I have a dentist appointment tomorrow.",
+          "My friend is getting married tomorrow.",
+          "I didn't sleep well last night.",
+          "Amanhã é aniversário da minha mãe.",
+          "Meu filho tem prova amanhã.",
+          "Tenho uma entrevista de emprego hoje.",
+          "Meu avô morreu ontem.",
+          "Vou ao médico amanhã.",
+          "Minha esposa está doente hoje.",
+          "Consegui um emprego novo esta semana.",
+          "Meu carro é vermelho e azul.",
+          "Estou cansado hoje.",
+          "Vamos nos mudar no mês que vem.",
+          "O casamento da minha filha é neste fim de semana.",
+          "Tenho uma reunião com meu chefe amanhã.",
+          "Vou viajar para Lisboa amanhã.",
+          "Meu cachorro está doente.",
+          "Acabei de terminar meu treino.",
+          "Hoje é meu aniversário.",
+          "Meu irmão vem me visitar esta semana.",
+          "Reprovei no exame de direção ontem.",
+          "Estou muito estressado com o trabalho agora.",
+          "Minha cor favorita é azul.",
+          "Eu moro em São Paulo.",
+          "Meu nome é João.",
+          "Comecei uma dieta nova hoje.",
+          "Tenho dentista amanhã.",
+          "Meu amigo vai se casar amanhã.",
+          "Não dormi bem ontem à noite."
+        ]
+      },
+      {
+        "id": "general",
+        "action": {
+          "webSearch": false
+        },
+        "examples": [
+          "How many calories are in an apple?",
+          "What is photosynthesis?",
+          "Who wrote Hamlet?",
+          "What's the capital of France?",
+          "How far is the moon from the earth?",
+          "Why is the sky blue?",
+          "How do I boil an egg?",
+          "What does DNA stand for?",
+          "Explain how a car engine works.",
+          "How many legs does a spider have?",
+          "What is the speed of light?",
+          "Who painted the Mona Lisa?",
+          "How do vaccines work?",
+          "What is the tallest mountain in the world?",
+          "How do I convert Celsius to Fahrenheit?",
+          "What causes earthquakes?",
+          "Give me a recipe for pancakes.",
+          "How much protein is in an egg?",
+          "What's a good way to fall asleep faster?",
+          "Translate hello into Spanish.",
+          "What year did World War Two end?",
+          "How many ounces in a pound?",
+          "How many calories does a banana have?",
+          "Is an egg healthy?",
+          "How much protein is in chicken?",
+          "Quantas calorias tem uma maçã?",
+          "O que é fotossíntese?",
+          "Quem escreveu Dom Casmurro?",
+          "Qual é a capital da França?",
+          "Qual a distância da Terra até a Lua?",
+          "Por que o céu é azul?",
+          "Como eu cozinho um ovo?",
+          "O que significa DNA?",
+          "Explique como funciona o motor de um carro.",
+          "Quantas patas tem uma aranha?",
+          "Qual é a velocidade da luz?",
+          "Quem pintou a Mona Lisa?",
+          "Como funcionam as vacinas?",
+          "Qual é a montanha mais alta do mundo?",
+          "Como converto Celsius para Fahrenheit?",
+          "O que causa terremotos?",
+          "Me dá uma receita de panqueca.",
+          "Quanta proteína tem um ovo?",
+          "Qual é um bom jeito de dormir mais rápido?",
+          "Como se diz olá em inglês?",
+          "Em que ano terminou a Segunda Guerra Mundial?",
+          "Quantos gramas tem um quilo?",
+          "Quantas calorias tem uma banana?",
+          "Ovo faz bem para a saúde?",
+          "Quanta proteína tem o frango?"
+        ]
+      },
+      {
+        "id": "chat",
+        "action": {
+          "webSearch": false
+        },
+        "examples": [
+          "Hello, how are you?",
+          "Hi there!",
+          "Good morning!",
+          "Thank you so much.",
+          "Tell me a joke.",
+          "Tell me a story.",
+          "What's your name?",
+          "Who are you?",
+          "You're funny.",
+          "That's great!",
+          "OK.",
+          "Never mind.",
+          "I love you.",
+          "Can you help me?",
+          "What can you do?",
+          "Goodbye!",
+          "Let's talk.",
+          "Are you a robot?",
+          "Sing me a song.",
+          "What do you think about that?",
+          "Wow, really?",
+          "Cool.",
+          "Why did you say that?",
+          "What did you just say?",
+          "Can you repeat that?",
+          "Are you sure?",
+          "Oi, tudo bem?",
+          "Olá!",
+          "Bom dia!",
+          "Muito obrigado.",
+          "Me conta uma piada.",
+          "Me conta uma história.",
+          "Qual é o seu nome?",
+          "Quem é você?",
+          "Você é engraçado.",
+          "Que legal!",
+          "Ok.",
+          "Deixa pra lá.",
+          "Eu te amo.",
+          "Você pode me ajudar?",
+          "O que você sabe fazer?",
+          "Tchau!",
+          "Vamos conversar.",
+          "Você é um robô?",
+          "Canta uma música.",
+          "O que você acha disso?",
+          "Nossa, sério?",
+          "Legal.",
+          "Por que você disse isso?",
+          "O que você acabou de dizer?",
+          "Pode repetir?",
+          "Tem certeza?"
+        ]
+      },
+      {
+        "id": "sources",
+        "comment": "Where the agent looked things up: answered from what it actually searched (the last web search or food lookup), without the model. {sources} and {query} are filled in; 'none' when nothing was looked up.",
+        "action": {
+          "webSearch": false,
+          "reply": {
+            "text": "Eu pesquisei em {sources} sobre {query}.",
+            "none": "Ainda não pesquisei nada na internet."
+          }
+        },
+        "examples": [
+          "Which website did you look at?",
+          "Where did you get that from?",
+          "Where did you look that up?",
+          "What was your source?",
+          "Which site did you check?",
+          "Where did you find that information?",
+          "What did you search?",
+          "Did you look it up online?",
+          "Qual site você olhou?",
+          "De onde você tirou isso?",
+          "Onde você pesquisou isso?",
+          "Qual foi a sua fonte?",
+          "Que site você consultou?",
+          "Onde você encontrou essa informação?",
+          "O que você pesquisou?",
+          "Você pesquisou na internet?"
+        ]
+      }
+    ],
+    "semantic": {
+      "enabled": true,
+      "minScore": 0.55,
+      "minMargin": 0.05,
+      "topK": 2,
+      "lexicalMinScore": 0.45,
+      "lexicalMinMargin": 0.1,
+      "lowScore": 0.4,
+      "strongMargin": 0.12,
+      "lexicalLowScore": 0.3,
+      "lexicalStrongMargin": 0.2,
+      "exactMatch": 0.9,
+      "lexicalExactMatch": 0.9
+    },
+    "classifier": {
+      "enabled": true,
+      "minConfidence": 0.6,
+      "minSimilarity": 0.35,
+      "lexicalMinSimilarity": 0.3,
+      "epochs": 80,
+      "learningRate": 2.0,
+      "l2": 0.001
+    },
+    "llm": {
+      "enabled": true,
+      "maxTokens": 8,
+      "question": "(Before you answer: what kind of message is this? Reply with one of these English words only: search if it is a question that needs current information from the internet, such as news, weather, sports, prices or who holds an office; food if I am telling you something I ate or drank, even a food you have never heard of; correction if I am correcting something you logged; remove if I am asking to remove something I logged or saying I did not eat it; total if I am asking how many calories I have had today; personal if I am telling you about my own life, plans, family or feelings; knowledge if it is a general question you can answer yourself; chat if it is small talk.)",
+      "labels": {
+        "search": "webSearch",
+        "food": "calories.log_food",
+        "total": "calories.get_calories_today",
+        "personal": "personal",
+        "knowledge": "general",
+        "chat": "chat",
+        "remove": "calories.delete_food",
+        "correction": "calories.correct_entry",
+        "pesquisa": "webSearch",
+        "busca": "webSearch",
+        "comida": "calories.log_food",
+        "alimento": "calories.log_food",
+        "pessoal": "personal",
+        "conhecimento": "general",
+        "conversa": "chat",
+        "papo": "chat",
+        "remover": "calories.delete_food",
+        "correção": "calories.correct_entry",
+        "correcao": "calories.correct_entry"
+      },
+      "dataToolMinScore": 0.65,
+      "dataToolMinScoreComment": "The model's pick of a tool that changes data is taken only when it is also the router's top candidate with at least this score; otherwise no tool."
+    },
+    "relevance": {
+      "enabled": true,
+      "minScore": 0.25,
+      "lexicalMinScore": 0.08,
+      "onNoneRelevant": "answerWithout"
+    },
+    "learning": {
+      "enabled": true,
+      "fromLLM": true,
+      "fromEmptySearch": true,
+      "emptySearchRoute": "general",
+      "maxLearned": 500,
+      "weight": 1.0,
+      "onlyCandidates": true
+    },
+    "default": "rules",
+    "followUp": {
+      "enabled": true,
+      "keepScore": 0.7,
+      "replaces": [
+        "calories.correct_entry"
+      ]
+    }
+  },
+  "onlineToolFillers": [
+    "Deixa eu verificar isso na internet.",
+    "Um momento, estou buscando isso no servidor.",
+    "Me dá um segundo para procurar isso.",
+    "Deixa eu buscar isso para você."
+  ],
+  "remote": {
+    "layer2": {"instructions": "Você é a voz de conhecimento geral de um assistente no celular do usuário. Você não controla nada: nem o carro (vidros, ar, portas, navegação, música) nem o celular (registros, timers, mensagens, configurações). Se o usuário pedir uma ação, diga em uma frase curta que não conseguiu fazer e peça para ele repetir. Nunca diga que fez, vai fazer ou pode fazer uma ação. Os fatos que você sabe sobre o usuário são só contexto: mencione um só quando o usuário perguntar sobre ele. Responda só à última mensagem do usuário, em português do Brasil, em uma a quatro frases curtas para serem faladas, sem listas nem markdown.", "unavailable": "Meu segundo modelo ainda não está pronto. Tente de novo em um instante."},
+    "comment": "With configure remote (the DaVoice Agent model): fillers said while the remote assistant (Gemini) answers; what is said when it fails (errors: offline, busy, timeout, unavailable; else failed); the router routes it answers directly (undecided: the router decided nothing), quietRoutes without a filler; the model's own can't-do replies, handed over instead of said.",
+    "fillers": [
+      "Um momento, deixa eu ver.",
+      "Me dá um segundo para pensar nisso.",
+      "Deixa eu verificar isso para você.",
+      "Só um instante.",
+      "Deixa eu descobrir."
+    ],
+    "failed": "Desculpe, o Gemini não conseguiu responder agora. Tente de novo daqui a pouco.",
+    "errors": {
+      "offline": "Não consigo falar com o Gemini. Verifique sua conexão com a internet e tente de novo.",
+      "busy": "O Gemini está ocupado agora. Tente de novo daqui a pouco.",
+      "timeout": "O Gemini está demorando para responder. Tente de novo daqui a pouco.",
+      "unavailable": "O Gemini está indisponível no momento. Tente mais tarde."
+    },
+    "routes": ["personal", "general", "undecided"],
+    "quietRoutes": ["chat"],
+    "cannotReplies": ["não consigo fazer", "não tenho como fazer", "\\bcan(?:'|’)?t do that\\b", "\\bnot able to do that\\b", "não está disponível aqui", "\\bnot available here\\b"]
+  },
+  "memory": {
+    "comment": "What the assistant remembers about each user (speaker) across conversations. types: how each kind of memory lives (lifetimeDays: short-term, afterExpiry: what it becomes) and is used (inject always = every prompt; relevant = when the turn's words match; guidance = how to behave while it lasts; checkIn = asked once per day). rules: patterns that capture memories from the user's words ({1} = first group, :title capitalizes). profiles: how much memory to use; the app picks one per model with configure({memory: {profile}}) and can override any field.",
+    "defaultProfile": "small",
+    "profiles": {
+      "off": {
+        "enabled": false
+      },
+      "small": {
+        "enabled": true,
+        "capture": "rules",
+        "alwaysMaxTokens": 120,
+        "relevantMax": 2,
+        "relevantMaxTokens": 100,
+        "maxMemories": 200
+      },
+      "large": {
+        "enabled": true,
+        "capture": "rules+tools",
+        "alwaysMaxTokens": 300,
+        "relevantMax": 6,
+        "relevantMaxTokens": 400,
+        "maxMemories": 2000
+      }
+    },
+    "types": {
+      "profile": {
+        "inject": "always"
+      },
+      "fact": {
+        "inject": "relevant"
+      },
+      "preference": {
+        "inject": "relevant"
+      },
+      "note": {
+        "inject": "relevant"
+      },
+      "grief": {
+        "inject": "always",
+        "lifetimeDays": 7,
+        "announce": false,
+        "guidance": "The user is grieving. Be warm and gentle, keep answers soft, and don't repeat condolences every turn.",
+        "checkIn": "Start your reply with one gentle sentence asking how the user is doing since their {who} died.",
+        "afterExpiry": {
+          "type": "fact",
+          "text": "The user's {who} died on {date}."
+        }
+      },
+      "upcoming": {
+        "inject": "always",
+        "lifetimeDays": 1,
+        "announce": false,
+        "guidance": "If it fits the conversation, wish them well with it."
+      }
+    },
+    "rules": [
+      {
+        "comment": "Forget everything",
+        "match": "^\\W*(?:please\\s+)?forget\\s+(?:everything|all)(?:\\s+(?:about\\s+me|you\\s+know))?\\W*$",
+        "action": "forgetAll"
+      },
+      {
+        "comment": "Esqueça tudo",
+        "match": "^\\W*(?:por favor\\s+)?esque(?:c|ç)a\\s+(?:tudo|todas as coisas)(?:\\s+(?:sobre mim|que (?:voc(?:e|ê)|vc) sabe))?\\W*$",
+        "action": "forgetAll"
+      },
+      {
+        "comment": "Forget one thing: the best match is deleted, with its history",
+        "match": "^\\W*(?:please\\s+)?forget\\s+(?:that\\s+|about\\s+)?(.+)$",
+        "action": "forget"
+      },
+      {
+        "comment": "Esquecer uma coisa",
+        "match": "^\\W*(?:por favor\\s+)?esque(?:c|ç)a\\s+(?:que\\s+|d[eoa]s?\\s+|sobre\\s+)?(.+)$",
+        "action": "forget"
+      },
+      {
+        "comment": "What do you remember about me? / Do you remember my name? (lists what is remembered)",
+        "match": "\\bwhat (?:do|did) you (?:know|remember) about me\\b|\\bwhat have you (?:saved|remembered)\\b|\\b(?:do|did|can) you (?:still )?remember\\b|\\bdon'?t you remember\\b",
+        "action": "recall"
+      },
+      {
+        "comment": "O que você sabe sobre mim? / Você se lembra do meu nome?",
+        "match": "\\bo que (?:voc(?:e|ê)|vc) (?:sabe|lembra) (?:sobre|de) mim\\b|\\bo que (?:voc(?:e|ê)|vc) (?:salvou|guardou|memorizou)\\b|\\b(?:(?:voc(?:e|ê)|vc) )?(?:ainda )?se lembra\\b|\\blembra (?:do|da|de) meu\\b|\\blembra (?:do|da|de) minha\\b",
+        "action": "recall"
+      },
+      {
+        "match": "\\bmeu sobrenome (?:é|e)\\s+((?:[a-z'-]|[^\\x00-\\x7f]){2,30})",
+        "type": "profile",
+        "key": "last name",
+        "text": "The user's last name is {1:title}."
+      },
+      {
+        "match": "\\b(?:meu nome (?:é|e)|me chamo|pode me chamar de|me chame de)\\s+((?:[a-z'-]|[^\\x00-\\x7f]){1,20}(?:\\s+(?:[a-z'-]|[^\\x00-\\x7f]){1,20})?)",
+        "type": "profile",
+        "key": "name",
+        "text": "The user's name is {1:title}."
+      },
+      {
+        "match": "\\b(?:eu )?moro (?:em|no|na|nos|nas)\\s+((?:[a-z'-]|[^\\x00-\\x7f])[a-z .'-]*(?:[^\\x00-\\x7f][a-z .'-]*)*)",
+        "type": "profile",
+        "key": "home",
+        "text": "The user lives in {1:title}."
+      },
+      {
+        "match": "\\b(?:eu )?sou al(?:e|é)rgic[oa]s? (?:a|ao|aos|as|à|às)\\s+((?:[a-z'-]|[^\\x00-\\x7f])[a-z .'-]*(?:[^\\x00-\\x7f][a-z .'-]*)*)",
+        "type": "profile",
+        "key": "allergy {1}",
+        "text": "The user is allergic to {1}."
+      },
+      {
+        "match": "\\b(?:eu )?sou (vegetarian[oa]|vegan[oa]|pescetarian[oa]|diab(?:e|é)tic[oa]|intolerante (?:a|à) lactose)(?![a-z])",
+        "type": "profile",
+        "key": "diet",
+        "text": "The user is {1}."
+      },
+      {
+        "match": "\\b(?:meu|minha) (esposa|marido|parceir[oa]|namorad[oa]|filh[oa]|irm(?:ã|a)o?|m(?:ã|a)e|pai|cachorr[oa]|gat[oa]|chefe)(?![a-z]) se chama\\s+((?:[a-z'-]|[^\\x00-\\x7f]){1,20})",
+        "type": "fact",
+        "key": "{1} name",
+        "text": "The user's {1} is named {2:title}."
+      },
+      {
+        "match": "\\bo nome d[oa] (?:meu|minha) (esposa|marido|parceir[oa]|namorad[oa]|filh[oa]|irm(?:ã|a)o?|m(?:ã|a)e|pai|cachorr[oa]|gat[oa]|chefe)(?![a-z]) (?:é|e)\\s+((?:[a-z'-]|[^\\x00-\\x7f]){1,20})",
+        "type": "fact",
+        "key": "{1} name",
+        "text": "The user's {1} is named {2:title}."
+      },
+      {
+        "match": "\\b(?:meu|minha) ((?:[a-z'-]|[^\\x00-\\x7f])+(?: (?:[a-z'-]|[^\\x00-\\x7f])+)?) (?:favorit[oa]|preferid[oa]) (?:é|e)\\s+([a-z0-9](?:[a-z0-9 .'-]|[^\\x00-\\x7f]){1,40})",
+        "type": "preference",
+        "key": "favorite {1}",
+        "text": "The user's favorite {1} is {2}."
+      },
+      {
+        "comment": "\"Meu carro é vermelho\" (não coberto acima); um valor novo substitui o antigo",
+        "match": "\\b(?:meu|minha|meus|minhas) ((?!(?:nome|sobrenome|pergunta|ponto|problema|palpite|prazer|erro|culpa|vez|resposta|pedido|ideia|opini|quest|preocupa|plano|objetivo|dia|manh|tarde|noite|deus)\\b)(?!(?:[a-z'-]|[^\\x00-\\x7f])+ (?:favorit|preferid))(?:[a-z'-]|[^\\x00-\\x7f])+(?: (?:[a-z'-]|[^\\x00-\\x7f])+)?) (?:é|são|est(?:á|ã)o?) ([a-z0-9](?:[a-z0-9 ,'-]|[^\\x00-\\x7f]){1,40})",
+        "type": "fact",
+        "key": "{1}",
+        "confidence": 0.8,
+        "text": "The user's {1} is {2}."
+      },
+      {
+        "comment": "Luto: curto prazo (7 dias), depois um fato",
+        "match": "\\b(?:meu|minha) ((?:(?:[a-z'-]|[^\\x00-\\x7f])+ ){0,2}?(?:[a-z'-]|[^\\x00-\\x7f])+) (?:morreu|faleceu|partiu)(?![a-z])",
+        "type": "grief",
+        "key": "loss {1}",
+        "vars": {
+          "who": "{1}"
+        },
+        "text": "The user's {1} died on {date}."
+      },
+      {
+        "match": "\\b(?:morreu|faleceu) (?:o meu|a minha|meu|minha) ((?:(?:[a-z'-]|[^\\x00-\\x7f])+ ){0,2}?(?:[a-z'-]|[^\\x00-\\x7f])+)",
+        "type": "grief",
+        "key": "loss {1}",
+        "vars": {
+          "who": "{1}"
+        },
+        "text": "The user's {1} died on {date}."
+      },
+      {
+        "comment": "Algo que vem aí: lembrado até o dia seguinte",
+        "match": "\\b(?:eu )?tenho (?:um |uma |o |a |meu |minha )?((?:(?:[a-z'-]|[^\\x00-\\x7f])+ ){0,2}?(?:prova|exame|teste|entrevista|cirurgia|opera(?:ç|c)(?:ã|a)o|consulta|voo|reuni(?:ã|a)o|apresenta(?:ç|c)(?:ã|a)o|dentista|m(?:é|e)dico))",
+        "type": "upcoming",
+        "key": "upcoming {1}",
+        "vars": {
+          "what": "{1}"
+        },
+        "text": "The user has a {1} on {date}."
+      },
+      {
+        "match": "\\bmy (?:last|family|sur) ?name is ([a-z][a-z'-]{1,30})",
+        "type": "profile",
+        "key": "last name",
+        "text": "The user's last name is {1:title}."
+      },
+      {
+        "match": "\\b(?:my name is|call me|i am called|i'm called)\\s+([a-z][a-z'-]{1,20}(?:\\s+[a-z][a-z'-]{1,20})?)",
+        "type": "profile",
+        "key": "name",
+        "text": "The user's name is {1:title}."
+      },
+      {
+        "match": "\\bi (?:live|am living|'m living) in ([a-z][a-z .'-]{1,40})",
+        "type": "profile",
+        "key": "home",
+        "text": "The user lives in {1:title}."
+      },
+      {
+        "match": "\\bi(?:'m| am) allergic to ([a-z][a-z ,'-]{1,40})",
+        "type": "profile",
+        "key": "allergy {1}",
+        "text": "The user is allergic to {1}."
+      },
+      {
+        "match": "\\bi(?:'m| am) (?:a |an )?(vegetarian|vegan|pescatarian|diabetic|lactose intolerant)\\b",
+        "type": "profile",
+        "key": "diet",
+        "text": "The user is {1}."
+      },
+      {
+        "match": "\\bmy (wife|husband|partner|girlfriend|boyfriend|son|daughter|brother|sister|mother|father|mom|dad|dog|cat|boss)(?:'s name is| is called| is named) ([a-z][a-z'-]{1,20})\\b",
+        "type": "fact",
+        "key": "{1} name",
+        "text": "The user's {1} is named {2:title}."
+      },
+      {
+        "match": "\\bmy favou?rite ([a-z]+(?: [a-z]+)?) is ([a-z0-9][a-z0-9 .'-]{1,40})",
+        "type": "preference",
+        "key": "favorite {1}",
+        "text": "The user's favorite {1} is {2}."
+      },
+      {
+        "comment": "Any \"my X is Y\" not covered above (\"my car is red with green lines\"); a new value replaces the old one",
+        "match": "\\bmy ((?!(?:name|question|point|problem|guess|pleasure|bad|mistake|fault|turn|answer|request|idea|opinion|issue|concern|plan|goal|day|morning|evening|night)\\b)[a-z]+(?: [a-z]+)?) (?:is|are) ([a-z0-9][a-z0-9 ,'-]{1,40})",
+        "type": "fact",
+        "key": "{1}",
+        "confidence": 0.8,
+        "text": "The user's {1} is {2}."
+      },
+      {
+        "comment": "Grief: short-term (7 days), then a plain fact",
+        "match": "\\bmy ((?:[a-z]+ ){0,2}?[a-z]+) (?:died|passed away|passed on|has died|just died)\\b",
+        "type": "grief",
+        "key": "loss {1}",
+        "vars": {
+          "who": "{1}"
+        },
+        "text": "The user's {1} died on {date}."
+      },
+      {
+        "match": "\\bwe lost (?:my|our) ((?:[a-z]+ ){0,2}?[a-z]+)\\b",
+        "type": "grief",
+        "key": "loss {1}",
+        "vars": {
+          "who": "{1}"
+        },
+        "text": "The user's {1} died on {date}."
+      },
+      {
+        "comment": "Something coming up: remembered until the day after",
+        "match": "\\bi have (?:a |an |my )?((?:[a-z]+ ){0,2}?(?:exam|test|interview|surgery|operation|appointment|flight|meeting|presentation|job interview))\\b",
+        "type": "upcoming",
+        "key": "upcoming {1}",
+        "vars": {
+          "what": "{1}"
+        },
+        "text": "The user has a {1} on {date}."
+      },
+      {
+        "comment": "\"Lembre que ...\" explícito, quando nenhuma regra acima salvou",
+        "match": "^\\W*(?:por favor\\s+)?(?:lembre(?:-se)?|anote|guarde|n(?:ã|a)o esque(?:ç|c)a)\\s+(?:de\\s+)?(?:que\\s+)?(.+)$",
+        "type": "note",
+        "cut": false,
+        "fallback": true,
+        "confidence": 1.0,
+        "text": "The user told you: \"{1}\""
+      },
+      {
+        "comment": "Explicit 'remember that ...', when no rule above saved it",
+        "match": "^\\W*(?:please\\s+)?(?:remember|note|keep in mind)\\s+(?:that\\s+)?(.+)$",
+        "type": "note",
+        "cut": false,
+        "fallback": true,
+        "confidence": 1.0,
+        "text": "The user told you: \"{1}\""
+      }
+    ],
+    "questions": [
+      "\\?\\s*$",
+      "^\\W*(?:what|who|whom|whose|where|when|why|how|do|does|did|is|are|was|were|can|could|would|will|should|have|has)\\b",
+      "^\\W*(?:o que|qual|quais|quem|onde|quando|por que|porque|como|quant[oa]s?|ser(?:á|a) que|(?:é|É)|(?:voc(?:e|ê)|vc) (?:sabe|pode|poderia|lembra|acha)|pode|poderia|existe|tem como)(?![a-z])"
+    ],
+    "valueEnd": "\\s*(?:[,.;!?]|\\b(?:but|so|because|though|which|who|mas|ent(?:a|ã)o|porque|pois|que|quem|onde)(?![a-z])|\\b(?:and|e)\\s+(?=(?:i|it|we|he|she|they|you|my|the|eu|ele|ela|n(?:o|ó)s|eles|elas|voc(?:e|ê)|meu|minha|o|a|os|as|isso|isto|(?:é|e|est(?:á|a)|tem|vai|foi))(?![a-z]))).*$",
+    "rejectValues": [
+      "it",
+      "that",
+      "this",
+      "them",
+      "him",
+      "her",
+      "back",
+      "later",
+      "now",
+      "please",
+      "maybe",
+      "you",
+      "secret",
+      "isso",
+      "isto",
+      "aquilo",
+      "ele",
+      "ela",
+      "eles",
+      "elas",
+      "depois",
+      "agora",
+      "talvez",
+      "você",
+      "voce",
+      "segredo",
+      "por favor"
+    ],
+    "rejectFirstWords": [
+      "the",
+      "not",
+      "just",
+      "what",
+      "that",
+      "this",
+      "so",
+      "very",
+      "really",
+      "also",
+      "still",
+      "actually",
+      "from",
+      "in",
+      "at",
+      "on",
+      "going",
+      "trying",
+      "why",
+      "how",
+      "who",
+      "when",
+      "where",
+      "which",
+      "hello",
+      "hi",
+      "hey",
+      "yes",
+      "no",
+      "okay",
+      "ok",
+      "o",
+      "a",
+      "os",
+      "as",
+      "não",
+      "nao",
+      "só",
+      "apenas",
+      "que",
+      "isso",
+      "isto",
+      "então",
+      "entao",
+      "muito",
+      "realmente",
+      "também",
+      "tambem",
+      "ainda",
+      "de",
+      "em",
+      "no",
+      "na",
+      "indo",
+      "tentando",
+      "por",
+      "porque",
+      "como",
+      "quem",
+      "quando",
+      "onde",
+      "qual",
+      "olá",
+      "ola",
+      "oi",
+      "ei",
+      "sim",
+      "tá",
+      "ta",
+      "beleza",
+      "um",
+      "uma"
+    ],
+    "spelling": {
+      "comment": "Letters spelled out in a row (\"O for Oscar, F for Frank\"): the first letters of the words make the word (speech recognition mangles the letters but not the words). replace: what the memory rules see, \"(spelled: ofer)\"; forModel: what the model gets in place of the spelling, \"Ofer (O-F-E-R)\".",
+      "pair": "\\b([a-z]{1,3})(?:\\s+(?:for|four|fore|as in|like|de|como em|como)|\\s*4)\\s+([a-z]{3,})\\b",
+      "minLetters": 2,
+      "replace": "(spelled: {word})",
+      "forModel": "{Word} ({LETTERS})",
+      "joiners": [
+        "and",
+        "then",
+        "e",
+        "depois"
+      ]
+    },
+    "fields": [
+      {
+        "id": "lastName",
+        "key": "last name",
+        "label": "sobrenome",
+        "text": "The user's last name is {Value}.",
+        "spelling": "allowed",
+        "verify": true,
+        "required": false,
+        "mentions": "\\b(?:last|family|sur) ?name\\b|\\bsobrenome\\b"
+      },
+      {
+        "id": "firstName",
+        "key": "name",
+        "label": "nome",
+        "text": "The user's first name is {Value}.",
+        "spelling": "allowed",
+        "verify": true,
+        "required": false,
+        "mentions": "\\b(?:name|nome)\\b"
+      }
+    ],
+    "fieldsComment": "fields: values the app needs right. key = the memory key (rules with that key feed the field); spelling: off | allowed (a spelled value, \"O for Oscar, F for Frank\", wins over what speech recognition heard) | required (only a spelled value is accepted); verify: read it back and keep it after a yes; required: the model asks for it until it is known and verified (again after askAgainMinutes, default 60), and once it is, nothing is added to the prompt; mentions: a spelled word in a message matching this goes to this field (checked in order, so the more specific field first); answer: optional pattern for a direct answer after we asked (group 1). fieldPrompts ask/spellHint go to the model; spell/readBack/confirmed/retry are said as they are, without the model.",
+    "fieldPrompts": {
+      "ask": "\n\n(After answering, ask the user, in Brazilian Portuguese, for their {label}{spellHint}.)",
+      "spellHint": ", soletrado letra por letra, como A de Amor",
+      "spell": "Por favor, soletre o seu {label} letra por letra, como A de Amor, B de Bola.",
+      "readBack": "Anotei o seu {label} como {Value}. Está certo?",
+      "confirmed": "Obrigado. Vou lembrar do seu {label}, {Value}.",
+      "retry": "Desculpe. Por favor, soletre o seu {label} letra por letra, como A de Amor, B de Bola."
+    },
+    "confirm": {
+      "yes": "^\\W*(?:yes|yeah|yep|yup|correct|right|that'?s right|that is right|exactly|sure|perfect)\\b|^\\W*(?:sim|isso|isso mesmo|correto|certo|exato|exatamente|perfeito|est(?:á|a) certo|t(?:á|a) certo|pode ser|claro|com certeza)(?![a-z])",
+      "no": "^\\W*(?:no|nope|wrong|incorrect|not (?:right|quite|correct)|that'?s wrong)\\b|^\\W*(?:n(?:ã|a)o|errado|incorreto|est(?:á|a) errado|t(?:á|a) errado|nada disso)(?![a-z])"
+    },
+    "dates": [
+      {
+        "pattern": "\\bdepois de amanh(?:ã|a)",
+        "days": 2
+      },
+      {
+        "pattern": "\\banteontem\\b|\\b(?:dois|2) dias atr(?:á|a)s|\\bh(?:á|a) (?:dois|2) dias\\b",
+        "days": -2
+      },
+      {
+        "pattern": "\\bontem\\b",
+        "days": -1
+      },
+      {
+        "pattern": "\\bsemana passada\\b",
+        "days": -7
+      },
+      {
+        "pattern": "\\bamanh(?:ã|a)",
+        "days": 1
+      },
+      {
+        "pattern": "\\bpr(?:ó|o)xima semana\\b|\\bsemana que vem\\b",
+        "days": 7
+      },
+      {
+        "pattern": "\\b(?:yesterday|last night)\\b",
+        "days": -1
+      },
+      {
+        "pattern": "\\b(?:two|2) days ago\\b",
+        "days": -2
+      },
+      {
+        "pattern": "\\blast week\\b",
+        "days": -7
+      },
+      {
+        "pattern": "\\btomorrow\\b",
+        "days": 1
+      },
+      {
+        "pattern": "\\bnext week\\b",
+        "days": 7
+      }
+    ],
+    "searchStopWords": [
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "but",
+      "of",
+      "to",
+      "in",
+      "on",
+      "at",
+      "for",
+      "with",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "been",
+      "am",
+      "do",
+      "does",
+      "did",
+      "have",
+      "has",
+      "had",
+      "i",
+      "me",
+      "my",
+      "you",
+      "your",
+      "it",
+      "its",
+      "this",
+      "that",
+      "what",
+      "who",
+      "how",
+      "when",
+      "where",
+      "why",
+      "can",
+      "could",
+      "would",
+      "will",
+      "should",
+      "about",
+      "from",
+      "just",
+      "so",
+      "not",
+      "no",
+      "yes",
+      "please",
+      "tell",
+      "know",
+      "think",
+      "user",
+      "user's",
+      "today",
+      "now",
+      "o",
+      "os",
+      "as",
+      "um",
+      "uma",
+      "uns",
+      "umas",
+      "e",
+      "ou",
+      "mas",
+      "de",
+      "do",
+      "da",
+      "dos",
+      "das",
+      "em",
+      "no",
+      "na",
+      "nos",
+      "nas",
+      "para",
+      "pra",
+      "por",
+      "com",
+      "é",
+      "são",
+      "era",
+      "foi",
+      "ser",
+      "estar",
+      "está",
+      "tem",
+      "ter",
+      "eu",
+      "meu",
+      "minha",
+      "você",
+      "seu",
+      "sua",
+      "isso",
+      "isto",
+      "que",
+      "quem",
+      "como",
+      "quando",
+      "onde",
+      "porque",
+      "pode",
+      "sobre",
+      "só",
+      "não",
+      "sim",
+      "favor",
+      "diga",
+      "sabe",
+      "acha",
+      "usuário",
+      "hoje",
+      "agora"
+    ],
+    "prompts": {
+      "line": "- {text}",
+      "relevant": "\n\n(You remember this about the user. It is true: use it to answer, and never say you can't remember things:\n{memories})",
+      "saved": "\n\n(You will remember this from now on: {text} Reply to the user directly, as \"you\", naturally and in one short sentence.)",
+      "updated": "\n\n(You updated what you remember: {text} Reply to the user directly, as \"you\", naturally and in one short sentence.)",
+      "forgotten": "\n\n(You deleted this from your memory: {text} Confirm it to the user in one short sentence.)",
+      "notFound": "\n\n(The user asked you to forget \"{query}\", but you don't remember anything like that. Say so in one short sentence.)",
+      "forgotAll": "\n\n(You deleted everything you remembered about the user. Confirm it in one short sentence.)",
+      "recall": "\n\n(Everything you remember about the user:\n{memories}\nTell the user all of it briefly, every item, speaking to them as \"you\".)",
+      "recallEmpty": "\n\n(You don't remember anything about the user yet. Say so in one short sentence.)",
+      "checkIn": "\n\n({text})"
+    },
+    "toolInstructions": "When the user tells you something about themselves that is worth remembering in future conversations (not small talk or what they ate), call remember_fact with one short sentence about them. When they ask you to forget something, call forget_fact.",
+    "tools": [
+      {
+        "name": "remember_fact",
+        "description": "Save a fact about the user for future conversations, e.g. 'The user works as a nurse'.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "type": "string",
+              "description": "One short sentence about the user, in the third person"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "fact",
+                "preference",
+                "note"
+              ]
+            }
+          },
+          "required": [
+            "fact"
+          ]
+        }
+      },
+      {
+        "name": "forget_fact",
+        "description": "Delete something the app remembers about the user, when they ask to forget it.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "type": "string",
+              "description": "What to forget, in a few words"
+            }
+          },
+          "required": [
+            "fact"
+          ]
+        }
+      }
+    ]
+  },
+  "fixedReplies": [
+    {"id": "car_options", "patterns": ["^(?=.*(?:carro|veículo|veiculo|automóvel|automovel))(?=.*(?:(?:opções|opcoes|opçoes|opcões)|comandos|(?:funções|funcoes|funçoes|funcões)|recursos|controles|o\\s+que\\s+(?:você|voce|vc)\\s+(?:pode|consegue|sabe)\\s+fazer|o\\s+que\\s+(?:dá|da)\\s+(?:pra|para)\\s+fazer)).*$", "^(?=.*(?:carro|veículo|veiculo))(?=.*(?:operações|operacoes|o\\s+que\\s+(?:eu|a\\s+gente)\\s+(?:posso|pode|consigo)\\s+(?:fazer|pedir|falar)|me\\s+lista|lista\\s+o\\s+que)).*$"], "replies": ["No carro eu posso: navegar até um lugar, achar uma parada no caminho, dizer o horário de chegada e evitar pedágio ou trânsito. Ajustar a temperatura, a ventilação, a direção do ar e o desembaçador, ou é só me dizer que está com calor ou com frio. Abrir ou fechar os vidros e o teto solar. Abrir, fechar, trancar ou destrancar as portas. Aquecer ou ventilar o seu banco. Tocar música, sintonizar o rádio, trocar a fonte de áudio e mudar o volume. E dizer a autonomia, o combustível, a bateria, a pressão dos pneus ou as luzes de alerta."]},
+    {"id": "capabilities", "patterns": ["^\\W*(?:(?:ei|oi|ok|então|entao)\\W+)?o\\s+que\\s+(?:mais\\s+)?(?:você|voce|vc)\\s+(?:pode|consegue|sabe)\\s+fazer(?:\\s+por\\s+mim)?\\W*$", "\\b(?:quais\\s+(?:são|sao)|me\\s+diz|lista)\\s+(?:as\\s+)?suas\\s+(?:opções|opcoes|opçoes|opcões|funções|funcoes|funçoes|funcões|habilidades)\\W*$"], "replies": ["Eu controlo o carro: navegação, ar-condicionado, vidros, teto solar, portas, bancos e música. Também anoto suas calorias, lembro do que você me conta e pesquiso coisas. Pergunte o que eu posso fazer no carro para ouvir a lista completa."]},
+    {
+      "id": "identity",
+      "patterns": ["^\\W*(?:(?:ei|oi|olá|ola)\\s+\\w+\\W+)?(?:quem|o\\s+que)\\s+(?:é|e)\\s+(?:você|voce|vc)\\W*$", "^\\W*(?:você|voce)\\s+é\\s+quem\\W*$", "^\\W*(?:(?:ei|oi)\\W+)?(?:(?:(?:você|voce|vc)|pode|(?:você|voce|vc)\\s+pode)\\s+)?me\\s+(?:diz|dizer|fala|falar|conta|contar)\\s+quem\\s+(?:você|voce|vc)\\s+(?:é|e)\\W*$", "^\\W*com\\s+quem\\s+eu\\s+(?:estou|to|tô)\\s+falando\\W*$"],
+      "replies": [
+        "Eu sou o seu agente de IA, ajustado pela DaVoice.io."
+      ]
+    },
+    {
+      "id": "how_are_you",
+      "patterns": [
+        "^\\W*(?:(?:ei|oi|olá|ola)\\W+(?:\\w+\\W+)?)?como\\s+(?:(?:você|voce|vc)\\s+)?(?:está|esta|tá|ta|vai)(?:\\s+(?:você|voce|vc))?(?:\\s+hoje)?\\W*$",
+        "^\\W*(?:(?:oi|olá|ola)\\W+)?tudo\\s+bem(?:\\s+com\\s+(?:você|voce|vc))?\\W*$"
+      ],
+      "replies": [
+        "Estou bem e pronto para começar, espero que você também."
+      ]
+    },
+    {
+      "id": "story",
+      "patterns": ["^\\W*(?:(?:ei|oi|olá|ola)\\W+(?:\\w+\\W+)?)?(?:(?:pode|você pode|voce pode)\\s+)?(?:me\\s+)?(?:conta|conte|contar|lê|le|ler)\\s+(?:uma|outra|mais\\s+uma)\\s+(?:\\w+\\s+)?hist[oó]ria(?:\\s+(?:por favor|pra mim))?\\W*$", "^\\W*hora\\s+da\\s+hist[oó]ria\\W*$", "^\\W*(?:uma\\s+)?hist[oó]ria(?:\\s+por\\s+favor)?\\W*$"],
+      "replies": [
+        "Era uma vez uma lebre que zombou de uma tartaruga por ser tão lenta e a desafiou para uma corrida. A lebre disparou na frente e, certa de que ia ganhar, deitou debaixo de uma árvore para tirar um cochilo. A tartaruga seguiu andando, devagar, mas sem parar nunca. Quando a lebre acordou, correu o mais rápido que pôde, mas a tartaruga já estava cruzando a linha de chegada. Devagar e sempre se vai longe.",
+        "Um leão dormia na floresta quando um ratinho passou correndo pelo seu nariz e o acordou. O leão pegou o ratinho e ia comê-lo, mas o ratinho implorou: me solta, e um dia eu te ajudo. O leão riu e o soltou. Alguns dias depois, o leão ficou preso na rede de um caçador. O ratinho ouviu o rugido, veio correndo e roeu as cordas até o leão ficar livre. Até o menor amigo pode ser uma grande ajuda.",
+        "Uma raposa faminta viu um cacho de uvas maduras pendurado bem alto numa parreira. Ela pulou e pulou, mas as uvas estavam sempre fora do alcance. Por fim, foi embora de nariz empinado, dizendo: aquelas uvas deviam estar verdes mesmo. É fácil desprezar o que não conseguimos ter.",
+        "Um jovem pastor, entediado cuidando das ovelhas, gritou: lobo, lobo! Os moradores da vila subiram o morro correndo para ajudar, e ele riu deles. Fez o mesmo no dia seguinte, e de novo eles vieram. Então, numa tarde, um lobo de verdade saiu da floresta. O menino gritou o mais alto que pôde, mas desta vez ninguém veio. Ninguém acredita em um mentiroso, mesmo quando ele fala a verdade."
+      ]
+    }
+  ]
+}

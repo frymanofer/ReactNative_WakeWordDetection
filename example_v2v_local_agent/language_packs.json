@@ -1,0 +1,145 @@
+{
+  "_readme": [
+    "Which languages are built into the app and which are downloaded on first use.",
+    "bundled: language ids shipped inside the app (their files must be in assets/models/). In this example NONE are bundled: every voice is downloaded from baseUrl/<file> on first use.",
+    "baseUrl: the public folder holding ALL the files (no trailing slash). Leave it empty until the upload is verified (URL + sha256).",
+    "After editing, nothing else is needed: metro.config.js runs scripts/generate-language-packs.js on every bundle (dev, Android release, iOS).",
+    "Run it by hand with: node scripts/generate-language-packs.js   (add --rehash after replacing a file in assets/models/ to refresh bytes + sha256)."
+  ],
+  "baseUrl": "https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/language-packs",
+  "bundled": [],
+  "languages": {
+    "en": {
+      "model": {
+        "file": "model_ex2_rich_kate.dm",
+        "bytes": 144414736,
+        "sha256": "b73b088a30cba3475c79c4f5ded82000835e7cf8ec390ceb0c9b5772e82fedb6"
+      },
+      "embedder": {
+        "file": "embedder_en.dm",
+        "bytes": 22241086,
+        "sha256": "8b3d4c950120eb2cf83649d3e156513cd434cc5772df507589d44bb316ec5d61"
+      }
+    },
+    "pt-BR": {
+      "model": {
+        "file": "model_ex2_portuguese_brv1.dm",
+        "bytes": 143278096,
+        "sha256": "7d71c5f3a13937755938003644e48174cd4cf0b5ba7a10ab2eb413eb6ce92efe"
+      },
+      "embedder": {
+        "file": "embedder_brv1.dm",
+        "bytes": 22915184,
+        "sha256": "a7fe390bca79e6a5740798367a09b29dec4b98719ca2146bdf9070882ee51f3d"
+      }
+    },
+    "pt-PT": {
+      "model": {
+        "file": "model_ex2_portuguese_pt.dm",
+        "bytes": 143278096,
+        "sha256": "b7f02ee5491386ce5d6452c985aa30869eb08ed4c1d5de12a03fdd3ab8ebb79c"
+      },
+      "embedder": {
+        "file": "embedder_pt_pt.dm",
+        "bytes": 22915184,
+        "sha256": "a7fe390bca79e6a5740798367a09b29dec4b98719ca2146bdf9070882ee51f3d"
+      }
+    },
+    "de": {
+      "model": {
+        "file": "model_ex2_german.dm",
+        "bytes": 143933456,
+        "sha256": "ff6bac2d149b8c57cffa4fec1a10f5cf7a6d462d70616546fbe5f3dcadf59eb5"
+      },
+      "embedder": {
+        "file": "embedder_de.dm",
+        "bytes": 22360736,
+        "sha256": "39daace731ed20340fd1df938d42db7aefa2c3ff37c425f12b45b823fdfbb4e0"
+      }
+    },
+    "es": {
+      "model": {
+        "file": "model_ex2_spanish.dm",
+        "bytes": 144209936,
+        "sha256": "ca68c00cf99c236489c582d17ac579156da099b9673ef1fcd5c1d6be7f8fb7f4"
+      },
+      "embedder": {
+        "file": "embedder_es.dm",
+        "bytes": 22386996,
+        "sha256": "7cf86e5f61c237c8dada3752ac1f142317c411b316d407013d086ba33e18d313"
+      }
+    },
+    "fr": {
+      "model": {
+        "file": "model_ex2_french.dm",
+        "bytes": 144455696,
+        "sha256": "7c8044b4e52bb616926581034c670c82f559c97251fd3fc528b98f82df9b5be3"
+      },
+      "embedder": {
+        "file": "embedder_fr.dm",
+        "bytes": 22320622,
+        "sha256": "31d7787dc145368dab232588be1d141458fd57f9edb3e73323d089d835db56e3"
+      }
+    },
+    "it": {
+      "model": {
+        "file": "model_ex2_italian.dm",
+        "bytes": 144640016,
+        "sha256": "d85ad7e70a8cad878551304b3d0030691efd17c84d4ab328c7781b19ba1d5bcf"
+      },
+      "embedder": {
+        "file": "embedder_it.dm",
+        "bytes": 22133008,
+        "sha256": "83b07366e8d65a9fde9b9132c7c3673bc474de584b3d7d9272d59b9452653dfb"
+      }
+    },
+    "nl": {
+      "model": {
+        "file": "model_ex2_dutch.dm",
+        "bytes": 145162256,
+        "sha256": "f458be7c665f9e4ab0ed85adb633241c558a08f744f0d46fdb81479daca4bf1c"
+      },
+      "embedder": {
+        "file": "embedder_nl.dm",
+        "bytes": 22377743,
+        "sha256": "3b486b8fc3bc097475f043ab75120c395487f99de28315a76177a08404bd68a6"
+      }
+    },
+    "da": {
+      "model": {
+        "file": "model_v1_danish.dm",
+        "bytes": 135536656,
+        "sha256": "4e79a232d1659a6349808a9b130e230a5f658b876d311d0510e5de8e6b80ae42"
+      },
+      "embedder": {
+        "file": "embedder_da.dm",
+        "bytes": 8211166,
+        "sha256": "7a8c60904dae18199c591f2f7ea0d88ed033378d14da583afc08b767e8a8703f"
+      }
+    },
+    "sv": {
+      "model": {
+        "file": "model_v1_swedish.dm",
+        "bytes": 137052176,
+        "sha256": "e6e6dfcc4b721decf7666d3716e152ecce52ee698e0dc4385b518254e494a58f"
+      },
+      "embedder": {
+        "file": "embedder_sv.dm",
+        "bytes": 8211166,
+        "sha256": "c8cfa41290401ca180388366256d4b5b7374a8bf77463a733a47418b2867f8b9"
+      }
+    },
+    "el": {
+      "model": {
+        "file": "model_v1_greek.dm",
+        "bytes": 128225296,
+        "sha256": "d00e0769c24609804dc7b2c8215b36270e08b7fd34cfe011a29a35c60269178c"
+      },
+      "embedder": {
+        "file": "embedder_el.dm",
+        "bytes": 8211166,
+        "sha256": "03ec5a597ae243df77e8be724ca4d7488fa0b7d121a64d516ea7050675dec039"
+      }
+    }
+  }
+}

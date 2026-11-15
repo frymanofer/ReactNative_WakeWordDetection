@@ -1,0 +1,507 @@
+{
+  "version": 2,
+  "description": "Calorias típicas por porção comum (valores médios aproximados para uma demonstração, não orientação nutricional).",
+  "foods": [
+    {
+      "name": "ovo",
+      "calories": 78,
+      "kcalPer100g": 143
+    },
+    {
+      "name": "ovo cozido",
+      "calories": 78,
+      "kcalPer100g": 155
+    },
+    {
+      "name": "omelete",
+      "calories": 190,
+      "kcalPer100g": 154
+    },
+    {
+      "name": "ovo mexido",
+      "calories": 90,
+      "kcalPer100g": 149
+    },
+    {
+      "name": "banana",
+      "calories": 105,
+      "kcalPer100g": 89
+    },
+    {
+      "name": "maçã",
+      "calories": 95,
+      "kcalPer100g": 52
+    },
+    {
+      "name": "laranja",
+      "calories": 62,
+      "kcalPer100g": 47
+    },
+    {
+      "name": "pera",
+      "calories": 100,
+      "kcalPer100g": 57
+    },
+    {
+      "name": "pêssego",
+      "calories": 60,
+      "kcalPer100g": 39
+    },
+    {
+      "name": "manga",
+      "calories": 200,
+      "kcalPer100g": 60
+    },
+    {
+      "name": "uva",
+      "calories": 100,
+      "kcalPer100g": 69
+    },
+    {
+      "name": "morango",
+      "calories": 50,
+      "kcalPer100g": 32
+    },
+    {
+      "name": "mamão",
+      "calories": 120,
+      "kcalPer100g": 43
+    },
+    {
+      "name": "abacaxi",
+      "calories": 80,
+      "kcalPer100g": 50
+    },
+    {
+      "name": "melancia",
+      "calories": 85,
+      "kcalPer100g": 30
+    },
+    {
+      "name": "cenoura",
+      "calories": 25,
+      "kcalPer100g": 41
+    },
+    {
+      "name": "abacate",
+      "calories": 240,
+      "kcalPer100g": 160
+    },
+    {
+      "name": "fatia de pizza",
+      "calories": 285,
+      "kcalPer100g": 266
+    },
+    {
+      "name": "pizza",
+      "calories": 285,
+      "kcalPer100g": 266
+    },
+    {
+      "name": "lata de refrigerante",
+      "calories": 140,
+      "kcalPer100g": 42
+    },
+    {
+      "name": "refrigerante",
+      "calories": 140,
+      "kcalPer100g": 42
+    },
+    {
+      "name": "coca",
+      "calories": 140,
+      "kcalPer100g": 42
+    },
+    {
+      "name": "coca cola",
+      "calories": 140,
+      "kcalPer100g": 42
+    },
+    {
+      "name": "guaraná",
+      "calories": 140,
+      "kcalPer100g": 39
+    },
+    {
+      "name": "coca zero",
+      "calories": 1,
+      "kcalPer100g": 0
+    },
+    {
+      "name": "café",
+      "calories": 2,
+      "kcalPer100g": 1
+    },
+    {
+      "name": "cafezinho",
+      "calories": 2,
+      "kcalPer100g": 1
+    },
+    {
+      "name": "expresso",
+      "calories": 3,
+      "kcalPer100g": 9
+    },
+    {
+      "name": "café com leite",
+      "calories": 60
+    },
+    {
+      "name": "cappuccino",
+      "calories": 120
+    },
+    {
+      "name": "chá",
+      "calories": 2,
+      "kcalPer100g": 1
+    },
+    {
+      "name": "água",
+      "calories": 0,
+      "kcalPer100g": 0
+    },
+    {
+      "name": "copo de leite",
+      "calories": 120,
+      "kcalPer100g": 61
+    },
+    {
+      "name": "leite",
+      "calories": 120,
+      "kcalPer100g": 61
+    },
+    {
+      "name": "suco de laranja",
+      "calories": 110,
+      "kcalPer100g": 45
+    },
+    {
+      "name": "suco",
+      "calories": 110,
+      "kcalPer100g": 45
+    },
+    {
+      "name": "vitamina",
+      "calories": 200
+    },
+    {
+      "name": "shake de proteína",
+      "calories": 160
+    },
+    {
+      "name": "cerveja",
+      "calories": 150,
+      "kcalPer100g": 43
+    },
+    {
+      "name": "taça de vinho",
+      "calories": 125,
+      "kcalPer100g": 83
+    },
+    {
+      "name": "vinho",
+      "calories": 125,
+      "kcalPer100g": 83
+    },
+    {
+      "name": "fatia de pão",
+      "calories": 80,
+      "kcalPer100g": 265
+    },
+    {
+      "name": "pão francês",
+      "calories": 135,
+      "kcalPer100g": 300
+    },
+    {
+      "name": "pão",
+      "calories": 135,
+      "kcalPer100g": 300
+    },
+    {
+      "name": "torrada",
+      "calories": 80,
+      "kcalPer100g": 290
+    },
+    {
+      "name": "croissant",
+      "calories": 230,
+      "kcalPer100g": 406
+    },
+    {
+      "name": "pão de queijo",
+      "calories": 80,
+      "kcalPer100g": 363
+    },
+    {
+      "name": "tapioca",
+      "calories": 140
+    },
+    {
+      "name": "panqueca",
+      "calories": 90,
+      "kcalPer100g": 227
+    },
+    {
+      "name": "waffle",
+      "calories": 220,
+      "kcalPer100g": 291
+    },
+    {
+      "name": "rosquinha",
+      "calories": 250,
+      "kcalPer100g": 421
+    },
+    {
+      "name": "muffin",
+      "calories": 400,
+      "kcalPer100g": 377
+    },
+    {
+      "name": "biscoito",
+      "calories": 50,
+      "kcalPer100g": 450
+    },
+    {
+      "name": "bolacha",
+      "calories": 50,
+      "kcalPer100g": 450
+    },
+    {
+      "name": "barra de chocolate",
+      "calories": 230,
+      "kcalPer100g": 535
+    },
+    {
+      "name": "chocolate",
+      "calories": 230,
+      "kcalPer100g": 546
+    },
+    {
+      "name": "barra de cereal",
+      "calories": 120,
+      "kcalPer100g": 400
+    },
+    {
+      "name": "barra de proteína",
+      "calories": 200
+    },
+    {
+      "name": "iogurte",
+      "calories": 150,
+      "kcalPer100g": 61
+    },
+    {
+      "name": "tigela de aveia",
+      "calories": 160,
+      "kcalPer100g": 71
+    },
+    {
+      "name": "aveia",
+      "calories": 160,
+      "kcalPer100g": 394
+    },
+    {
+      "name": "cereal",
+      "calories": 200,
+      "kcalPer100g": 379
+    },
+    {
+      "name": "granola",
+      "calories": 200,
+      "kcalPer100g": 471
+    },
+    {
+      "name": "prato de arroz",
+      "calories": 205,
+      "kcalPer100g": 128
+    },
+    {
+      "name": "arroz",
+      "calories": 205,
+      "kcalPer100g": 128
+    },
+    {
+      "name": "feijão",
+      "calories": 115,
+      "kcalPer100g": 76
+    },
+    {
+      "name": "arroz com feijão",
+      "calories": 320
+    },
+    {
+      "name": "macarrão",
+      "calories": 220,
+      "kcalPer100g": 158
+    },
+    {
+      "name": "lasanha",
+      "calories": 400
+    },
+    {
+      "name": "peito de frango",
+      "calories": 165,
+      "kcalPer100g": 165
+    },
+    {
+      "name": "frango",
+      "calories": 165,
+      "kcalPer100g": 190
+    },
+    {
+      "name": "bife",
+      "calories": 500,
+      "kcalPer100g": 271
+    },
+    {
+      "name": "picanha",
+      "calories": 450,
+      "kcalPer100g": 289
+    },
+    {
+      "name": "salmão",
+      "calories": 360,
+      "kcalPer100g": 208
+    },
+    {
+      "name": "atum",
+      "calories": 130,
+      "kcalPer100g": 132
+    },
+    {
+      "name": "peixe",
+      "calories": 200
+    },
+    {
+      "name": "salada",
+      "calories": 150
+    },
+    {
+      "name": "sanduíche",
+      "calories": 350
+    },
+    {
+      "name": "misto quente",
+      "calories": 300
+    },
+    {
+      "name": "hambúrguer",
+      "calories": 500,
+      "kcalPer100g": 254
+    },
+    {
+      "name": "cheeseburger",
+      "calories": 550,
+      "kcalPer100g": 263
+    },
+    {
+      "name": "batata frita",
+      "calories": 365,
+      "kcalPer100g": 312
+    },
+    {
+      "name": "cachorro quente",
+      "calories": 290,
+      "kcalPer100g": 247
+    },
+    {
+      "name": "coxinha",
+      "calories": 220
+    },
+    {
+      "name": "pastel",
+      "calories": 250
+    },
+    {
+      "name": "esfiha",
+      "calories": 180
+    },
+    {
+      "name": "sushi",
+      "calories": 300
+    },
+    {
+      "name": "sopa",
+      "calories": 150
+    },
+    {
+      "name": "batata",
+      "calories": 160,
+      "kcalPer100g": 87
+    },
+    {
+      "name": "batata doce",
+      "calories": 110,
+      "kcalPer100g": 86
+    },
+    {
+      "name": "mandioca",
+      "calories": 160,
+      "kcalPer100g": 125
+    },
+    {
+      "name": "fatia de queijo",
+      "calories": 110,
+      "kcalPer100g": 371
+    },
+    {
+      "name": "queijo",
+      "calories": 110,
+      "kcalPer100g": 350
+    },
+    {
+      "name": "requeijão",
+      "calories": 70,
+      "kcalPer100g": 257
+    },
+    {
+      "name": "amêndoas",
+      "calories": 160,
+      "kcalPer100g": 579
+    },
+    {
+      "name": "castanha",
+      "calories": 170,
+      "kcalPer100g": 600
+    },
+    {
+      "name": "amendoim",
+      "calories": 170,
+      "kcalPer100g": 567
+    },
+    {
+      "name": "pasta de amendoim",
+      "calories": 95,
+      "kcalPer100g": 588
+    },
+    {
+      "name": "sorvete",
+      "calories": 140,
+      "kcalPer100g": 207
+    },
+    {
+      "name": "brigadeiro",
+      "calories": 100
+    },
+    {
+      "name": "bolo",
+      "calories": 250
+    },
+    {
+      "name": "açúcar",
+      "calories": 16,
+      "kcalPer100g": 387
+    },
+    {
+      "name": "mel",
+      "calories": 64,
+      "kcalPer100g": 304
+    },
+    {
+      "name": "manteiga",
+      "calories": 100,
+      "kcalPer100g": 717
+    }
+  ]
+}

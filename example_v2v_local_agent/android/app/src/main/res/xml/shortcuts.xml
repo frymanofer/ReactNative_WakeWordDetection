@@ -1,0 +1,15 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="open_example_app"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_short_label"
+        android:shortcutLongLabel="@string/shortcut_long_label">
+
+        <!-- Intent triggered by Google Assistant -->
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.example.exampleapp.MainActivity"
+            android:targetPackage="com.example.exampleapp" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

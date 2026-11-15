@@ -1,0 +1,906 @@
+{
+  "id": "calories",
+  "instructions": "The app shows a calories-today tracker. Call a tool only when the user wants to log, change, undo or check THEIR OWN calories for today. A question about how many calories a food has is general knowledge: answer it directly, without any tool. Only use the tools listed below; for anything else answer normally. A tool result with \"ok\": true means the change is already made: say in one short sentence what was done; never ask whether to do it. Never offer or suggest logging food unless the user talks about something they ate or drank. If the user corrects something already logged (\"I said one egg, not two\", \"it was a banana, not an apple\"), use correct_entry, not log_food. The user speaks Brazilian Portuguese: give food names in tool arguments exactly as the user said them, in Portuguese (e.g. ovo, banana, fatia de pizza), never translated.",
+  "missingToolReply": "Desculpe, não consegui atualizar o registro de calorias. Pode repetir, talvez com o número de calorias?",
+  "routing": {
+    "rules": [
+      {
+        "comment": "\"How many calories are in an apple?\" is general knowledge",
+        "all": [
+          "\\b(how many|how much)\\b.*\\bcalories?\\b|\\b(?:quantas|quanta|quantos)\\b.*\\bcalori",
+          "\\b(in|does|do)\\b|\\b(?:tem|t(?:ê|e)m|h(?:á|a)|possui|em|n[oa]s?)(?![a-z])"
+        ],
+        "none": [
+          "\\b(i|i'm|i've|me|my|today|so far)\\b|\\b(?:eu|comi|bebi|tomei|meu|minha|meus|minhas|hoje)\\b|\\bat(?:é|e) agora"
+        ],
+        "choice": "none"
+      },
+      {
+        "comment": "\"Unlog the eggs\": the embedding model reads it as log",
+        "any": [
+          "\\bun-?log|\\bdesregistr"
+        ],
+        "choice": {
+          "name": "delete_food"
+        },
+        "exact": true
+      },
+      {
+        "any": [
+          "\\b(undo|cancel (it|that)|that was wrong|take that back)\\b|\\b(?:desfa(?:ç|z)a|desfazer|desfaz|cancel(?:e|a) (?:isso|isto)|estava errado|volta atr(?:á|a)s)(?![a-z])"
+        ],
+        "choice": {
+          "name": "undo_last_change"
+        },
+        "exact": true
+      },
+      {
+        "any": [
+          "\\b(set (it|my|the|today)|reset|in total|total (is|was|to)|clear (it|the list|everything|all)|(remove|delete) (all|everything))\\b|\\b(?:(?:defin(?:a|e)|coloque|ajuste|mude) (?:o total|para|em)|zer(?:a|e) (?:o total|tudo)|no total|o total (?:é|foi|para)|limp(?:a|e) (?:a lista|tudo)|(?:remov(?:a|e)|apag(?:a|ue)|exclu(?:a|i)) tudo)(?![a-z])"
+        ],
+        "choice": {
+          "name": "set_calories_today"
+        },
+        "exact": true
+      },
+      {
+        "comment": "\"Remove 100 calories\" subtracts a number",
+        "all": [
+          "\\b(remove|subtract|take off|take away|minus|delete|erase)\\b|\\b(didn'?t|did not|never) (eat|have|drink)\\b|\\b(?:remov(?:a|e|er)|subtra(?:i|ia|ir)|tir(?:a|e|ar)|descont(?:a|e)|menos|apag(?:a|ue|ar)|exclu(?:a|i|ir))(?![a-z])|\\b(?:n(?:ã|a)o|nunca) (?:comi|bebi|tomei)\\b"
+        ],
+        "any": [
+          "\\d+\\s*(k?cals?|calories?)\\b|\\d+\\s*(?:k?cals?|calorias?)\\b",
+          "^\\W*(remove|subtract|take off|take away|minus)\\s+\\d+\\W*$|^\\W*(?:remova|subtraia|tire|menos)\\s+\\d+\\W*$"
+        ],
+        "choice": {
+          "name": "remove_calories"
+        },
+        "exact": true
+      },
+      {
+        "comment": "\"Remove the kiwi\", \"I didn't eat the coke\" delete that line",
+        "all": [
+          "\\b(remove|subtract|take off|take away|minus|delete|erase)\\b|\\b(didn'?t|did not|never) (eat|have|drink)\\b|\\b(?:remov(?:a|e|er)|subtra(?:i|ia|ir)|tir(?:a|e|ar)|descont(?:a|e)|menos|apag(?:a|ue|ar)|exclu(?:a|i|ir))(?![a-z])|\\b(?:n(?:ã|a)o|nunca) (?:comi|bebi|tomei)\\b"
+        ],
+        "choice": {
+          "name": "delete_food"
+        }
+      },
+      {
+        "comment": "Logging, including follow-ups without a verb (\"And a banana\"); not questions (\"How many calories have I had?\")",
+        "any": [
+          "\\b(i (just )?(ate|had|drank)|log|add|ate|drank)\\b|\\b(?:eu )?(?:acabei de )?(?:comi|bebi|tomei|almocei|jantei|lanchei)\\b|\\bacabei de (?:comer|beber|tomar)\\b|\\b(?:registr(?:a|e)|anot(?:a|e)|adicion(?:a|e)|coloc(?:a|e)|acrescent(?:a|e))\\b",
+          "^\\s*(and|also|plus)\\s+(a|an|some|one|two|three|four|five|\\d+)\\b|^\\s*(?:e|tamb(?:é|e)m|mais)\\s+(?:um|uma|uns|umas|dois|duas|tr(?:ê|e)s|quatro|cinco|\\d+)(?![a-z])"
+        ],
+        "none": [
+          "^\\W*(how (much|many)|what)\\b|^\\W*(?:quant(?:o|a|os|as)|o que|qual)\\b"
+        ],
+        "choice": {
+          "name": "log_food"
+        }
+      },
+      {
+        "any": [
+          "\\b(how (much|many)( calories)? (have|did) i|my total|so far|today's total|calories (have i|today)|what have i eaten|what did i eat)\\b|\\b(?:quantas calorias (?:eu )?(?:j(?:á|a) )?(?:comi|consumi|ingeri|tomei)|meu total|at(?:é|e) agora|total de hoje|o que (?:eu )?(?:j(?:á|a) )?comi)"
+        ],
+        "choice": {
+          "name": "get_calories_today"
+        }
+      }
+    ],
+    "default": "none",
+    "autoToolsComment": "Tools the model may use on its own when no rule picked a tool: reading the tracker only. Changes need the user's words to match a rule.",
+    "autoTools": [
+      "get_calories_today"
+    ],
+    "defaultComment": "When no rule matches, the turn has no tools and the model just answers (\"Hello, how are you?\"). It becomes \"auto\" when the app, an MCP server or memory adds tools only the model can choose; then autoTools limits this skill to reading.",
+    "fillers": {
+      "log_food": [
+        "Claro, vou registrar.",
+        "Entendi, adicionando agora.",
+        "Certo, registrando para você."
+      ],
+      "delete_food": [
+        "Certo, vou remover isso.",
+        "Claro, tirando da lista."
+      ],
+      "remove_calories": [
+        "Certo, atualizando o seu total."
+      ],
+      "set_calories_today": [
+        "Certo, atualizando o seu total."
+      ],
+      "undo_last_change": [
+        "Certo, desfazendo."
+      ],
+      "get_calories_today": [
+        "Deixa eu ver o seu total.",
+        "Um momento, olhando o seu registro."
+      ],
+      "correct_entry": [
+        "Certo, corrigindo.",
+        "Desculpe, vou corrigir isso."
+      ]
+    },
+    "fillersComment": "Said as soon as a rule routes the turn to the tool, before the model runs (per tool; \"*\" = any of this skill's tools). Leave a tool out for no filler.",
+    "examples": {
+      "log_food": [
+        "I ate a sandwich.",
+        "I had pizza for lunch.",
+        "I just drank a can of coke.",
+        "For breakfast I had oatmeal.",
+        "I snacked on some chips.",
+        "I finished a burger and fries.",
+        "Add a banana.",
+        "Log a glass of milk.",
+        "I had a coffee with milk.",
+        "Dinner was pasta with meatballs.",
+        "Can you log two eggs for me?",
+        "Please add a slice of pizza.",
+        "Two eggs.",
+        "A banana and a coffee.",
+        "And an apple.",
+        "It was a bowl of cereal.",
+        "Put down a glass of orange juice.",
+        "I just had a yogurt.",
+        "Log my breakfast: toast and jam.",
+        "Can you log another egg for me, please?",
+        "Add another coffee.",
+        "One more banana.",
+        "I had three eggs this morning.",
+        "I ate two slices of toast for breakfast.",
+        "I had a bowl of soup for dinner.",
+        "We had pancakes for breakfast.",
+        "I had two apples as a snack.",
+        "Can you log that?",
+        "Please log that for me.",
+        "Add that to my list.",
+        "Eu comi um sanduíche.",
+        "Comi pizza no almoço.",
+        "Acabei de tomar uma lata de refrigerante.",
+        "No café da manhã eu comi aveia.",
+        "Belisquei umas batatinhas.",
+        "Comi um hambúrguer com batata frita.",
+        "Adiciona uma banana.",
+        "Registra um copo de leite.",
+        "Tomei um café com leite.",
+        "O jantar foi macarrão com almôndegas.",
+        "Pode registrar dois ovos para mim?",
+        "Por favor, adiciona uma fatia de pizza.",
+        "Dois ovos.",
+        "Uma banana e um café.",
+        "E uma maçã.",
+        "Foi uma tigela de cereal.",
+        "Anota um copo de suco de laranja.",
+        "Acabei de comer um iogurte.",
+        "Registra meu café da manhã: pão com geleia.",
+        "Pode registrar mais um ovo, por favor?",
+        "Adiciona mais um café.",
+        "Mais uma banana.",
+        "Comi três ovos hoje de manhã.",
+        "Comi duas torradas no café da manhã.",
+        "Tomei uma tigela de sopa no jantar.",
+        "Comemos panqueca no café da manhã.",
+        "Comi duas maçãs de lanche.",
+        "Pode registrar isso?",
+        "Por favor, registra isso para mim.",
+        "Coloca isso na minha lista."
+      ],
+      "get_calories_today": [
+        "How many calories have I had today?",
+        "What's my calorie total?",
+        "How am I doing with my calories?",
+        "How much have I eaten today?",
+        "Can you tell me how many calories I ate today?",
+        "How many calories did I eat today?",
+        "How many calories have I had so far?",
+        "What did I eat today?",
+        "Tell me my calories for today.",
+        "What's my total so far?",
+        "Quantas calorias eu comi hoje?",
+        "Qual é o meu total de calorias?",
+        "Como estou com as calorias?",
+        "Quanto eu comi hoje?",
+        "Pode me dizer quantas calorias eu comi hoje?",
+        "Quantas calorias eu já consumi hoje?",
+        "Quantas calorias até agora?",
+        "O que eu comi hoje?",
+        "Me diz minhas calorias de hoje.",
+        "Qual é o meu total até agora?"
+      ],
+      "delete_food": [
+        "Remove the banana.",
+        "Delete the coke from my list.",
+        "I didn't eat the sandwich.",
+        "Take the pizza off.",
+        "Remove the eggs.",
+        "Take the banana off my list.",
+        "I didn't actually eat the pizza.",
+        "Delete the last thing I added.",
+        "I never had the coffee.",
+        "Scratch the cookie, I didn't eat it.",
+        "I didn't eat the apple.",
+        "I didn't have the eggs.",
+        "I didn't drink the coke.",
+        "I did not eat the toast.",
+        "I never ate the chips.",
+        "Remove a banana.",
+        "Can you remove the two eggs for me, please?",
+        "Could you delete the banana from my list?",
+        "Please remove the coffee.",
+        "Remove two eggs from today.",
+        "Can you take the pizza off my list?",
+        "I want to remove the sandwich.",
+        "Apaga o refrigerante da minha lista.",
+        "Eu não comi o sanduíche.",
+        "Tira a pizza.",
+        "Remove os ovos.",
+        "Tira a banana da minha lista.",
+        "Na verdade eu não comi a pizza.",
+        "Apaga a última coisa que eu adicionei.",
+        "Eu não tomei o café.",
+        "Tira o biscoito, eu não comi.",
+        "Eu não comi a maçã.",
+        "Eu não comi os ovos.",
+        "Eu não bebi o refrigerante.",
+        "Não comi a torrada.",
+        "Nunca comi as batatinhas.",
+        "Pode remover os dois ovos para mim, por favor?",
+        "Você pode apagar a banana da minha lista?",
+        "Por favor, tira o café.",
+        "Remove dois ovos de hoje.",
+        "Pode tirar a pizza da minha lista?",
+        "Quero remover o sanduíche.",
+        "Unlog the two eggs.",
+        "Can you unlog the eggs, please?",
+        "Please unlog the banana.",
+        "Un-log the coffee.",
+        "Desregistra os dois ovos."
+      ],
+      "undo_last_change": [
+        "Undo that.",
+        "That was wrong, undo it.",
+        "Cancel the last change.",
+        "I did not ask to log three eggs.",
+        "I didn't ask you to log that.",
+        "I never asked you to add that.",
+        "Why did you log that? I didn't ask for it.",
+        "That's not what I wanted, remove what you just added.",
+        "Stop logging things I didn't ask for.",
+        "I did not say pizza.",
+        "I never said rice, where did you get that?",
+        "Where did you see that I said cheese?",
+        "I didn't say that, why did you log it?",
+        "Desfaz isso.",
+        "Isso estava errado, desfaz.",
+        "Cancela a última mudança.",
+        "Eu não pedi para registrar três ovos.",
+        "Eu não pedi para você registrar isso.",
+        "Eu nunca pedi para adicionar isso.",
+        "Por que você registrou isso? Eu não pedi.",
+        "Não era isso que eu queria, remove o que você acabou de adicionar.",
+        "Para de registrar coisas que eu não pedi.",
+        "Eu não falei pizza.",
+        "Eu nunca falei arroz, de onde você tirou isso?",
+        "Onde você viu que eu falei queijo?",
+        "Eu não disse isso, por que você registrou?",
+        "I mean, remove the two eggs, not add two eggs.",
+        "I said remove, not add.",
+        "No, I wanted to remove it, not add it.",
+        "I asked you to remove the eggs, not log them.",
+        "Eu quis dizer remover os dois ovos, não adicionar.",
+        "Eu falei para tirar, não para adicionar.",
+        "Não, eu queria remover, não adicionar.",
+        "Eu pedi para tirar os ovos, não para registrar."
+      ],
+      "correct_entry": [
+        "I said one egg, not two.",
+        "I asked for another egg, not two eggs.",
+        "It was a banana, not an apple.",
+        "That should be two eggs, not three.",
+        "Wrong food, it was rice.",
+        "You logged the wrong amount.",
+        "That's not what I said, I said one.",
+        "Change the last entry to one egg.",
+        "It was a tea, not a coffee.",
+        "Sorry, it was rice, not pasta.",
+        "Actually it was a muffin, not a donut.",
+        "Not a coke, it was a sprite.",
+        "Eu disse um ovo, não dois.",
+        "Eu pedi mais um ovo, não dois ovos.",
+        "Era uma banana, não uma maçã.",
+        "Deveria ser dois ovos, não três.",
+        "Comida errada, era arroz.",
+        "Você registrou a quantidade errada.",
+        "Não foi isso que eu disse, eu disse um.",
+        "Muda o último registro para um ovo.",
+        "Era um chá, não um café.",
+        "Desculpa, era arroz, não macarrão.",
+        "Na verdade era um muffin, não um donut.",
+        "Não era coca, era guaraná."
+      ]
+    },
+    "examplesMinScore": 0.62,
+    "examplesComment": "Example sentences per tool for the router (used when no rule matched); a tool needs examplesMinScore similarity (with an embedding model).",
+    "rulesComment": "Rules marked exact are exact commands and always apply; the others only decide when the router has no embedding model (with one, the examples below decide).",
+    "argumentChecks": {
+      "log_food": {
+        "argument": "food",
+        "valid": [
+          "egg",
+          "banana",
+          "apple",
+          "sandwich",
+          "pizza",
+          "coffee",
+          "milk",
+          "coke",
+          "oatmeal",
+          "rice",
+          "chicken",
+          "salad",
+          "bread",
+          "cheese",
+          "yogurt",
+          "orange juice",
+          "chips",
+          "burger",
+          "pasta",
+          "soup",
+          "steak",
+          "cereal",
+          "chocolate",
+          "ice cream",
+          "beer",
+          "wine",
+          "water",
+          "tea",
+          "avocado",
+          "fish",
+          "cookie",
+          "cake",
+          "ovo",
+          "banana",
+          "maçã",
+          "sanduíche",
+          "pizza",
+          "café",
+          "leite",
+          "refrigerante",
+          "aveia",
+          "arroz",
+          "frango",
+          "salada",
+          "pão",
+          "queijo",
+          "iogurte",
+          "suco de laranja",
+          "batata frita",
+          "hambúrguer",
+          "macarrão",
+          "sopa",
+          "bife",
+          "cereal",
+          "chocolate",
+          "sorvete",
+          "cerveja",
+          "vinho",
+          "água",
+          "chá",
+          "abacate",
+          "peixe",
+          "biscoito",
+          "bolo",
+          "feijão",
+          "pão de queijo",
+          "coxinha",
+          "tapioca"
+        ],
+        "invalid": [
+          "I ate",
+          "I had",
+          "I drank",
+          "I just ate",
+          "what I ate",
+          "something",
+          "it",
+          "that",
+          "this",
+          "food",
+          "today",
+          "my total",
+          "a lot",
+          "nothing",
+          "you",
+          "me",
+          "I",
+          "how many",
+          "tell me",
+          "eu comi",
+          "eu tomei",
+          "eu bebi",
+          "acabei de comer",
+          "o que eu comi",
+          "alguma coisa",
+          "isso",
+          "isto",
+          "comida",
+          "hoje",
+          "meu total",
+          "muito",
+          "nada",
+          "você",
+          "eu",
+          "quantas",
+          "me diz"
+        ],
+        "margin": 0.05,
+        "message": "O que você comeu ou bebeu?",
+        "fromUserWords": 2,
+        "fromUserWordsComment": "The food must be in the user's own words: this turn or the user's message before it (\"log that\"). A food the model made up is never logged; the message is said instead."
+      }
+    },
+    "argumentChecksComment": "A tool argument checked by meaning before the tool runs: closer to invalid than valid examples (by margin) -> message is said instead.",
+    "noToolExamples": [
+      "Well, I've logged from what I see three eggs, one log of one egg and another log of two eggs.",
+      "I can see three eggs in the list.",
+      "It was logged in the past.",
+      "I see two entries for eggs.",
+      "That entry was there before.",
+      "The list shows a banana.",
+      "I already logged that earlier.",
+      "Why does it say zero calories?",
+      "What is in my list?",
+      "I was just looking at the list.",
+      "Bom, pelo que vejo registrei três ovos, um registro de um ovo e outro de dois ovos.",
+      "Estou vendo três ovos na lista.",
+      "Isso foi registrado antes.",
+      "Vejo dois registros de ovos.",
+      "Esse registro já estava lá.",
+      "A lista mostra uma banana.",
+      "Eu já registrei isso antes.",
+      "Por que está mostrando zero calorias?",
+      "O que tem na minha lista?",
+      "Eu só estava olhando a lista."
+    ],
+    "noToolExamplesComment": "Sentences about the tracker that need no tool (describing the list, talking about earlier entries): the router's calories.none route.",
+    "claimCheck": {
+      "claims": [
+        "I've logged two eggs for you.",
+        "I have added a banana to your tracker.",
+        "I will remove the egg from your list.",
+        "I've removed the coffee.",
+        "I deleted the banana from today's list.",
+        "I've corrected the entry.",
+        "I've updated your calorie total.",
+        "I have undone the last change.",
+        "I'll log that for you.",
+        "Okay, logging one egg now.",
+        "I have reset your total to zero.",
+        "Done, it's been added.",
+        "I'll change that entry.",
+        "I've put it in your log.",
+        "Registrei dois ovos para você.",
+        "Adicionei uma banana ao seu registro.",
+        "Vou remover o ovo da sua lista.",
+        "Removi o café.",
+        "Apaguei a banana da lista de hoje.",
+        "Corrigi o registro.",
+        "Atualizei o seu total de calorias.",
+        "Desfiz a última mudança.",
+        "Vou registrar isso para você.",
+        "Certo, registrando um ovo agora.",
+        "Zerei o seu total.",
+        "Pronto, foi adicionado.",
+        "Vou mudar esse registro.",
+        "Coloquei no seu registro."
+      ],
+      "notClaims": [
+        "There are three eggs logged today.",
+        "You have logged two eggs and a banana.",
+        "Your total for today is 261 calories.",
+        "An egg has about 78 calories.",
+        "The list shows a banana and two eggs.",
+        "You logged one egg earlier.",
+        "I can't see any coffee in your list.",
+        "Would you like to know your total?",
+        "I haven't changed your tracker.",
+        "Nothing was changed.",
+        "I didn't log anything.",
+        "Tem três ovos registrados hoje.",
+        "Você registrou dois ovos e uma banana.",
+        "Seu total de hoje é 261 calorias.",
+        "Um ovo tem cerca de 78 calorias.",
+        "A lista mostra uma banana e dois ovos.",
+        "Você registrou um ovo mais cedo.",
+        "Não vejo nenhum café na sua lista.",
+        "Quer saber o seu total?",
+        "Eu não alterei o seu registro.",
+        "Nada foi alterado.",
+        "Eu não registrei nada."
+      ],
+      "minScore": 0.45,
+      "margin": 0.05,
+      "replacement": "Não fiz nenhuma alteração. Pode repetir o pedido?"
+    },
+    "claimCheckComment": "A reply sentence claiming a change (closer to claims than notClaims by margin, and at least minScore) is not said in a turn where no tool changed anything; replacement is said if nothing is left."
+  },
+  "tools": [
+    {
+      "name": "get_calories_today",
+      "description": "Read the user's calorie tracker: today's total and entries.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "log_food",
+      "description": "Log something the user says they ate or drank ('I ate', 'I had', 'log', 'add'). Give the food name and quantity; the app knows the calories of common foods. Set calories only if the user said a number.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "food": {
+            "type": "string",
+            "description": "Food or drink in the user's own Portuguese words, singular, e.g. ovo, banana, fatia de pizza, lata de refrigerante. Use 'calories' if the user only said a number."
+          },
+          "quantity": {
+            "type": "number",
+            "description": "How many, default 1",
+            "minimum": 0
+          },
+          "calories": {
+            "type": "integer",
+            "description": "Total calories, only if the user said the number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "food"
+        ]
+      }
+    },
+    {
+      "name": "delete_food",
+      "description": "Delete a food or drink from today's list ('remove the kiwi', 'delete the coke', 'I didn't eat the banana').",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "food": {
+            "type": "string",
+            "description": "The food to delete in the user's own words, e.g. kiwi, or 'last' for the last one"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove_calories",
+      "description": "Subtract a number of calories from today's total ('remove 100 calories'). To remove a food, use delete_food.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "set_calories_today",
+      "description": "Replace today's total with an exact number, e.g. 'set it to 1500', 'reset to zero', 'today I ate 1200 in total'.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "total"
+        ]
+      }
+    },
+    {
+      "name": "undo_last_change",
+      "description": "Undo the last change to the calorie tracker ('undo', 'that was wrong', 'cancel that').",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "correct_entry",
+      "description": "Fix a food already logged today: its amount ('I said one egg, not two') or the food itself ('it was a banana, not an apple').",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "food": {
+            "type": "string",
+            "description": "The logged food to fix, in the user's words, e.g. ovo or maçã"
+          },
+          "new_food": {
+            "type": "string",
+            "description": "The right food, only if the food itself was wrong, in the user's words, e.g. banana"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "The right number, e.g. 1",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "food"
+        ]
+      }
+    }
+  ],
+  "matching": {
+    "foodStopWords": "\\b(a|an|some|the|my|of the|small|large|big|medium)\\b|\\b(?:um|uma|uns|umas|os|as|meu|minha|pequen[oa]|grande|algum|alguma|alguns|algumas)\\b",
+    "servingWords": [
+      "of",
+      "with",
+      "and",
+      "in",
+      "slice",
+      "piece",
+      "bowl",
+      "cup",
+      "glass",
+      "plate",
+      "can",
+      "bottle",
+      "serving",
+      "portion",
+      "handful",
+      "homemade",
+      "fresh",
+      "de",
+      "do",
+      "da",
+      "com",
+      "e",
+      "em",
+      "fatia",
+      "fatias",
+      "copo",
+      "copos",
+      "tigela",
+      "prato",
+      "lata",
+      "garrafa",
+      "porcao",
+      "punhado",
+      "caseiro",
+      "caseira",
+      "fresco",
+      "fresca",
+      "unidade",
+      "colher",
+      "colheres",
+      "xicara",
+      "pote"
+    ],
+    "notFoodWords": [
+      "i",
+      "me",
+      "you",
+      "can",
+      "could",
+      "please",
+      "just",
+      "actually",
+      "didn",
+      "didnt",
+      "t",
+      "did",
+      "not",
+      "never",
+      "eat",
+      "ate",
+      "eaten",
+      "have",
+      "had",
+      "drink",
+      "drank",
+      "remove",
+      "delete",
+      "erase",
+      "take",
+      "off",
+      "away",
+      "get",
+      "rid",
+      "of",
+      "with",
+      "and",
+      "in",
+      "from",
+      "on",
+      "to",
+      "list",
+      "today",
+      "tracker",
+      "entry",
+      "entries",
+      "item",
+      "food",
+      "line",
+      "one",
+      "it",
+      "that",
+      "this",
+      "eu",
+      "voce",
+      "pode",
+      "por",
+      "favor",
+      "so",
+      "na",
+      "verdade",
+      "nao",
+      "nunca",
+      "comi",
+      "comer",
+      "comido",
+      "bebi",
+      "beber",
+      "tomei",
+      "tomar",
+      "remove",
+      "remova",
+      "apaga",
+      "apague",
+      "tira",
+      "tire",
+      "da",
+      "do",
+      "de",
+      "dos",
+      "das",
+      "com",
+      "e",
+      "em",
+      "no",
+      "para",
+      "pra",
+      "lista",
+      "hoje",
+      "registro",
+      "comida",
+      "um",
+      "uma",
+      "isso",
+      "isto"
+    ],
+    "lastEntry": "^\\s*(it|that|this|(the )?(last|latest|previous)( one| thing| item| entry| food)?)\\s*$|\\b(last|latest|previous) (one|thing|item|entry|food)\\b|\\b(remove|delete|erase) (it|that|this)\\b|^\\s*(?:isso|isto|(?:o |a )?(?:ultim|últim)[oa](?: coisa| item| registro| comida)?)\\s*$|\\b(?:remov(?:a|e)|apag(?:a|ue)|tir(?:a|e)) (?:isso|isto)\\b",
+    "grams": "(\\d+(?:\\.\\d+)?)\\s*(?:g|gr|grams?|gramas?)\\b",
+    "justCalories": "^\\s*(k?cal(orie)?s?)?\\s*$",
+    "correctionCues": [
+      "not",
+      "instead",
+      "rather",
+      "nao",
+      "em vez",
+      "no lugar"
+    ],
+    "correctionCuesComment": "In a correction, the food (and count) right after one of these words is the logged one to fix ('a tea, not a coffee', 'one egg, not two'); another food named is the new one. The user's words win over the model's arguments.",
+    "modifierCuts": [
+      "with",
+      "and",
+      "in",
+      "on",
+      "for",
+      "plus",
+      "from",
+      "at",
+      "com",
+      "e",
+      "em",
+      "no",
+      "na",
+      "para",
+      "pra",
+      "mais",
+      "de"
+    ],
+    "modifierCutsComment": "A food's main part ends before these words ('coffee with milk' -> coffee); the known food must be the last word(s) of that part ('strawberry yogurt' -> yogurt, never strawberries). No known food there: it is looked up online, not guessed.",
+    "routingMask": "food",
+    "routingMaskComment": "With the embedding model, every known food name becomes this word in the routing examples and in the user's words, so the router decides by what the user wants, not by which food was named ('I did not say yogurt' is a complaint, not a log)."
+  },
+  "onlineLookup": {
+    "timeoutMs": 6000,
+    "fillers": [
+      "Preciso verificar na internet as calorias de {food}.",
+      "{Food} não está na minha lista, então vou procurar na internet.",
+      "Deixa eu procurar na internet as calorias de {food}.",
+      "Um momento, estou vendo na internet quantas calorias tem {food}.",
+      "Me dá um segundo para encontrar {food} na internet.",
+      "Vou pesquisar na internet as calorias de {food}."
+    ]
+  },
+  "fallbackArguments": {
+    "comment": "When the model doesn't call log_food after a retry, the food (and count) come from the user's words: these patterns are removed (after the grams), then a leading count is read",
+    "log_food": {
+      "strip": [
+        "^\\W*(?:i\\s+)?(?:just\\s+)?(?:have\\s+)?(?:ate|had|drank|eaten|drunk|log|add|and|also|plus)\\b",
+        "^\\W*(?:eu\\s+)?(?:acabei de\\s+)?(?:comi|bebi|tomei|comer|beber|tomar|registr(?:a|e)|anot(?:a|e)|adicion(?:a|e)|e|tamb(?:é|e)m|mais)(?![a-z])",
+        "^\\W*(?:of|de)\\b",
+        "\\b(?:for|at|with)\\s+(?:breakfast|lunch|dinner|a snack)\\b",
+        "\\b(?:no|de|pro|para o)\\s+(?:caf(?:é|e) da manh(?:ã|a)|almo(?:ç|c)o|jantar|lanche)",
+        "\\b(?:today|tonight|this morning|please|too|as well|to my list|to the tracker)\\b",
+        "\\b(?:hoje|hoje (?:de|pela) manh(?:ã|a)|por favor|tamb(?:é|e)m|na minha lista|no registro)(?![a-z])",
+        "[.!?,]"
+      ],
+      "count": {
+        "pattern": "^(a|an|another|one|two|three|four|five|six|seven|eight|nine|ten|um|uma|outro|outra|mais um|mais uma|dois|duas|tr(?:ê|e)s|quatro|cinco|seis|sete|oito|nove|dez|\\d+(?:\\.\\d+)?)(?![a-z])",
+        "words": {
+          "a": 1,
+          "an": 1,
+          "one": 1,
+          "two": 2,
+          "three": 3,
+          "four": 4,
+          "five": 5,
+          "six": 6,
+          "seven": 7,
+          "eight": 8,
+          "nine": 9,
+          "ten": 10,
+          "another": 1,
+          "more": 1,
+          "um": 1,
+          "uma": 1,
+          "outro": 1,
+          "outra": 1,
+          "mais um": 1,
+          "mais uma": 1,
+          "dois": 2,
+          "duas": 2,
+          "três": 3,
+          "tres": 3,
+          "quatro": 4,
+          "cinco": 5,
+          "seis": 6,
+          "sete": 7,
+          "oito": 8,
+          "nove": 9,
+          "dez": 10
+        }
+      }
+    }
+  },
+  "messages": {
+    "unknownFood": "Não encontrei {food} na minha lista de alimentos{searchedOn}.",
+    "searchedOn": " nem na {sources}",
+    "unreachable": " Não consegui acessar a {sources} agora.",
+    "askCalories": " Quantas calorias tinha?",
+    "askPortions": "Conheço {food} por porção ({calories} calorias cada), não por peso. Quantas porções eram {grams} gramas?",
+    "sourcesSeparator": " nem na ",
+    "deleteNotFound": "Não encontrei {food} na lista de hoje. A lista tem: {list}. Qual deles eu removo?",
+    "deleteListItem": "{label}, {calories} calorias",
+    "deleteListSeparator": "; ",
+    "deleteEmpty": "A lista de hoje está vazia, então não há nada para remover.",
+    "nothingToUndo": "Não há nada para desfazer.",
+    "removeAskAmount": "Quantas calorias eu devo remover?",
+    "statusLogged": "Pronto: adicionado ao registro de hoje",
+    "statusDeleted": "Pronto: removido da lista de hoje",
+    "statusRemoved": "Pronto: descontado do total de hoje",
+    "statusSetTotal": "Pronto: total de hoje substituído",
+    "statusUndone": "Pronto: a última mudança foi desfeita",
+    "statusCorrected": "Pronto: o registro foi corrigido",
+    "correctNotFound": "Não encontrei {food} na lista de hoje. A lista tem: {list}. Qual deles eu corrijo?",
+    "replyLogged": "Registrei {calories} calorias. Seu total hoje é de {total} calorias.",
+    "replyLoggedOnline": "Registrei {calories} calorias, segundo a {source}. Seu total hoje é de {total} calorias.",
+    "replyLoggedCalories": "Registrei {calories} calorias. Seu total hoje é de {total} calorias.",
+    "replyDeleted": "Removi da lista de hoje. Seu total hoje é de {total} calorias.",
+    "replyRemoved": "Descontei {calories} calorias. Seu total hoje é de {total} calorias.",
+    "replySetTotal": "Seu total hoje agora é de {total} calorias.",
+    "replyCorrected": "Corrigi o registro. Seu total hoje é de {total} calorias.",
+    "replyToday": "Seu total hoje é de {total} calorias.",
+    "replyTodayEmpty": "Você ainda não registrou nada hoje.",
+    "replyUndone": "Desfeito. Seu total hoje é de {total} calorias.",
+    "replyComment": "reply*: what the agent says when the tool is done, filled from the tool's own result (the model does not reword it, so no number can come out wrong, and no second model round is spent). Leave one out to let the model word that reply."
+  }
+}

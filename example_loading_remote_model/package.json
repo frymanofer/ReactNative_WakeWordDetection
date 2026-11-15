@@ -1,0 +1,38 @@
+{
+  "name": "ExampleApp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DaVoice wake word + speaker verification example with wake word models updated from a CDN (React Native)",
+  "scripts": {
+    "postinstall": "patch-package && node scripts/check-models.js",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-native": "0.82.0",
+    "react-native-fs": "^2.20.0",
+    "react-native-wakeword": "1.1.171"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@react-native-community/cli": "^20.0.2",
+    "@react-native/babel-preset": "0.82.0",
+    "@react-native/eslint-config": "0.82.0",
+    "@react-native/gradle-plugin": "^0.82.0",
+    "@react-native/metro-config": "0.82.0",
+    "@react-native/typescript-config": "0.82.0",
+    "@types/react": "^19.1.1",
+    "eslint": "^8.19.0",
+    "patch-package": "^8.0.0",
+    "prettier": "2.8.8",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
