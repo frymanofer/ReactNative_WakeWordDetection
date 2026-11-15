@@ -1,4 +1,4 @@
-# ReactNative KeywordsDetection by Davoice
+# ReactNative "Wake Work" / KeywordsDetection by Davoice
 
 [License](LICENSE) · [Model and Voice Asset Notice](MODEL_NOTICES.md)
 
@@ -16,22 +16,22 @@ Welcome to **Davoice WakeWord / Keywords Detection** – Wake words and keyword 
 
 This is a **"wake word"** package for React Native. A wake word is a keyword that activates your device, like "Hey Siri" or "OK Google". "Wake Word" is also known as "keyword detection", "Phrase Recognition", "Phrase Spotting", “Voice triggered”, “hotword”, “trigger word”
 
-It also provide **Speech to Intent**. **Speech to Intent** refers to the ability to recognize a spoken word or phrase
-and directly associate it with a specific action or operation within an application. Unlike a **"wake word"**, which typically serves to activate or wake up the application,
-Speech to Intent goes further by enabling complex interactions and functionalities based on the recognized intent behind the speech.
+It also provide **Complete Voice-to-Voice AI Agent**, with **Wake Word**, **Speaker Identification**, **Speech-to-Text** and **Text-to-Speech** all running on-device
 
-For example, a wake word like "Hey App" might activate the application, while Speech
-to Intent could process a phrase like "Play my favorite song" or "Order a coffee" to
-execute corresponding tasks within the app.
-Speech to Intent is often triggered after a wake word activates the app, making it a key
-component of more advanced voice-controlled applications. This layered approach allows for
-seamless and intuitive voice-driven user experiences.
+Another active project of **React-Native on-device full Voice-to-Voice AI Agent** is in https://github.com/frymanofer/ReactNative_DaVoice
+
+**Wake-Word** AKA **phrase spotting** AKA **Hot Word** AKA **Trigger Word** is the first step into a voice interaction. It works best with **Speaker Identification/Isolation**
+
 
 ## Latest news
 
 - **New 14 Oct 2025**:
   
-   **Full Voice2Voice comunications** - See new folder example_full_voice/
+   **Full on-device Voice2Voice AI Agent** - See new folder example_v2v_local_agent/
+
+- **New 14 Oct 2025**:
+  
+   **Full Voice2Voice comunications** - See new folder example_v2v_local_agent/
 
 - **New 2 June 2025**:
   
