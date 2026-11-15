@@ -1,18 +1,12 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
+#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 
-@implementation AppDelegate
+@interface ReactNativeDelegate : RCTDefaultReactNativeFactoryDelegate
+@end
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-  self.moduleName = @"ExampleApp";
-  // You can add your custom initial props in the dictionary below.
-  // They will be passed down to the ViewController used by React Native.
-  self.initialProps = @{};
-
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
-}
+@implementation ReactNativeDelegate
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
@@ -26,6 +20,23 @@
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+}
+
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  ReactNativeDelegate *delegate = [ReactNativeDelegate new];
+  delegate.dependencyProvider = [RCTAppDependencyProvider new];
+
+  self.reactNativeDelegate = delegate;
+  self.reactNativeFactory = [[RCTReactNativeFactory alloc] initWithDelegate:delegate];
+  self.launchOptions = launchOptions;
+
+  // The UIWindow is created in SceneDelegate (scene:willConnectToSession:options:).
+  return YES;
 }
 
 @end

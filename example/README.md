@@ -1,76 +1,65 @@
-# Getting Started
-In ios and android directory there is a static library for Keyword detection
+# DaVoice Wake Word + Speaker Verification — React Native example
 
-## Step 1: Start the Metro Server
+An on-device wake word app with speaker verification, built with
+[`react-native-wakeword`](https://www.npmjs.com/package/react-native-wakeword) 1.1.171 and React Native 0.82.
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+- Always-listening wake word ("Hey Coach"), fully on device.
+- **Speaker verification (SV):** enroll your voice once, and the wake word then answers **only to you**. Other
+  people saying the wake word, a TV or a podcast are ignored. This is checked natively, as part of the detection.
+- Test your enrolled voice: a live score while you talk.
 
-To start Metro, run the following command from the _root_ of your React Native project:
-
-```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
+## Run it
 
 ```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
+npm install          # also checks that the bundled models are real files (Git LFS)
+npx react-native run-android
+# iOS
+cd ios && pod install && cd ..
+npx react-native run-ios
 ```
 
-### For iOS
+Model files (`*.dm`) are stored with [Git LFS](https://git-lfs.com). If you cloned without LFS, run
+`git lfs install && git lfs pull`.
 
-```bash
-# using npm
-npm run ios
+## How to use the app
 
-# OR using Yarn
-yarn ios
+1. Grant microphone access.
+2. Say **"Hey Coach"**. Every detection is listed.
+3. Tap **Enroll my voice** and read the lines on the screen out loud: the wake word several times and a few other
+   sentences, until all 5 samples are captured.
+4. With **Only my voice wakes the app** on, only your voice triggers the wake word.
+5. **Test my voice** scores your voice continuously while you talk (Last score, Match, Since last). Ask someone else
+   to talk too: their voice should show NO. Tap **Done** to go back.
+
+## The code
+
+| File | What it does |
+| --- | --- |
+| [`src/wakeword.ts`](src/wakeword.ts) | Creates the detector, applies the license, starts and stops listening, with or without a voice profile |
+| [`src/speakerVerification.ts`](src/speakerVerification.ts) | Enrollment, saving the voice profile, testing a voice |
+| [`src/config.ts`](src/config.ts) | Model names, thresholds, the license |
+| [`App.tsx`](App.tsx) | The screen |
+
+Wake word detection gated by speaker verification:
+
+```ts
+import { createKeyWordRNBridgeInstance } from 'react-native-wakeword';
+
+const detector = await createKeyWordRNBridgeInstance('wakeword', false);
+await detector.createInstanceMulti(['hey_coach_model_28_22012026b.dm'], [0.999], [3], [1000]);
+detector.onKeywordDetectionEvent((event) => console.log('wake word!', event));
+await detector.setKeywordDetectionLicense(LICENSE);
+
+await detector.startKeywordDetection(0.999, true);                  // anyone
+await detector.startKeywordDetection(0.999, voiceProfilePath, true); // only the enrolled speaker
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+Several speakers can be enrolled: `startKeywordDetectionWithSpeakers(threshold, [{ id, json }, ...])`,
+`addSpeaker`, `removeSpeaker`.
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+## License
 
-## Step 3: Modifying your App
+The license in `src/config.ts` is a demo license that expires on **2026-12-01**. For a license for your own app,
+contact **info@davoice.io**. See also [MODEL_NOTICES.md](../MODEL_NOTICES.md).
 
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Need your own wake word? See [WakeWordGenerator.md](../WakeWordGenerator.md) or https://davoice.io.

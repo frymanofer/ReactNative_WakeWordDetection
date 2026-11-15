@@ -1,7 +1,0 @@
-<capability xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="actions.intent.OPEN_APP_FEATURE">
-    <intent
-        android:targetPackage="com.example.exampleapp"
-        android:action="android.intent.action.VIEW"
-        android:targetClass="com.example.exampleapp.MainActivity" />
-</capability>

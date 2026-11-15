@@ -1,7 +1,0 @@
-{
-  "name": "Spark",
-  "displayName": "Spark",
-  "android": {
-    "packageName": "com.spark"
-  }
-}
