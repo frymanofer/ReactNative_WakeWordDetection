@@ -217,7 +217,7 @@ they are needed (never at install) from DaVoice's Cloudflare R2
 | Wake word (`hey_coach_model_28_22012026b.dm`), speaker verification (`sv.dm`) | in the app | always |
 | Agent packs (`agent/`, `agent_automotive/`), car tools JSON, narration | in the app | always |
 | TTS model + voice-cloning encoder of every language (en, pt-BR, pt-PT, de, es, fr, it, nl, da, sv, el; 136–170 MB each) | R2 `language-packs/<file>` → phone `Documents/language_packs/<language>/` | the first time the language is chosen |
-| On-device models (GGUF, 382 MB each): Automotive Agent `auto16_g3c_it3639` (default; `auto8_r8d_it150` and `auto5_r4b_it100` as backups), Personal Agent `ft7f2_it900` | R2 `agent-llm/<file>` → phone `Documents/local_llm/models/` | the first time the demo opens |
+| On-device models (GGUF, 382 MB each): Automotive Agent `auto16_g3c_it3639`, Personal Agent `ft7f2_it900` | R2 `agent-llm/<file>` → phone `Documents/local_llm/models/` | the first time the demo opens |
 | Pre-warmed state of the Automotive Agent, English or pt-BR (about 430 MB) | R2 `agent-llm/prewarm/<file>` → next to the model | with the model, for the app's language |
 
 **Configuration of the language files: `language_packs.json`** (in `example_v2v_local_agent/`):
@@ -308,10 +308,7 @@ R2 folder, the same language files and the same on-device models and pre-warmed 
     downloaded once and checked by sha256), with its pre-warmed state for English or Brazilian
     Portuguese (about 430 MB, downloaded with the model), so the first start skips the warm-up.
     The R2 files were checked by downloading them and comparing size and sha256.
-  - Backups, used only when picked by hand: **r8d_it150** (`LOCAL_LLM_DAVOICE_AUTOMOTIVE_R8D`,
-    "(r8d, backup)", the default from 2026-11-13 to 2026-11-17) and **r4b_it100**
-    (`LOCAL_LLM_DAVOICE_AUTOMOTIVE_R4B`, "(r4b, backup)"). There is no automatic fallback to
-    another model.
+  - The older Automotive models (r8d_it150, r4b_it100) were removed; a phone that had one picked uses this one.
   - Calories demo: the Personal Agent, `ft7f2_it900`.
   - DaVoice's other example apps (React Native, Expo, Flutter) list the same models.
 - **Other models:** each demo remembers its own pick from **Change** (model picker,

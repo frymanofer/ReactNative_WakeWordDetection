@@ -10,25 +10,17 @@ export const LOCAL_LLM_E4B: ModelId = 'gemma-3n-e4b-it';
 export const LOCAL_LLM_QWEN25_1_5B: ModelId = 'qwen2.5-1.5b-instruct';
 export const LOCAL_LLM_QWEN25_3B: ModelId = 'qwen2.5-3b-instruct';
 /** The latest models (2026-11-12, user: every app uses the latest): the Personal Agent (ft7f2_it900) for the calories demo and the
- * Automotive Agent r4b_it100 (below) for the car demo. The older ft7c / ft7e VW demo entries and the ft7f2 Automotive entry were removed
- * (their R2 files can go); a phone that had one selected falls back to its demo's default (ModelRegistry.getSelectedModel). */
+ * Automotive Agent (below) for the car demo. Older Automotive entries (ft7c, ft7e, ft7f2, r4b_it100, r8d_it150) were removed
+ * (their R2 files are gone); a phone that had one selected falls back to its demo's default (ModelRegistry.getSelectedModel). */
 export const LOCAL_LLM_DAVOICE_PERSONAL: ModelId = 'davoice-personal-agent-0.6b';
 /** EXPERIMENTAL Automotive Agent candidates (2026-11-11, user: C3 preferred, A fallback; both experimental until the full in-app test,
  * NOT defaults). Same h3 tools, guards correcting + the follow-up guard (historyAsRun), guided tool calls. Not hosted: the files are
  * sideloaded into the models folder for the test (an existing file is never downloaded). Car actions stay simulated. */
 export const LOCAL_LLM_DAVOICE_AUTOMOTIVE_C3_EXP: ModelId = 'davoice-automotive-agent-0.6b-c3-auto3-h3-it300-experimental';
 export const LOCAL_LLM_DAVOICE_AUTOMOTIVE_A_EXP: ModelId = 'davoice-automotive-agent-0.6b-a-auto1-h3-it1050-experimental';
-/** Automotive Agent r4b_it100 (2026-11-11 evening, user): round 4b from C3, the car demo's model. Core g9 frozen sets: pt-BR acceptance 139/161
- * (C3 136), correct executed 320/370 (C3 312), wrong executed 38 (= C3), 0 opposite / unsupported executed, follow-ups 36/39 (C3 35), valid
- * requests declined 3 (C3 7). Final g10 comparison pending. C3 stays in the list as the fallback. Car actions stay simulated. */
-export const LOCAL_LLM_DAVOICE_AUTOMOTIVE_R4B: ModelId = 'davoice-automotive-agent-0.6b-r4b-it100';
-/** Automotive Agent r8d_it150: the car demo's DEFAULT (2026-11-13, user Q2), h3d tool wording. Frozen sets, core g28 with the bounded
- * retry + guided calls: pt-BR acceptance 157/161, correct executed 358, wrong 10, 0 opposite / unsupported. r4b stays as a backup (explicit
- * pick only, never an automatic fallback; exactly one model is loaded). Car actions stay simulated. */
-export const LOCAL_LLM_DAVOICE_AUTOMOTIVE_R8D: ModelId = 'davoice-automotive-agent-0.6b-r8d-it150';
-/** Automotive Agent g3c_it3639: the car demo's DEFAULT since 2026-11-17. Same tools, guards and settings as r8d; compared with r8d on the
- * same core: fewer wrong executed actions, more commands right on the first call, and follow-ups in longer conversations handled better.
- * r8d stays as a backup (explicit pick only; exactly one model is loaded). Car actions stay simulated. */
+/** Automotive Agent g3c_it3639: the car demo's model since 2026-11-17 (h3d tool wording). Compared with the previous model on the same
+ * core: fewer wrong executed actions, more commands right on the first call, and follow-ups in longer conversations handled better.
+ * Exactly one model is loaded. Car actions stay simulated. */
 export const LOCAL_LLM_DAVOICE_AUTOMOTIVE_G3C: ModelId = 'davoice-automotive-agent-0.6b-g3c-it3639';
 
 // URLs are real, verified-reachable files (checked 2026-11-09). The Gemma entries use the same unsloth GGUF repos the AmigoLocal
@@ -56,39 +48,7 @@ export const BUILTIN_LOCAL_LLM_MODELS: LocalLLMModelConfig[] = [
     isCustom: false,
   },
   {
-    // Automotive Agent r4b_it100: the previous car demo model, now a BACKUP (explicit pick only; r8d below is the default since 2026-11-13).
-    // URL uploaded by the user; verified 2026-11-11: HTTP 200, 381,565,920 bytes, sha256 of the download = the training artifact's.
-    id: LOCAL_LLM_DAVOICE_AUTOMOTIVE_R4B,
-    displayName: 'DaVoice Automotive Agent 0.6B (r4b, backup)',
-    filename: 'davoice-automotive-qwen3-0.6b-r4b-it100-q4_0.gguf',
-    url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/auto5_r4b_it100-q4_0.gguf',
-    sizeBytes: 381_565_920,
-    sha256: '1c078e961c5f4e16ae0f667d213fa06de53f3f4bc92c9248427bdb37237bd205',
-    contextSize: 8192,
-    chatTemplate: CHAT_TEMPLATE_PRESETS.qwen3.template,
-    remoteAssistant: true,
-    usesRouter: false,
-    modelTools: true,
-    temperature: 0,
-    relevantMemory: false,
-    toolWording: 'h3',
-    callGuards: 'correct',
-    historyAsRun: true,
-    guidedToolCalls: true,
-    // the model reconsiders once when a guard blocks a wrong-tool call (core g13+; I078)
-    guardRetry: true,
-    // date after the tools: a saved / pre-warmed state stays valid on every day (g7: acceptance 79.5 vs 82.0 in the trained order; 0 opposite / unsupported)
-    promptOrder: 'cache',
-    // Pre-warmed states (made 2026-11-11 on the S20 by this app: r4b + cache order + agent_automotive pack + h3 vw_demo tools).
-    // url: the user's R2 upload (verified 2026-11-12: HTTP 200, size + sha256 of the download match). Regenerate whenever the model, pack, tools or core prompt text change.
-    prebuiltStates: {
-      en: { url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/prewarm/r4b_it100_prewarm_en.kvstate', sha256: '90685bef9146b3a796b94d5ce5534b91002882cc4abe49400f1157ab7c35f3ef', sizeBytes: 398_482_405 },
-      'pt-BR': { url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/prewarm/r4b_it100_prewarm_pt-BR.kvstate', sha256: '68502883de5e13438dfb116d68be2595d2c97fa6843f75955582be3e85f9990a', sizeBytes: 401_464_709 },
-    },
-    isCustom: false,
-  },
-  {
-    // Automotive Agent g3c_it3639, the car demo's default since 2026-11-17 (see LOCAL_LLM_DAVOICE_AUTOMOTIVE_G3C): same settings as r8d.
+    // Automotive Agent g3c_it3639, the car demo's default since 2026-11-17 (see LOCAL_LLM_DAVOICE_AUTOMOTIVE_G3C).
     // R2 upload verified 2026-11-17: HTTP 200, 381,565,920 bytes, sha256 of the full download = the training artifact's.
     id: LOCAL_LLM_DAVOICE_AUTOMOTIVE_G3C,
     displayName: 'DaVoice Automotive Agent 0.6B',
@@ -129,52 +89,6 @@ export const BUILTIN_LOCAL_LLM_MODELS: LocalLLMModelConfig[] = [
     prebuiltStates: {
       en: { url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/prewarm/g3c_it3639_prewarm_en.kvstate', sha256: '75a35e15c774b9b63223b4b71e3283f6abffbf3b52e6343f16b04d9f26cd325f', sizeBytes: 426_699_589 },
       'pt-BR': { url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/prewarm/g3c_it3639_prewarm_pt-BR.kvstate', sha256: 'f794a202844afdcb754678ce092da729dbdc66377c5e39c78d81300c683f11a0', sizeBytes: 429_681_893 },
-    },
-    isCustom: false,
-  },
-  {
-    // Automotive Agent r8d_it150, the car demo's default until 2026-11-17, now a backup (explicit pick only; see LOCAL_LLM_DAVOICE_AUTOMOTIVE_R8D): h3d wording.
-    // R2 upload verified 2026-11-13: HTTP 200, 381,565,920 bytes, sha256 of the full download = the training artifact's.
-    id: LOCAL_LLM_DAVOICE_AUTOMOTIVE_R8D,
-    displayName: 'DaVoice Automotive Agent 0.6B (r8d, backup)',
-    filename: 'davoice-automotive-qwen3-0.6b-r8d-it150-q4_0.gguf',
-    url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/auto8_r8d_it150-q4_0.gguf',
-    sizeBytes: 381_565_920,
-    sha256: 'a977c181c3af6aa49991d927e66256fba77502af76bf42291109e3c3c4b2a550',
-    // 6144 (2026-11-13): with the 6-turn history the prompt stays under ~4.7k tokens; S20: same decisions as 8192 (150 / 150), peak
-    // 1.59 vs 1.82 GB; the pre-warmed state (made at 8192) restores into it
-    contextSize: 6144,
-    chatTemplate: CHAT_TEMPLATE_PRESETS.qwen3.template,
-    remoteAssistant: true,
-    usesRouter: false,
-    modelTools: true,
-    temperature: 0,
-    relevantMemory: false,
-    toolWording: 'h3d',
-    callGuards: 'correct',
-    historyAsRun: true,
-    guidedToolCalls: true,
-    promptOrder: 'cache',
-    guardRetry: true,
-    // two clear commands in one request run both (core 2026-11-13, Q3; older cores ignore it)
-    maxOperations: 2,
-    // latency (core 2026-11-13): only the last 6 user turns in the prompt (KV shift: no reprocessing) and {"ok":true} for tools that
-    // answered with their own sentence. S20, 25-turn conversations: prompt time ~2.3 s flat (was 2.0 -> 3.2 s), no accuracy loss
-    historyTurns: 6,
-    compactToolResults: true,
-    // Command scope + undo (core 2026-11-14, dev g29zh; older cores ignore both): only straightforward car commands reach the model
-    // (<= 10 words; up to 15 when clear; up to 22 for a clear car request such as a dual zone with a preamble); general requests go
-    // to the remote assistant, garbled / vague ones are asked again, car functions without a tool are declined, background speech is
-    // ignored. "desfaz" / "undo" restores the car's previous state (src/car/undo.ts). Benchmarked by DaVoice
-    // on held-out car-command test sets.
-    scope: { enabled: true, localMaxWords: 10, strictMaxWords: 15, hardMaxWords: 22 },
-    undo: true,
-    // Pre-warmed states made 2026-11-12 on the S20 by this app (r8d + h3d + cache order + agent_automotive pack; the prompt text is the
-    // same in core g14-g28). R2 upload verified 2026-11-13 (HTTP 200, size + sha256 of the full download match). Regenerate whenever the
-    // model, pack, tools or core prompt text change.
-    prebuiltStates: {
-      en: { url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/prewarm/r8d_it150_prewarm_en.kvstate', sha256: 'ae8ec4f6ce359d171faddc31d2195af8da4cf5b8b66e2d64fc0630058b58a6d9', sizeBytes: 426_699_589 },
-      'pt-BR': { url: 'https://pub-27f94b1602c647ab95a601086cf52820.r2.dev/agent-llm/prewarm/r8d_it150_prewarm_pt-BR.kvstate', sha256: 'e5fc93e1a3af51741a7748125452ef89e166b97f08aee58d7249575830d8007d', sizeBytes: 429_681_893 },
     },
     isCustom: false,
   },
@@ -281,7 +195,7 @@ export const LOCAL_LLM_DEFAULT_MODEL: ModelId = LOCAL_LLM_DAVOICE_PERSONAL;
 /** Each Local AI Chat demo's model until the user picks another one in that demo (src/local_llm/demo.ts). */
 export const LOCAL_LLM_DEMO_DEFAULT_MODEL: Record<'calories' | 'car', ModelId> = {
   calories: LOCAL_LLM_DAVOICE_PERSONAL,
-  car: LOCAL_LLM_DAVOICE_AUTOMOTIVE_G3C,   // 2026-11-17: g3c_it3639; was r8d_it150 (now a backup, explicit pick only)
+  car: LOCAL_LLM_DAVOICE_AUTOMOTIVE_G3C,   // 2026-11-17: g3c_it3639
 };
 
 /** The default before the registry recorded it (files written until 2026-11-05). */
