@@ -2,7 +2,7 @@ import type { AgentRemoteRequest } from 'react-native-davoice-llm';
 
 import { generateGeminiReply, normalizeTextForSpeech } from './index';
 import type { GeminiChatMessage } from './index';
-import { LOCAL_LLM_LAYER2, LOCAL_LLM_NO_REMOTE_MESSAGE, LOCAL_LLM_NOT_IN_DEMO_MESSAGE } from '../local_llm/constants';
+import { LOCAL_LLM_LAYER2, LOCAL_LLM_LOW_CONFIDENCE_MESSAGE, LOCAL_LLM_NO_REMOTE_MESSAGE, LOCAL_LLM_NOT_IN_DEMO_MESSAGE } from '../local_llm/constants';
 import { DID_NOT_CATCH, isTooShortForDecline } from './fragments';
 import { getTTSLanguage } from '../tts';
 
@@ -50,6 +50,13 @@ export async function answerRemoteRequest(
     }
     console.log('[AIChat][REMOTE] not available in this demo (the model declined)');
     return { text: LOCAL_LLM_NOT_IN_DEMO_MESSAGE[language] ?? LOCAL_LLM_NOT_IN_DEMO_MESSAGE.en };
+  }
+  // The on-device model was not sure enough of its car action (Local confidence, core reason "low-confidence") and no remote model is set
+  // up: nothing ran, and the user hears that this command needs the remote agent.
+  if ((request.reason as string) === 'low-confidence' && LOCAL_LLM_LAYER2 === 'none') {   // a reason newer than the published typings
+    const language = getTTSLanguage();
+    console.log('[AIChat][REMOTE] low confidence, no remote model set up: telling the user');
+    return { text: LOCAL_LLM_LOW_CONFIDENCE_MESSAGE[language] ?? LOCAL_LLM_LOW_CONFIDENCE_MESSAGE.en };
   }
   // No remote model set up (constants.ts LOCAL_LLM_LAYER2 'none'): say so instead of answering.
   if (LOCAL_LLM_LAYER2 === 'none') {

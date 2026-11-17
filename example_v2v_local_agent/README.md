@@ -8,7 +8,7 @@ This example app demonstrates a full **React Native voice AI** flow running on d
 - on-device text to speech
 - coordinated pause/resume between wake word and ASR
 
-The key implementation is in [App.tsx](./App.tsx).
+The key implementation is in [App.tsx](./App.tsx). Step-by-step guides: [englishHowTo.md](./englishHowTo.md) (English) and [portugueseHowTo.md](./portugueseHowTo.md) (Português).
 
 ## What the demo shows
 

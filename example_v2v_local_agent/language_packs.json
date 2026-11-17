@@ -24,8 +24,8 @@
     "pt-BR": {
       "model": {
         "file": "model_ex2_portuguese_brv1.dm",
-        "bytes": 143278096,
-        "sha256": "7d71c5f3a13937755938003644e48174cd4cf0b5ba7a10ab2eb413eb6ce92efe"
+        "bytes": 144660496,
+        "sha256": "49b98fe134199b5131f8cf3434f319ab5287fd176efa347eaf170434d8c9ea6e"
       },
       "embedder": {
         "file": "embedder_brv1.dm",

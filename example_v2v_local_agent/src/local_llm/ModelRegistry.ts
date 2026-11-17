@@ -24,6 +24,8 @@ interface RegistryFile {
   /** The Local AI Chat demo (2026-11-10: calories / car) and each demo's own model choice. */
   demo?: LocalDemo;
   selectedByDemo?: Partial<Record<LocalDemo, ModelId>>;
+  /** The car demo's minimum confidence (0 = off): see LOCAL_LLM_CONFIDENCE_CHOICES. */
+  localConfidence?: number;
 }
 
 function registryDir(): string {
@@ -51,6 +53,7 @@ async function readRegistry(): Promise<RegistryFile> {
         defaultModelId: LOCAL_LLM_DEFAULT_MODEL,
         demo: parsed.demo === 'calories' || parsed.demo === 'car' ? parsed.demo : 'car',
         selectedByDemo: parsed.selectedByDemo ?? {},
+        localConfidence: typeof parsed.localConfidence === 'number' ? parsed.localConfidence : 0,
       };
     }
   } catch (error) {
@@ -171,4 +174,14 @@ export async function removeCustomModel(id: ModelId): Promise<void> {
     selectedModelId: r.selectedModelId === id ? LOCAL_LLM_DEFAULT_MODEL : r.selectedModelId,
     customModels: r.customModels.filter((m) => m.id !== id),
   }));
+}
+
+/** The car demo's minimum confidence for a local action (0 = off, the default). Below it the agent core does not run the model's call:
+ * the request goes to the remote assistant, or the user hears that this command needs one (core 2026-11-17, configure "confidence"). */
+export async function getLocalConfidence(): Promise<number> {
+  return (await readRegistry()).localConfidence ?? 0;
+}
+
+export async function setLocalConfidence(value: number): Promise<void> {
+  await writeRegistry((r) => ({ ...r, localConfidence: value }));
 }

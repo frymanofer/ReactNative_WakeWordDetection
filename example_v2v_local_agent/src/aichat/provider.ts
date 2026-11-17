@@ -9,7 +9,8 @@ import { generateGeminiReply, generateGeminiReplyStream } from './index';
 
 import type { LocalLLMModelConfig } from '../local_llm/types';
 import { ensureLayer2Loaded, ensureModelLoaded, isModelReady, nativeLoadCount } from '../local_llm/LocalLLMLoader';
-import { getSelectedModel } from '../local_llm/ModelRegistry';
+import { getLocalConfidence, getSelectedModel } from '../local_llm/ModelRegistry';
+import { currentLocalDemo } from '../local_llm/demo';
 import { LOCAL_LLM_LAYER2, LOCAL_LLM_LAYER2_MODEL, LOCAL_LLM_USE_REMOTE_ASSISTANT } from '../local_llm/constants';
 import { getProfile } from '../local_llm/profile/ProfileStore';
 import { listFacts } from '../local_llm/memory/LongTermMemoryStore';
@@ -122,6 +123,8 @@ export class LocalLLMProvider implements LLMProvider {
   // The steering side last sent to the agent (configure "vehicle"), and to which agent.
   private steeringSent: string | null = null;
   private steeringSentTo: Agent | null = null;
+  private confidenceSentTo: Agent | null = null;
+  private confidenceSent = -1;
   private configuredAgent: Agent | null = null;
   private chatTemplateSet: Promise<void> = Promise.resolve();
 
@@ -199,6 +202,13 @@ export class LocalLLMProvider implements LLMProvider {
     setCarUndoResults(model.undo === true);
     // The car's steering-wheel side (core 2026-11-13, Q4; older cores ignore it): "o banco da direita" is the passenger in a left-hand-drive
     // car and the driver in a right-hand-drive one; explicit left / right positions stay physical. Sent again when it changes.
+    // Local confidence (core 2026-11-17, configure "confidence"; older cores ignore it): the car demo's setting, off in the other demo.
+    const minConfidence = currentLocalDemo() === 'car' ? await getLocalConfidence() : 0;
+    if (this.confidenceSentTo !== agent || this.confidenceSent !== minConfidence) {
+      this.confidenceSentTo = agent;
+      this.confidenceSent = minConfidence;
+      await agent.configure({ ...({ confidence: { min: minConfidence } } as Record<string, unknown>) });
+    }
     const steering = getCarState().vehicle.steering;
     if (this.steeringSentTo !== agent || this.steeringSent !== steering) {
       this.steeringSentTo = agent;

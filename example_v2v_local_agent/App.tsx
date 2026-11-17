@@ -6,7 +6,7 @@
  */
 
 import RNFS from 'react-native-fs';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 
 import { Platform } from 'react-native';
 //import { check, request, openSettings, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -84,14 +84,14 @@ import {
 } from './src/tts/voiceClone';
 import type { VoiceCloneResult } from 'react-native-davoice/speech';
 import ModelPicker from './src/local_llm/ModelPicker';
-import { getLocalDemo, getSelectedModel, listModels, setLocalDemo } from './src/local_llm/ModelRegistry';
+import { getLocalConfidence, getLocalDemo, getSelectedModel, listModels, setLocalConfidence, setLocalDemo } from './src/local_llm/ModelRegistry';
 import { currentLocalDemo } from './src/local_llm/demo';
 import type { LocalDemo } from './src/local_llm/demo';
 import { resetLocalAgent } from './src/agent/LocalAgent';
 import { DID_NOT_CATCH, isBareDone, isNoiseFragment } from './src/aichat/fragments';
 import { setAIChatSentenceRewriter } from './src/aichat';
 import { deleteUnusedModelFiles } from './src/local_llm/ModelManager';
-import { LOCAL_LLM_CAR_TOOLS, LOCAL_LLM_LAYER2, LOCAL_LLM_LAYER2_MODEL } from './src/local_llm/constants';
+import { LOCAL_LLM_CAR_TOOLS, LOCAL_LLM_CONFIDENCE_CHOICES, LOCAL_LLM_LAYER2, LOCAL_LLM_LAYER2_MODEL } from './src/local_llm/constants';
 import { isModelReady } from './src/local_llm/LocalLLMLoader';
 import { connectMcpServer } from 'react-native-davoice-llm';
 import type { ToolDefinition } from 'react-native-davoice-llm';
@@ -482,6 +482,17 @@ function App(): React.JSX.Element {
   const [isAIChatLoading, setIsAIChatLoading] = useState(false);
   const [isAIChatHelpVisible, setIsAIChatHelpVisible] = useState(false);
   const [isModelPickerVisible, setIsModelPickerVisible] = useState(false);
+  // The car demo's "Local confidence" (core 2026-11-17): Off -> 0.8 -> 0.9 -> 0.95 -> Off; persisted; sent to the agent before the next turn.
+  const [localConfidence, setLocalConfidenceState] = useState(0);
+  useEffect(() => {
+    getLocalConfidence().then(setLocalConfidenceState).catch(() => undefined);
+  }, []);
+  const cycleLocalConfidence = useCallback(() => {
+    const i = LOCAL_LLM_CONFIDENCE_CHOICES.indexOf(localConfidence);
+    const next = LOCAL_LLM_CONFIDENCE_CHOICES[(i + 1) % LOCAL_LLM_CONFIDENCE_CHOICES.length];
+    setLocalConfidenceState(next);
+    setLocalConfidence(next).catch(() => undefined);
+  }, [localConfidence]);
   // Local AI Chat demo (2026-11-10): calories (Personal Agent) or car (Automotive Agent); each has its own pack, tools, card and model.
   const [localDemo, setLocalDemoState] = useState<LocalDemo>(currentLocalDemo());
   useEffect(() => {
@@ -2587,6 +2598,17 @@ function App(): React.JSX.Element {
                 <Text style={styles.localModelChangeText}>Change</Text>
               </TouchableOpacity>
             </View>
+            {localDemo === 'car' && (
+              <View style={styles.chatModelFooter}>
+                <Text style={styles.speechSentenceLabel}>
+                  Local confidence: {localConfidence > 0 ? localConfidence.toFixed(2) : 'Off'}
+                  {localConfidence > 0 ? ' · less sure → remote agent' : ''}
+                </Text>
+                <TouchableOpacity activeOpacity={0.7} disabled={isAIChatLoading} onPress={cycleLocalConfidence}>
+                  <Text style={styles.localModelChangeText}>Change</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             <View style={styles.ttsTestActionRow}>
               <TouchableOpacity style={[styles.ttsSpeakButton, styles.aiChatResetButton]} activeOpacity={0.7} onPress={resetAIChatSession}>
                 <Text style={styles.ttsSpeakButtonText}>Reset Chat</Text>
