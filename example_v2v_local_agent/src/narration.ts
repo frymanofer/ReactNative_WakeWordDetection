@@ -56,7 +56,7 @@ const NARRATION: Record<AppLanguage, NarrationCopy> = {
     speakerVerificationSkipped: 'A verificação do locutor foi ignorada.',
     speakerVerificationReady: 'A verificação do locutor está pronta!',
     sayWakeWord: (wakeWords) => `Agora diga a palavra de ativação ${wakeWords} para continuar.`,
-    cloneCreated: (voice) => `Olá! Eu sou ${voice}. Esta é a minha nova voz clonada.`,
+    cloneCreated: (voice) => `Olá, meu nome é ${voice}! Não sou uma voz sintética comum. Quer ouvir algo interessante? Eu gosto do gosto deste café, almoço um bom almoço e chego à reunião às dez e meia.`,
   },
   'pt-PT': {
     wakeWordDetected: (wakeWord) => `${wakeWord} detetado.`,
@@ -77,7 +77,7 @@ const NARRATION: Record<AppLanguage, NarrationCopy> = {
     speakerVerificationSkipped: 'A verificação do orador foi ignorada.',
     speakerVerificationReady: 'A verificação do orador está pronta!',
     sayWakeWord: (wakeWords) => `Agora diga a palavra de ativação ${wakeWords} para continuar.`,
-    cloneCreated: (voice) => `Olá! Eu sou ${voice}. Esta é a minha nova voz clonada.`,
+    cloneCreated: (voice) => `Olá, o meu nome é ${voice}! Não sou uma voz sintética comum. Quer ouvir algo interessante? Eu gosto do gosto deste café, almoço um bom almoço e chego à reunião às dez e meia.`,
   },
   de: {
     wakeWordDetected: (wakeWord) => `${wakeWord} erkannt.`,
