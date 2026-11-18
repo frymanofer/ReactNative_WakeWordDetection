@@ -125,6 +125,27 @@ describe('other operations name what they did, or that nothing changed', () => {
     expect(say('set_defrost', { target: 'rear', on: false })).toBe('The rear defogger is already off.');
     expect(say('set_volume', { action: 'unmute' })).toBe('The sound is already on, volume 12.');
     expect(say('set_volume', { action: 'mute' })).toBe('I muted the sound.');
+  });
+  test('volume: a step of the size the user said, a target, the default step', () => {
+    // "change" = the step the agent core writes from the user's words (execution.stepArgument)
+    expect(say('set_volume', { action: 'up', change: 5 })).toBe('I turned the volume up to 17.');
+    expect(say('set_volume', { action: 'down', change: -2 })).toBe('I turned the volume down to 15.');
+    expect(say('set_volume', { action: 'down', change: 4 })).toBe('I turned the volume down to 11.');
+    expect(say('set_volume', { action: 'set', change: 3 })).toBe('I turned the volume up to 14.');
+    expect(say('set_volume', { action: 'up', change: 50 })).toBe('I turned the volume up to 30.');
+    expect(say('set_volume', { action: 'set', level: 12 })).toBe('I set the volume to 12.');
+    // "up" with a level below the volume / "down" with one above it cannot be a target: the step
+    expect(say('set_volume', { action: 'up', level: 2 })).toBe('I turned the volume up to 14.');
+    expect(say('set_volume', { action: 'down', level: 20 })).toBe('I turned the volume down to 0.');
+    expect(say('set_volume', { action: 'set', level: 12 })).toBe('I set the volume to 12.');
+    // a target stays a target ("turn the volume down to 5", "up to 20"), the plain step stays 3
+    expect(say('set_volume', { action: 'down', level: 5 })).toBe('I turned the volume down to 5.');
+    expect(say('set_volume', { action: 'up', level: 20 })).toBe('I turned the volume up to 20.');
+    expect(say('set_volume', { action: 'up' })).toBe('I turned the volume up to 23.');
+    expect(say('set_volume', { action: 'down' })).toBe('I turned the volume down to 20.');
+    expect(say('set_volume', { action: 'set', level: 12 })).toBe('I set the volume to 12.');
+  });
+  test('fan and the rest in Portuguese', () => {
     mockLang = 'pt-BR';
     expect(say('set_fan_speed', { level: 3 })).toBe('A ventilação já está no nível 3.');
     expect(say('set_fan_speed', { level: 5 })).toBe('Coloquei a ventilação no nível 5.');

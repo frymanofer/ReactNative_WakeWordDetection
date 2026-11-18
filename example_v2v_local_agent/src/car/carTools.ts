@@ -386,15 +386,30 @@ const HANDLERS: Record<string, Handler> = {
     updateCar((s) => ({ ...s, audioFocus: String(seat) }));
     return done(seat === 'all' ? L('sound for everyone', 'som para todos') : L(`sound focused on ${words(String(seat))}`, `som focado no ${PT_SEAT[seat] ?? seat}`));
   },
-  set_volume: ({ action, level }) => {
+  set_volume: ({ action: asked, level, change }) => {
     const s0 = getCarState();
     let volume = s0.volume;
-    if (action === 'set' || (level !== undefined && action !== 'mute' && action !== 'unmute')) volume = range(level, 0, 30, L('Volume', 'O volume'));
+    let action = asked;
+    // A step of the user's own size ("by 5", "2 notches"; 2026-11-18: "raise the volume by two" set the volume to 2):
+    //   change = the step (the agent core writes it from the user's words: execution.stepArgument in the tool definitions);
+    //   "up" with a level BELOW the current volume, or "down" with one ABOVE it, cannot be a target: it is the step.
+    const amount = change === undefined || change === null || typeof change === 'boolean' ? NaN : Number(change);
+    const target = level === undefined || level === null || typeof level === 'boolean' ? NaN : Number(level);
+    let step: number | undefined;
+    if (action !== 'mute' && action !== 'unmute') {
+      if (Number.isFinite(amount) && amount !== 0) step = amount < 0 || action === 'down' ? -Math.abs(amount) : Math.abs(amount);
+      else if (Number.isFinite(target) && action === 'up' && target > 0 && target < volume) step = target;
+      else if (Number.isFinite(target) && action === 'down' && target > volume) step = -target;
+    }
+    if (step !== undefined) {
+      volume = Math.max(0, Math.min(30, s0.volume + step));
+      action = step > 0 ? 'up' : 'down';
+    } else if (action === 'set' || (level !== undefined && action !== 'mute' && action !== 'unmute')) volume = range(level, 0, 30, L('Volume', 'O volume'));
     else if (action === 'up') volume = Math.min(30, s0.volume + 3);
     else if (action === 'down') volume = Math.max(0, s0.volume - 3);
     if (action === 'mute' && s0.muted) return already(L('already muted', 'já no mudo'), L('The sound is already muted.', 'O som já está no mudo.'));
     if (action === 'unmute' && !s0.muted) return already(L('sound already on', 'som já ligado'), L(`The sound is already on, volume ${s0.volume}.`, `O som já está ligado, volume ${s0.volume}.`));
-    if ((action === 'set' || (action !== 'up' && action !== 'down' && level !== undefined)) && volume === s0.volume && !s0.muted) {
+    if (step === undefined && (action === 'set' || (action !== 'up' && action !== 'down' && level !== undefined)) && volume === s0.volume && !s0.muted) {
       return already(L(`volume already ${volume}`, `volume já em ${volume}`), L(`The volume is already at ${volume}.`, `O volume já está em ${volume}.`));
     }
     const muted = action === 'mute' ? true : action === 'unmute' || action === 'up' || action === 'set' ? false : s0.muted;

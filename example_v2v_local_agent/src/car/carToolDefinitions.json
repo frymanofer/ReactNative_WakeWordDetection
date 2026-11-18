@@ -704,6 +704,9 @@
     "required": [
      "action"
     ]
+   },
+   "execution": {
+     "stepArgument": "change"
    }
   },
   {

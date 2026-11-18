@@ -15,8 +15,8 @@
     "jetifier": "^2.0.0",
     "react": "19.1.1",
     "react-native": "0.82.0",
-    "react-native-davoice": "1.0.140",
-    "react-native-davoice-llm": "1.0.15",
+    "react-native-davoice": "1.0.142",
+    "react-native-davoice-llm": "1.0.17",
     "react-native-fs": "^2.20.0",
     "react-native-wakeword": "1.1.171",
     "tweetnacl": "1.0.3"
